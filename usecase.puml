@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+
+actor "Гость" as Guest
+actor "Соискатель" as Seeker
+actor "Работодатель" as Employer
+
+Guest <|-- Seeker
+Guest <|-- Employer
+
+rectangle "Система поиска работы" {
+
+  usecase "Регистрация" as Register
+  usecase "Авторизация" as Login
+  usecase "Поиск вакансий" as SearchVacancies
+
+  usecase "Управление профилем" as ManageProfileSeeker
+  usecase "Управление резюме" as ManageResume
+  usecase "Откликнуться на вакансию" as Apply
+  usecase "Просмотр своих откликов и их статусов" as ViewMyApplications
+  
+  usecase "Создать новое резюме" as AddResume
+
+  usecase "Управление профилем компании" as ManageCompany
+  usecase "Управление вакансиями" as ManageVacancies
+  usecase "Поиск резюме" as SearchResumes
+  usecase "Просмотр полученных откликов" as ViewReceivedApplications
+  usecase "Изменение статуса отклика" as ChangeAppStatus
+
+  Guest --> Register
+  Guest --> Login
+  Guest --> SearchVacancies
+  Seeker --> ManageProfileSeeker
+  Seeker --> ManageResume
+  Seeker --> Apply
+  Seeker --> ViewMyApplications
+
+  ManageResume ..> AddResume : extend
+
+  Apply ...> SearchVacancies : extend
+
+  Employer --> ManageCompany
+  Employer --> ManageVacancies
+  Employer --> SearchResumes
+  Employer --> ViewReceivedApplications
+  Employer --> ChangeAppStatus
+
+  ChangeAppStatus ..> ViewReceivedApplications : extend
+}
+
+@enduml
