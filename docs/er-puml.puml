@@ -39,7 +39,7 @@ entity "Вакансия" as Vacancy {
 entity "Резюме" as Resume {
   Идентификатор : int <<PK>>
   --
-  Категория : varchar
+  Описание : text
   Дата_создания : datetime
 }
 
