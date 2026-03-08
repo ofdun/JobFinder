@@ -1,0 +1,122 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+entity "Работодатель" as Employer {
+  Идентификатор : int <<PK>>
+  --
+  Название : varchar
+  Описание : text
+  Адрес : varchar
+  Ссылка_на_сайт : varchar
+  Email : varchar
+  Хеш_пароля : varchar
+}
+
+entity "Соискатель" as Seeker {
+  Идентификатор : int <<PK>>
+  --
+  Имя : varchar
+  Email : varchar
+  Хеш_пароля : varchar
+  Номер_телефона : varchar
+}
+
+entity "Вакансия" as Vacancy {
+  Идентификатор : int <<PK>>
+  --
+  Зарплата : decimal
+  Частота_выплат : enum
+  Опыт_работы : varchar
+  Формат_работы : enum
+  Описание : text
+  Дата_публикации : datetime
+  Тип_занятости : enum
+  Адрес : varchar
+}
+
+entity "Резюме" as Resume {
+  Идентификатор : int <<PK>>
+  --
+  Описание : text
+  Дата_создания : datetime
+}
+
+entity "Категория" as Category {
+  Идентификатор : int <<PK>>
+  --
+  Название : varchar
+}
+
+entity "Отклик" as Application {
+  Идентификатор : int <<PK>>
+  --
+  Дата : datetime
+  Статус : enum
+}
+
+entity "Локация" as Location {
+  Идентификатор : int <<PK>>
+  --
+  Город : varchar
+  Страна : varchar
+}
+
+entity "Опыт работы" as Experience {
+  Идентификатор : int <<PK>>
+  --
+  Должность : varchar
+  Дата_начала : date
+  Дата_окончания : date
+  Название_компании : varchar
+  Описание : text
+}
+
+entity "Образование" as Education {
+  Идентификатор : int <<PK>>
+  --
+  Учебное_заведение : varchar
+  Факультет : varchar
+  Год_окончания : int
+  Степень : enum
+}
+
+entity "Навык" as Skill {
+  Идентификатор : int <<PK>>
+  --
+  Название : varchar
+}
+
+entity "Язык" as Language {
+  Идентификатор : int <<PK>>
+  --
+  Название : varchar
+}
+
+entity "Владение языком" as LangSkill {
+  Идентификатор : int <<PK>>
+  --
+  Уровень_владения : enum
+}
+
+Employer ||..o{ Vacancy
+
+Vacancy ||..o{ Application
+Vacancy }o....|{ LangSkill
+Vacancy }o..o{ Skill
+Vacancy ||..|| Location
+
+Language }o..|| LangSkill
+
+Resume }|..|| Category
+Resume }o...o{ Skill
+Resume ||..o{ Application
+Resume ||...o{ Experience
+Resume ||..o{ Education
+Resume ||..o{ LangSkill
+Resume }o..|| Seeker
+
+Location ||...o{ Seeker
+
+@enduml
