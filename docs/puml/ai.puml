@@ -1,0 +1,106 @@
+@startuml
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BackgroundColor<<Domain>> #FFF9C4
+    BackgroundColor<<Infrastructure>> #FFECB3
+    BackgroundColor<<Interface>> #E1BEE7
+}
+
+package "api" {
+    class MatchingController {
+        -MatchingService matchingService
+        -MatchingApiMapper apiMapper
+        +findTopCandidates(vacancyId: Long): List<MatchResponse>
+    }
+    
+    interface MatchingApiMapper <<Interface>> {
+        +toResponse(domain: MatchingCandidate): MatchResponse
+    }
+
+    class MatchResponse <<DTO>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+    }
+}
+
+package "business-logic" {
+    interface MatchingService <<Interface>> {
+        +matchCandidates(vacancyId: Long): List<MatchingCandidate>
+    }
+
+    class BasicMatchingService {
+        -AiClient aiClient
+        -MatchingRepository matchingRepo
+        -VacancyRepository vacancyRepo
+    }
+    
+    interface AiClient <<Interface>> {
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(vacancy: String, resume: String): String
+    }
+    
+    interface MatchingRepository <<Interface>> {
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    class MatchingCandidate <<Domain>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+        +void rank(double score)
+    }
+}
+
+package "infrastructure-ai" {
+    class OllamaAiClient <<Infrastructure>> {
+        -RestTemplate restTemplate
+        -AiDataMapper aiMapper
+        -String modelEndpoint
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(v: String, r: String): String
+    }
+    
+    interface AiDataMapper <<Interface>> {
+        +toOllamaRequest(prompt: String): String
+        +parseEmbedding(json: String): float[]
+    }
+    
+    class OllamaRequest <<DTO>> {
+        +String model
+        +String prompt
+        +boolean stream
+    }
+}
+
+package "data-access" {
+    class BasicMatchingRepository {
+        -JpaMatchingRepository jpaRepo
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    interface JpaMatchingRepository <<SpringData>> {
+        ' Здесь используется pgvector SQL: 
+        ' SELECT * FROM resumes ORDER BY embedding <=> ?
+    }
+}
+
+MatchingController --> MatchingService : uses
+MatchingController --> MatchingApiMapper : uses
+MatchingApiMapper ..> MatchingCandidate : converts
+MatchingApiMapper ..> MatchResponse : converts
+
+BasicMatchingService ..|> MatchingService : implements
+BasicMatchingService --> AiClient : uses
+BasicMatchingService --> MatchingRepository : uses
+
+OllamaAiClient ..|> AiClient : implements
+OllamaAiClient --> AiDataMapper : uses
+OllamaAiClient ..> OllamaRequest : converts
+
+BasicMatchingRepository ..|> MatchingRepository : implements
+BasicMatchingRepository --> JpaMatchingRepository : uses
+
+@enduml
