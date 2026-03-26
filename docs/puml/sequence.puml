@@ -8,7 +8,7 @@ actor "Соискатель" as Candidate
 
 == Публикация вакансии ==
 
-Employer -> Employer: Авторизация в системе
+Employer -> Platform: Авторизация в системе
 Employer -> Platform: Нажатие "Создать вакансию"
 Employer -> Platform: Заполнение данных\n(Название, ЗП, Навыки, Тип занятости)
 Employer -> Platform: Публикация вакансии

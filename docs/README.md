@@ -88,17 +88,23 @@ Frontend: TypeScript (React)
 ## Container диаграмма
 ![Container диаграмма](./img/container.svg)
 ## Component диаграмма
-![Container диаграмма](./img/component.svg)
+![Component диаграмма](./img/component.svg)
 ## Code диаграммы
 ### UML диаграмма классов для модуля вакансий
 ![UML диаграмма классов для модуля вакансий](./img/vacancy.svg)
 ### UML диаграмма классов для модуля работодателей
 ![UML диаграмма классов для модуля работодателей](./img/employer.svg)
+### UML диаграмма классов для модуля резюме
+![UML диаграмма классов для модуля резюме](./img/resume.svg)
 ### UML диаграмма классов для модуля умного поиска
-![UML диаграмма классов для модуля умного поиска](./img/ai.svg)
+![UML диаграмма классов для модуля умного поиска](./img/matching.svg)
 
-# Sequence диаграмма
-![Sequence диаграмма](./img/sequence.svg)
+# Sequence диаграммы
+## Sequence диаграмма сохранения резюме
+![Sequence диаграмма сохранения резюме](./img/sequence-adding-resume.svg)
+
+## Sequence диаграмма использования системы автоматизированного поиска
+![Sequence диаграмма использования системы автоматизированного поиска](./img/sequence-finding-applicant-ai.svg)
 
 # DBML схема
 ![DBML схема](./img/dbml.svg)

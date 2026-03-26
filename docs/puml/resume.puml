@@ -1,0 +1,89 @@
+@startuml
+skinparam ClassBackgroundColor #F5F5F5
+skinparam PackageStyle rectangle
+skinparam shadowing false
+
+package "api" {
+    class ResumeController {
+        - ResumeService resumeService
+        - ResumeApiMapper apiMapper
+        + create(req: ResumeCreateRequest): ResumeResponse
+    }
+
+    interface ResumeApiMapper <<Interface>> #E1BEE7 {
+        + toDomain(dto: ResumeCreateRequest): Resume
+        + toResponse(r: Resume): ResumeResponse
+    }
+
+    class BasicResumeApiMapper
+}
+
+package "business-logic" {
+    interface ResumeService <<Interface>> #E1BEE7 {
+        + createResume(r: Resume): Resume
+    }
+
+    class BasicResumeService {
+        - ResumeSaveHandler saveChainHead
+    }
+
+    class Resume <<Domain>> #FFF9C4 {
+        + Long id
+        + String textContent
+        + float[] vector
+    }
+
+    abstract class ResumeSaveHandler #F5F5F5 {
+        - ResumeSaveHandler next
+        + setNext(h: ResumeSaveHandler): ResumeSaveHandler
+        + {abstract} handle(r: Resume): Resume
+    }
+
+    class SqlSaveHandler {
+        - ResumeRepository repository
+        + handle(r: Resume): Resume
+    }
+
+    class AiEmbeddingHandler {
+        - AIClient aiClient
+        + handle(r: Resume): Resume
+    }
+
+    class VectorSaveHandler {
+        - VectorResumeRepository vectorRepository
+        + handle(r: Resume): Resume
+    }
+
+    interface AIClient <<Interface>> #E1BEE7 {
+        + getEmbeddings(text: String): float[]
+    }
+
+    interface ResumeRepository <<Interface>> #E1BEE7 {
+        + save(r: Resume): Resume
+    }
+}
+
+package "data-access" {
+    class BasicResumeRepository
+    class QdrantResumeRepository
+}
+
+ResumeController --> ResumeService : uses
+ResumeController --> ResumeApiMapper : uses
+BasicResumeApiMapper ..|> ResumeApiMapper : implements
+
+BasicResumeService ..|> ResumeService : implements
+BasicResumeService --> ResumeSaveHandler : starts chain
+
+SqlSaveHandler --|> ResumeSaveHandler : extends
+AiEmbeddingHandler --|> ResumeSaveHandler : extends
+VectorSaveHandler --|> ResumeSaveHandler : extends
+
+SqlSaveHandler --> ResumeRepository : uses
+AiEmbeddingHandler --> AIClient : uses
+VectorSaveHandler --> ResumeRepository : uses
+
+BasicResumeRepository ..|> ResumeRepository : implements
+QdrantResumeRepository ..|> ResumeRepository : implements
+
+@enduml
