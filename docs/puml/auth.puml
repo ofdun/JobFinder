@@ -1,0 +1,92 @@
+@startuml
+
+skinparam ClassBackgroundColor #F5F5F5
+skinparam PackageStyle rectangle
+skinparam shadowing false
+
+package "api" {
+    class AuthController {
+        - AuthService employerService
+        - AuthService seekerService
+        + registerSeeker(req: SeekerRegisterReq): AuthResponse
+        + registerEmployer(req: EmployerRegisterReq): AuthResponse
+        + login(req: LoginRequest): AuthResponse
+    }
+
+    class LoginRequest <<DTO>> #D1EAF5 {
+        + String email
+        + String password
+        + String role
+    }
+
+    class AuthResponse <<DTO>> #D1EAF5 {
+        + String token
+        + String role
+    }
+}
+
+package "business-logic" {
+    interface AuthService <<Interface>> #E1BEE7 {
+        + login(email: String, pass: String): String
+        + register(data: Object): void
+    }
+
+    class EmployerService {
+        - EmployerRepository employerRepo
+        - TokenRepository tokenRepo
+    }
+
+    class SeekerService {
+        - SeekerRepository seekerRepo
+        - TokenRepository tokenRepo
+    }
+
+    class Employer <<Domain>> #FFF9C4 {
+        + Long id
+        + String email
+        + String passwordHash
+    }
+
+    class Seeker <<Domain>> #FFF9C4 {
+        + Long id
+        + String email
+        + String passwordHash
+    }
+
+    interface EmployerRepository <<Interface>> #E1BEE7 {
+        + findByEmail(e: String): Optional<Employer>
+        + save(e: Employer): void
+    }
+
+    interface SeekerRepository <<Interface>> #E1BEE7 {
+        + findByEmail(e: String): Optional<Seeker>
+        + save(s: Seeker): void
+    }
+
+    interface TokenRepository <<Interface>> #E1BEE7 {
+        + saveToken(id: String, userId: Long): void
+    }
+}
+
+package "data-access" {
+    class PostgresEmployerRepository
+    class PostgresSeekerRepository
+    class RedisTokenRepository
+}
+
+AuthController --> AuthService : "Использует обе реализации"
+
+EmployerService ..|> AuthService : "Реализует для работодателя"
+SeekerService ..|> AuthService : "Реализует для соискателя"
+
+EmployerService --> EmployerRepository : "Работает с данными компаний"
+EmployerService --> TokenRepository : "Сохраняет токены"
+
+SeekerService --> SeekerRepository : "Работает с данными людей"
+SeekerService --> TokenRepository : "Сохраняет токены"
+
+PostgresEmployerRepository ..|> EmployerRepository : "impl"
+PostgresSeekerRepository ..|> SeekerRepository : "impl"
+RedisTokenRepository ..|> TokenRepository : "impl"
+
+@enduml

@@ -78,14 +78,9 @@ package "business-logic" {
     class Vacancy <<Domain>> {
         -Long id
         -String title
-        -Money salary
+        -BigDecimal salary
         -String description
         -String status
-    }
-
-    class Money <<ValueObject>> {
-        -BigDecimal amount
-        -String currency
     }
 }
 
@@ -141,7 +136,5 @@ VacancyDataMapper ..> Vacancy : converts
 VacancyDataMapper ..> VacancyEntity : converts
 
 BasicVacancyDataMapper ..|> VacancyDataMapper : implements
-
-Vacancy *-- Money : contains
 
 @enduml

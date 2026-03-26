@@ -33,21 +33,14 @@ package "business-logic" {
         + Double similarityScore
     }
 
-    interface AIClient <<Interface>> #E1BEE7 {
-        + getEmbeddings(text: String): float[]
-    }
+    interface VacancyRepository <<Interface>> #E1BEE7
+    interface ResumeRepository <<Interface>> #E1BEE7
+    interface VectorResumeRepository <<Interface>> #E1BEE7
 }
 
-package "ai-integration" {
-    class OllamaAIClient implements AIClient {
-        + getEmbeddings()
-    }
+interface AIClient <<Interface>> #E1BEE7 {
+    + getEmbeddings(text: String): float[]
 }
-
-' External references (to other modules)
-interface VacancyRepository <<Interface>> #E1BEE7
-interface ResumeRepository <<Interface>> #E1BEE7
-interface VectorResumeRepository <<Interface>> #E1BEE7
 
 MatchingController --> MatchingService : uses
 BasicMatchingService --> VacancyRepository : uses

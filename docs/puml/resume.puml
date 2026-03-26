@@ -40,7 +40,7 @@ package "business-logic" {
     }
 
     class SqlSaveHandler {
-        - ResumeRepository repository
+        - RelationalResumeRepository repository
         + handle(r: Resume): Resume
     }
 
@@ -58,7 +58,11 @@ package "business-logic" {
         + getEmbeddings(text: String): float[]
     }
 
-    interface ResumeRepository <<Interface>> #E1BEE7 {
+    interface RelationalResumeRepository <<Interface>> #E1BEE7 {
+        + save(r: Resume): Resume
+    }
+
+    interface VectorResumeRepository <<Interface>> #E1BEE7 {
         + save(r: Resume): Resume
     }
 }
@@ -79,11 +83,11 @@ SqlSaveHandler --|> ResumeSaveHandler : extends
 AiEmbeddingHandler --|> ResumeSaveHandler : extends
 VectorSaveHandler --|> ResumeSaveHandler : extends
 
-SqlSaveHandler --> ResumeRepository : uses
+SqlSaveHandler --> RelationalResumeRepository : uses
 AiEmbeddingHandler --> AIClient : uses
-VectorSaveHandler --> ResumeRepository : uses
+VectorSaveHandler --> VectorResumeRepository : uses
 
-BasicResumeRepository ..|> ResumeRepository : implements
-QdrantResumeRepository ..|> ResumeRepository : implements
+BasicResumeRepository ..|> RelationalResumeRepository : implements
+QdrantResumeRepository ..|> VectorResumeRepository : implements
 
 @enduml
