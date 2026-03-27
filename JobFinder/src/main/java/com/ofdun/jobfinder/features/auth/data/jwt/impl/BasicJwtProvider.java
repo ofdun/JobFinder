@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.features.auth.domain.jwt.impl;
+package com.ofdun.jobfinder.features.auth.data.jwt.impl;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.domain.model.AccountType;
