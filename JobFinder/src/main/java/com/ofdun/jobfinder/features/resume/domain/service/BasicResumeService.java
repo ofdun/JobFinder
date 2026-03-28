@@ -66,12 +66,17 @@ public class BasicResumeService implements ResumeService {
     @NonNull
     public Boolean deleteResume(Long resumeId) {
         var relationalDelete = relationalResumeRepository.deleteResume(resumeId);
+
+        if (!relationalDelete) {
+            throw new RuntimeException("Failed to delete resume from relational repository"); // TODO
+        }
+
         var vectorDelete = vectorResumeRepository.deleteResume(resumeId);
 
-        if (relationalDelete != vectorDelete) {
+        if (!vectorDelete) {
             throw new RuntimeException("Failed to delete resume from both repositories"); // TODO
         }
 
-        return relationalDelete;
+        return true;
     }
 }
