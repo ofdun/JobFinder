@@ -1,0 +1,58 @@
+@startuml
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+
+actor "Работодатель" as Employer
+participant "Платформа" as Platform
+actor "Соискатель" as Candidate
+
+== Публикация вакансии ==
+
+Employer -> Platform: Авторизация в системе
+Employer -> Platform: Нажатие "Создать вакансию"
+Employer -> Platform: Заполнение данных\n(Название, ЗП, Навыки, Тип занятости)
+Employer -> Platform: Публикация вакансии
+activate Platform
+Platform -> Platform: Валидация и сохранение вакансии
+Platform -> Platform: Публикация в общем списке
+deactivate Platform
+
+==Поиск и отклик==
+
+Candidate -> Platform: Вход на платформу
+Candidate -> Platform: Настройка фильтров поиска
+Candidate -> Platform: Изучение списка вакансий
+Candidate -> Platform: Выбор вакансии
+Candidate -> Platform: Нажатие кнопки "Откликнуться"
+
+alt Не авторизован
+    Candidate -> Platform: Регистрация / Авторизация
+end
+
+alt Нет резюме
+    Candidate -> Platform: Создание нового резюме
+end
+
+Candidate -> Platform: Выбор резюме для отклика
+Candidate -> Platform: Подтверждение отправки
+activate Platform
+Platform -> Platform: Создание записи "Отклик"
+deactivate Platform
+
+== Обработка отклика ==
+
+Employer -> Platform: Переход к списку откликов
+Platform --> Employer: Список откликов с резюме
+Employer -> Employer: Анализ резюме кандидата
+
+alt Кандидат интересен
+    Employer -> Platform: Изменение статуса на "Приглашение"
+else Кандидат НЕ интересен
+    Employer -> Platform: Изменение статуса на "Отказ"
+end
+
+activate Platform
+Platform -> Platform: Сохранение статуса
+deactivate Platform
+
+@enduml

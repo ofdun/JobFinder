@@ -1,0 +1,66 @@
+@startuml
+actor "Работодатель" as User
+
+participant "WebSPA" as SPA
+
+box "Backend" #WhiteSmoke
+    participant "MatchingController" as CTRL
+    participant "MatchingService" as SVC
+    participant "Репозитории" as REPO
+end box
+
+participant "AIService" as AI
+database "Qdrant" as VDB
+database "PostgreSQL" as DB
+
+User -> SPA: Найти кандидатов
+activate SPA
+
+SPA -> CTRL: Запрос на поиск совпадений
+activate CTRL
+
+CTRL -> SVC: Найти подходящие резюме
+activate SVC
+
+SVC -> REPO: Получить описание вакансии
+activate REPO
+REPO -> DB: Запрос текста вакансии
+activate DB
+DB --> REPO: Текст вакансии
+deactivate DB
+REPO --> SVC: Данные вакансии
+deactivate REPO
+
+SVC -> AI: Получить эмбеддинг вакансии
+activate AI
+AI --> SVC: Вектор вакансии
+deactivate AI
+
+SVC -> REPO: Найти похожие векторы
+activate REPO
+REPO -> VDB: Поиск ближайших соседей
+activate VDB
+VDB --> REPO: Список ID и весов (score)
+deactivate VDB
+REPO --> SVC: Список ID и весов
+deactivate REPO
+
+SVC -> REPO: Получить полные данные по списку ID
+activate REPO
+REPO -> DB: Запрос данных профилей
+activate DB
+DB --> REPO: Данные соискателей
+deactivate DB
+REPO --> SVC: Список профилей
+deactivate REPO
+
+SVC --> CTRL: Результаты подбора
+deactivate SVC
+
+CTRL --> SPA: Список подходящих профилей
+deactivate CTRL
+
+SPA --> User: Отображение рекомендованных кандидатов
+deactivate SPA
+
+@enduml

@@ -1,0 +1,133 @@
+@startuml
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BackgroundColor<<Domain>> #FFF9C4
+    BackgroundColor<<Entity>> #F1F8E9
+    BackgroundColor<<Interface>> #E1BEE7
+}
+
+package "api" {
+    class EmployerController {
+        -EmployerService employerService
+        -EmployerApiMapper apiMapper
+        +create(req: EmployerCreateRequest): EmployerResponse
+        +update(req: EmployerUpdateRequest): EmployerResponse
+        +getById(id: Long): EmployerResponse
+    }
+
+    class BasicEmployerApiMapper {
+    }
+    
+    interface EmployerApiMapper <<Interface>> {
+        +toDomain(dto: EmployerCreateRequest): Employer
+        +toDomain(dto: EmployerUpdateRequest): Employer
+        +toResponse(e: Employer): EmployerResponse
+    }
+
+    class EmployerCreateRequest <<DTO>> {
+        +String companyName
+        +String description
+        +String contactEmail
+        +String website
+    }
+    
+    class EmployerUpdateRequest <<DTO>> {
+        +Long id
+        +String companyName
+        +String description
+        +String website
+        +String address
+    }
+
+    class EmployerResponse <<DTO>> {
+        +Long id
+        +String companyName
+        +String description
+        +String contactEmail
+        +String website
+        +String address
+        +LocalDateTime registeredAt
+    }
+}
+
+package "business-logic" {
+    interface EmployerService <<Interface>> {
+        +createEmployer(e: Employer): Employer
+        +updateEmployer(e: Employer): Employer
+        +getEmployer(id: Long): Employer
+    }
+
+    class BasicEmployerService {
+        -EmployerRepository employerRepository
+    }
+    
+    interface EmployerRepository <<Interface>> {
+        +save(e: Employer): Employer
+        +findById(id: Long): Optional<Employer>
+        +existsById(id: Long): boolean
+    }
+    
+    class Employer <<Domain>> {
+        -Long id
+        -String companyName
+        -String description
+        -String contactEmail
+        -String website
+        -String address
+        +updateContactInfo()
+        +verifyCompany()
+    }
+}
+
+package "data-access" {
+    class BasicEmployerRepository {
+        -JpaEmployerRepository jpaRepo
+        -EmployerDataMapper dataMapper
+    }
+
+    class BasicEmployerDataMapper {
+    }
+    
+    interface EmployerDataMapper <<Interface>> {
+        +toEntity(domain: Employer): EmployerEntity
+        +toDomain(entity: EmployerEntity): Employer
+    }
+    
+    class EmployerEntity <<Entity>> {
+        +Long id
+        +String companyName
+        +String description
+        +String contactEmail
+        +String website
+        +String physicalAddress
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+    }
+
+    interface JpaEmployerRepository <<SpringData>> {
+        +save(entity: EmployerEntity): EmployerEntity
+        +findById(id: Long): Optional<EmployerEntity>
+    }
+}
+
+EmployerController --> EmployerService : uses
+EmployerController --> EmployerApiMapper : uses
+EmployerApiMapper ..> Employer : converts
+EmployerApiMapper ..> EmployerCreateRequest : converts
+EmployerApiMapper ..> EmployerUpdateRequest : converts
+EmployerApiMapper ..> EmployerResponse : converts
+
+BasicEmployerApiMapper ..|> EmployerApiMapper : implements
+
+BasicEmployerService ..|> EmployerService : implements
+BasicEmployerService --> EmployerRepository : uses
+
+BasicEmployerRepository ..|> EmployerRepository : implements
+BasicEmployerRepository --> EmployerDataMapper : uses
+BasicEmployerRepository --> JpaEmployerRepository : uses
+EmployerDataMapper ..> Employer : converts
+EmployerDataMapper ..> EmployerEntity : converts
+
+BasicEmployerDataMapper ..|> EmployerDataMapper : implements
+
+@enduml

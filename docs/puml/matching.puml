@@ -1,0 +1,50 @@
+@startuml
+skinparam ClassBackgroundColor #F5F5F5
+skinparam PackageStyle rectangle
+
+package "api" {
+    class MatchingController {
+        - MatchingService matchingService
+        + getMatches(vacancyId: Long, maxAmount: Long): List<MatchingResponse>
+    }
+
+    class MatchingResponse <<DTO>> #D1EAF5 {
+        + Long resumeId
+        + String fullName
+        + Double score
+    }
+}
+
+package "business-logic" {
+    interface MatchingService <<Interface>> #E1BEE7 {
+        + findSuitableCandidates(vacancyId: Long, maxAmount: Long): List<MatchResult>
+    }
+
+    class BasicMatchingService implements MatchingService {
+        - VacancyRepository vacancyRepo
+        - ResumeRepository resumeRepo
+        - VectorResumeRepository vectorRepo
+        - AIClient aiClient
+        + findSuitableCandidates()
+    }
+
+    class MatchResult <<Domain>> #FFF9C4 {
+        + Long resumeId
+        + Double similarityScore
+    }
+
+    interface VacancyRepository <<Interface>> #E1BEE7
+    interface ResumeRepository <<Interface>> #E1BEE7
+    interface VectorResumeRepository <<Interface>> #E1BEE7
+}
+
+interface AIClient <<Interface>> #E1BEE7 {
+    + getEmbeddings(text: String): float[]
+}
+
+MatchingController --> MatchingService : uses
+BasicMatchingService --> VacancyRepository : uses
+BasicMatchingService --> ResumeRepository : uses
+BasicMatchingService --> VectorResumeRepository : uses
+BasicMatchingService --> AIClient : uses
+@enduml

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="729px" preserveAspectRatio="none" style="width:3016px;height:729px;background:#FFFFFF;" version="1.1" viewBox="0 0 3016 729" width="3016px" zoomAndPan="magnify"><defs/><g><!--MD5=[7442f3b126ee602ae02566c1a49e158a]
+cluster api--><g id="cluster_api"><path d="M1458.5,6 L1482.5,6 A3.75,3.75 0 0 1 1485,8.5 L1492,28.2969 L1931.5,28.2969 A2.5,2.5 0 0 1 1934,30.7969 L1934,529 A2.5,2.5 0 0 1 1931.5,531.5 L1458.5,531.5 A2.5,2.5 0 0 1 1456,529 L1456,8.5 A2.5,2.5 0 0 1 1458.5,6 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="1456" x2="1492" y1="28.2969" y2="28.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="23" x="1460" y="20.9951">api</text></g><!--MD5=[94c9cfe1a5287d7af10fe173e14f7cd3]
+cluster business-logic--><g id="cluster_business-logic"><path d="M8.5,351 L123.5,351 A3.75,3.75 0 0 1 126,353.5 L133,373.2969 L1429.5,373.2969 A2.5,2.5 0 0 1 1432,375.7969 L1432,711.5 A2.5,2.5 0 0 1 1429.5,714 L8.5,714 A2.5,2.5 0 0 1 6,711.5 L6,353.5 A2.5,2.5 0 0 1 8.5,351 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="6" x2="133" y1="373.2969" y2="373.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="114" x="10" y="365.9951">business-logic</text></g><!--MD5=[6299646b37fff5992ff6430509120b26]
+cluster infrastructure-ai--><g id="cluster_infrastructure-ai"><path d="M1997.5,351 L2127.5,351 A3.75,3.75 0 0 1 2130,353.5 L2137,373.2969 L2500.5,373.2969 A2.5,2.5 0 0 1 2503,375.7969 L2503,719.5 A2.5,2.5 0 0 1 2500.5,722 L1997.5,722 A2.5,2.5 0 0 1 1995,719.5 L1995,353.5 A2.5,2.5 0 0 1 1997.5,351 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="1995" x2="2137" y1="373.2969" y2="373.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="129" x="1999" y="365.9951">infrastructure-ai</text></g><!--MD5=[d918a0b70f37e7ed967200225c930ec8]
+cluster data-access--><g id="cluster_data-access"><path d="M2529.5,379.5 L2625.5,379.5 A3.75,3.75 0 0 1 2628,382 L2635,401.7969 L3006.5,401.7969 A2.5,2.5 0 0 1 3009,404.2969 L3009,695 A2.5,2.5 0 0 1 3006.5,697.5 L2529.5,697.5 A2.5,2.5 0 0 1 2527,695 L2527,382 A2.5,2.5 0 0 1 2529.5,379.5 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="2527" x2="2635" y1="401.7969" y2="401.7969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="95" x="2531" y="394.4951">data-access</text></g><!--MD5=[b36b42d15b31da029d4805b4d9f86bc9]
+class MatchingController--><g id="elem_MatchingController"><rect codeLine="9" fill="#F1F1F1" height="96.8906" id="MatchingController" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="445" x="1472.5" y="41"/><ellipse cx="1625.75" cy="57" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1628.7188,62.6406 Q1628.1406,62.9375 1627.5,63.0781 Q1626.8594,63.2344 1626.1563,63.2344 Q1623.6563,63.2344 1622.3281,61.5938 Q1621.0156,59.9375 1621.0156,56.8125 Q1621.0156,53.6875 1622.3281,52.0313 Q1623.6563,50.375 1626.1563,50.375 Q1626.8594,50.375 1627.5,50.5313 Q1628.1563,50.6875 1628.7188,50.9844 L1628.7188,53.7031 Q1628.0938,53.125 1627.5,52.8594 Q1626.9063,52.5781 1626.2813,52.5781 Q1624.9375,52.5781 1624.25,53.6563 Q1623.5625,54.7188 1623.5625,56.8125 Q1623.5625,58.9063 1624.25,59.9844 Q1624.9375,61.0469 1626.2813,61.0469 Q1626.9063,61.0469 1627.5,60.7813 Q1628.0938,60.5 1628.7188,59.9219 L1628.7188,62.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="130" x="1646.25" y="61.8467">MatchingController</text><line style="stroke:#181818;stroke-width:0.5;" x1="1473.5" x2="1916.5" y1="73" y2="73"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="1480.5" y="83.6484"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="231" x="1492.5" y="89.9951">MatchingService matchingService</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="1480.5" y="99.9453"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="212" x="1492.5" y="106.292">MatchingApiMapper apiMapper</text><line style="stroke:#181818;stroke-width:0.5;" x1="1473.5" x2="1916.5" y1="113.5938" y2="113.5938"/><ellipse cx="1483.5" cy="127.2422" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="419" x="1492.5" y="130.5889">findTopCandidates(vacancyId: Long): List&lt;MatchResponse&gt;</text></g><!--MD5=[1509d6c67ad89d82efe60b00e7d670dc]
+class MatchingApiMapper--><g id="elem_MatchingApiMapper"><rect codeLine="15" fill="#E1BEE7" height="72.5625" id="MatchingApiMapper" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="436" x="1472" y="215"/><ellipse cx="1617.75" cy="235.1328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1613.6719,230.8984 L1613.6719,228.7422 L1621.0625,228.7422 L1621.0625,230.8984 L1618.5938,230.8984 L1618.5938,238.9766 L1621.0625,238.9766 L1621.0625,241.1328 L1613.6719,241.1328 L1613.6719,238.9766 L1616.1406,238.9766 L1616.1406,230.8984 L1613.6719,230.8984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="1671.25" y="231.1387">«Interface»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="136" x="1638.25" y="246.9639">MatchingApiMapper</text><line style="stroke:#181818;stroke-width:0.5;" x1="1473" x2="1907" y1="255.2656" y2="255.2656"/><line style="stroke:#181818;stroke-width:0.5;" x1="1473" x2="1907" y1="263.2656" y2="263.2656"/><ellipse cx="1483" cy="276.9141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="410" x="1492" y="280.2607">toResponse(domain: MatchingCandidate): MatchResponse</text></g><!--MD5=[cb27487bbf7ef4024bda12bdbd384e2e]
+class MatchResponse--><g id="elem_MatchResponse"><rect codeLine="19" fill="#E1F5FE" height="121.4531" id="MatchResponse" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="176" x="1602" y="394.5"/><ellipse cx="1630.95" cy="414.6328" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1633.9188,420.2734 Q1633.3406,420.5703 1632.7,420.7109 Q1632.0594,420.8672 1631.3563,420.8672 Q1628.8563,420.8672 1627.5281,419.2266 Q1626.2156,417.5703 1626.2156,414.4453 Q1626.2156,411.3203 1627.5281,409.6641 Q1628.8563,408.0078 1631.3563,408.0078 Q1632.0594,408.0078 1632.7,408.1641 Q1633.3563,408.3203 1633.9188,408.6172 L1633.9188,411.3359 Q1633.2938,410.7578 1632.7,410.4922 Q1632.1063,410.2109 1631.4813,410.2109 Q1630.1375,410.2109 1629.45,411.2891 Q1628.7625,412.3516 1628.7625,414.4453 Q1628.7625,416.5391 1629.45,417.6172 Q1630.1375,418.6797 1631.4813,418.6797 Q1632.1063,418.6797 1632.7,418.4141 Q1633.2938,418.1328 1633.9188,417.5547 L1633.9188,420.2734 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="39" x="1685.05" y="410.6387">«DTO»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113" x="1648.05" y="426.4639">MatchResponse</text><line style="stroke:#181818;stroke-width:0.5;" x1="1603" x2="1777" y1="434.7656" y2="434.7656"/><ellipse cx="1613" cy="448.4141" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="112" x="1622" y="451.7607">Long applicantId</text><ellipse cx="1613" cy="464.7109" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="103" x="1622" y="468.0576">String fullName</text><ellipse cx="1613" cy="481.0078" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="150" x="1622" y="484.3545">double similarityScore</text><ellipse cx="1613" cy="497.3047" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="129" x="1622" y="500.6514">String aiReasoning</text><line style="stroke:#181818;stroke-width:0.5;" x1="1603" x2="1777" y1="507.9531" y2="507.9531"/></g><!--MD5=[2cabeeb1ade15bf7c4f095273d48f8fa]
+class MatchingService--><g id="elem_MatchingService"><rect codeLine="28" fill="#E1BEE7" height="72.5625" id="MatchingService" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="456" x="22" y="617"/><ellipse cx="189.25" cy="637.1328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M185.1719,632.8984 L185.1719,630.7422 L192.5625,630.7422 L192.5625,632.8984 L190.0938,632.8984 L190.0938,640.9766 L192.5625,640.9766 L192.5625,643.1328 L185.1719,643.1328 L185.1719,640.9766 L187.6406,640.9766 L187.6406,632.8984 L185.1719,632.8984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="231.25" y="633.1387">«Interface»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="113" x="209.75" y="648.9639">MatchingService</text><line style="stroke:#181818;stroke-width:0.5;" x1="23" x2="477" y1="657.2656" y2="657.2656"/><line style="stroke:#181818;stroke-width:0.5;" x1="23" x2="477" y1="665.2656" y2="665.2656"/><ellipse cx="33" cy="678.9141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="430" x="42" y="682.2607">matchCandidates(vacancyId: Long): List&lt;MatchingCandidate&gt;</text></g><!--MD5=[08db5150ece118aac9fda9c9a89fb325]
+class BasicMatchingService--><g id="elem_BasicMatchingService"><rect codeLine="32" fill="#F1F1F1" height="96.8906" id="BasicMatchingService" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="268" x="773" y="406.5"/><ellipse cx="827.75" cy="422.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M830.7188,428.1406 Q830.1406,428.4375 829.5,428.5781 Q828.8594,428.7344 828.1563,428.7344 Q825.6563,428.7344 824.3281,427.0938 Q823.0156,425.4375 823.0156,422.3125 Q823.0156,419.1875 824.3281,417.5313 Q825.6563,415.875 828.1563,415.875 Q828.8594,415.875 829.5,416.0313 Q830.1563,416.1875 830.7188,416.4844 L830.7188,419.2031 Q830.0938,418.625 829.5,418.3594 Q828.9063,418.0781 828.2813,418.0781 Q826.9375,418.0781 826.25,419.1563 Q825.5625,420.2188 825.5625,422.3125 Q825.5625,424.4063 826.25,425.4844 Q826.9375,426.5469 828.2813,426.5469 Q828.9063,426.5469 829.5,426.2813 Q830.0938,426 830.7188,425.4219 L830.7188,428.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="150" x="848.25" y="427.3467">BasicMatchingService</text><line style="stroke:#181818;stroke-width:0.5;" x1="774" x2="1040" y1="438.5" y2="438.5"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="781" y="449.1484"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="793" y="455.4951">AiClient aiClient</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="781" y="465.4453"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="242" x="793" y="471.792">MatchingRepository matchingRepo</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="781" y="481.7422"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="227" x="793" y="488.0889">VacancyRepository vacancyRepo</text><line style="stroke:#181818;stroke-width:0.5;" x1="774" x2="1040" y1="495.3906" y2="495.3906"/></g><!--MD5=[49090e099e060b05a6aba43280160b77]
+class AiClient--><g id="elem_AiClient"><rect codeLine="38" fill="#E1BEE7" height="88.8594" id="AiClient" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="417" x="513.5" y="609"/><ellipse cx="684.75" cy="629.1328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M680.6719,624.8984 L680.6719,622.7422 L688.0625,622.7422 L688.0625,624.8984 L685.5938,624.8984 L685.5938,632.9766 L688.0625,632.9766 L688.0625,635.1328 L680.6719,635.1328 L680.6719,632.9766 L683.1406,632.9766 L683.1406,624.8984 L680.6719,624.8984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="703.25" y="625.1387">«Interface»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="51" x="712.75" y="640.9639">AiClient</text><line style="stroke:#181818;stroke-width:0.5;" x1="514.5" x2="929.5" y1="649.2656" y2="649.2656"/><line style="stroke:#181818;stroke-width:0.5;" x1="514.5" x2="929.5" y1="657.2656" y2="657.2656"/><ellipse cx="524.5" cy="670.9141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="243" x="533.5" y="674.2607">getEmbeddings(text: String): float[]</text><ellipse cx="524.5" cy="687.2109" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="391" x="533.5" y="690.5576">generateAnalysis(vacancy: String, resume: String): String</text></g><!--MD5=[3ef4a1d44f145e9fbff1970a56c4d2f7]
+class MatchingRepository--><g id="elem_MatchingRepository"><rect codeLine="43" fill="#E1BEE7" height="72.5625" id="MatchingRepository" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="451" x="965.5" y="617"/><ellipse cx="1118.25" cy="637.1328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M1114.1719,632.8984 L1114.1719,630.7422 L1121.5625,630.7422 L1121.5625,632.8984 L1119.0938,632.8984 L1119.0938,640.9766 L1121.5625,640.9766 L1121.5625,643.1328 L1114.1719,643.1328 L1114.1719,640.9766 L1116.6406,640.9766 L1116.6406,632.8984 L1114.1719,632.8984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="1172.25" y="633.1387">«Interface»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="137" x="1138.75" y="648.9639">MatchingRepository</text><line style="stroke:#181818;stroke-width:0.5;" x1="966.5" x2="1415.5" y1="657.2656" y2="657.2656"/><line style="stroke:#181818;stroke-width:0.5;" x1="966.5" x2="1415.5" y1="665.2656" y2="665.2656"/><ellipse cx="976.5" cy="678.9141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="425" x="985.5" y="682.2607">findSimilarResumes(vector: float[]): List&lt;MatchingCandidate&gt;</text></g><!--MD5=[fce24a8c5cd047da1d317003c45c24f3]
+class MatchingCandidate--><g id="elem_MatchingCandidate"><rect codeLine="47" fill="#FFF9C4" height="137.75" id="MatchingCandidate" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="189" x="548.5" y="386"/><ellipse cx="574.3" cy="406.1328" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M577.2688,411.7734 Q576.6906,412.0703 576.05,412.2109 Q575.4094,412.3672 574.7063,412.3672 Q572.2063,412.3672 570.8781,410.7266 Q569.5656,409.0703 569.5656,405.9453 Q569.5656,402.8203 570.8781,401.1641 Q572.2063,399.5078 574.7063,399.5078 Q575.4094,399.5078 576.05,399.6641 Q576.7063,399.8203 577.2688,400.1172 L577.2688,402.8359 Q576.6438,402.2578 576.05,401.9922 Q575.4563,401.7109 574.8313,401.7109 Q573.4875,401.7109 572.8,402.7891 Q572.1125,403.8516 572.1125,405.9453 Q572.1125,408.0391 572.8,409.1172 Q573.4875,410.1797 574.8313,410.1797 Q575.4563,410.1797 576.05,409.9141 Q576.6438,409.6328 577.2688,409.0547 L577.2688,411.7734 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="61" x="626.7" y="402.1387">«Domain»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="133" x="590.7" y="417.9639">MatchingCandidate</text><line style="stroke:#181818;stroke-width:0.5;" x1="549.5" x2="736.5" y1="426.2656" y2="426.2656"/><ellipse cx="559.5" cy="439.9141" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="112" x="568.5" y="443.2607">Long applicantId</text><ellipse cx="559.5" cy="456.2109" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="103" x="568.5" y="459.5576">String fullName</text><ellipse cx="559.5" cy="472.5078" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="150" x="568.5" y="475.8545">double similarityScore</text><ellipse cx="559.5" cy="488.8047" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="129" x="568.5" y="492.1514">String aiReasoning</text><line style="stroke:#181818;stroke-width:0.5;" x1="549.5" x2="736.5" y1="499.4531" y2="499.4531"/><ellipse cx="559.5" cy="513.1016" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="163" x="568.5" y="516.4482">void rank(double score)</text></g><!--MD5=[340f74ba9cea573b6716bf049eb85707]
+class OllamaAiClient--><g id="elem_OllamaAiClient"><rect codeLine="57" fill="#FFECB3" height="137.75" id="OllamaAiClient" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="321" x="2014.5" y="386"/><ellipse cx="2122.25" cy="406.1328" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M2125.2188,411.7734 Q2124.6406,412.0703 2124,412.2109 Q2123.3594,412.3672 2122.6563,412.3672 Q2120.1563,412.3672 2118.8281,410.7266 Q2117.5156,409.0703 2117.5156,405.9453 Q2117.5156,402.8203 2118.8281,401.1641 Q2120.1563,399.5078 2122.6563,399.5078 Q2123.3594,399.5078 2124,399.6641 Q2124.6563,399.8203 2125.2188,400.1172 L2125.2188,402.8359 Q2124.5938,402.2578 2124,401.9922 Q2123.4063,401.7109 2122.7813,401.7109 Q2121.4375,401.7109 2120.75,402.7891 Q2120.0625,403.8516 2120.0625,405.9453 Q2120.0625,408.0391 2120.75,409.1172 Q2121.4375,410.1797 2122.7813,410.1797 Q2123.4063,410.1797 2124,409.9141 Q2124.5938,409.6328 2125.2188,409.0547 L2125.2188,411.7734 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="100" x="2141.25" y="402.1387">«Infrastructure»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="97" x="2142.75" y="417.9639">OllamaAiClient</text><line style="stroke:#181818;stroke-width:0.5;" x1="2015.5" x2="2334.5" y1="426.2656" y2="426.2656"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="2022.5" y="436.9141"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="193" x="2034.5" y="443.2607">RestTemplate restTemplate</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="2022.5" y="453.2109"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="163" x="2034.5" y="459.5576">AiDataMapper aiMapper</text><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="2022.5" y="469.5078"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="149" x="2034.5" y="475.8545">String modelEndpoint</text><line style="stroke:#181818;stroke-width:0.5;" x1="2015.5" x2="2334.5" y1="483.1563" y2="483.1563"/><ellipse cx="2025.5" cy="496.8047" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="243" x="2034.5" y="500.1514">getEmbeddings(text: String): float[]</text><ellipse cx="2025.5" cy="513.1016" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="295" x="2034.5" y="516.4482">generateAnalysis(v: String, r: String): String</text></g><!--MD5=[df079a557a935b5d5974f4ea1d371575]
+class AiDataMapper--><g id="elem_AiDataMapper"><rect codeLine="65" fill="#E1BEE7" height="88.8594" id="AiDataMapper" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="303" x="2011.5" y="609"/><ellipse cx="2110.75" cy="629.1328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M2106.6719,624.8984 L2106.6719,622.7422 L2114.0625,622.7422 L2114.0625,624.8984 L2111.5938,624.8984 L2111.5938,632.9766 L2114.0625,632.9766 L2114.0625,635.1328 L2106.6719,635.1328 L2106.6719,632.9766 L2109.1406,632.9766 L2109.1406,624.8984 L2106.6719,624.8984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="70" x="2144.25" y="625.1387">«Interface»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="96" x="2131.25" y="640.9639">AiDataMapper</text><line style="stroke:#181818;stroke-width:0.5;" x1="2012.5" x2="2313.5" y1="649.2656" y2="649.2656"/><line style="stroke:#181818;stroke-width:0.5;" x1="2012.5" x2="2313.5" y1="657.2656" y2="657.2656"/><ellipse cx="2022.5" cy="670.9141" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="277" x="2031.5" y="674.2607">toOllamaRequest(prompt: String): String</text><ellipse cx="2022.5" cy="687.2109" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="254" x="2031.5" y="690.5576">parseEmbedding(json: String): float[]</text></g><!--MD5=[cac0cf19a6df502793c03585002267e5]
+class OllamaRequest--><g id="elem_OllamaRequest"><rect codeLine="70" fill="#E1F5FE" height="105.1563" id="OllamaRequest" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="137" x="2349.5" y="601"/><ellipse cx="2364.5" cy="621.1328" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M2367.4688,626.7734 Q2366.8906,627.0703 2366.25,627.2109 Q2365.6094,627.3672 2364.9063,627.3672 Q2362.4063,627.3672 2361.0781,625.7266 Q2359.7656,624.0703 2359.7656,620.9453 Q2359.7656,617.8203 2361.0781,616.1641 Q2362.4063,614.5078 2364.9063,614.5078 Q2365.6094,614.5078 2366.25,614.6641 Q2366.9063,614.8203 2367.4688,615.1172 L2367.4688,617.8359 Q2366.8438,617.2578 2366.25,616.9922 Q2365.6563,616.7109 2365.0313,616.7109 Q2363.6875,616.7109 2363,617.7891 Q2362.3125,618.8516 2362.3125,620.9453 Q2362.3125,623.0391 2363,624.1172 Q2363.6875,625.1797 2365.0313,625.1797 Q2365.6563,625.1797 2366.25,624.9141 Q2366.8438,624.6328 2367.4688,624.0547 L2367.4688,626.7734 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="39" x="2411.5" y="617.1387">«DTO»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="2378.5" y="632.9639">OllamaRequest</text><line style="stroke:#181818;stroke-width:0.5;" x1="2350.5" x2="2485.5" y1="641.2656" y2="641.2656"/><ellipse cx="2360.5" cy="654.9141" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="87" x="2369.5" y="658.2607">String model</text><ellipse cx="2360.5" cy="671.2109" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="94" x="2369.5" y="674.5576">String prompt</text><ellipse cx="2360.5" cy="687.5078" fill="none" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="108" x="2369.5" y="690.8545">boolean stream</text><line style="stroke:#181818;stroke-width:0.5;" x1="2350.5" x2="2485.5" y1="698.1563" y2="698.1563"/></g><!--MD5=[7199f37144678923b7cf2a03773e952b]
+class BasicMatchingRepository--><g id="elem_BasicMatchingRepository"><rect codeLine="78" fill="#F1F1F1" height="80.5938" id="BasicMatchingRepository" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="451" x="2542.5" y="414.5"/><ellipse cx="2676.75" cy="430.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M2679.7188,436.1406 Q2679.1406,436.4375 2678.5,436.5781 Q2677.8594,436.7344 2677.1563,436.7344 Q2674.6563,436.7344 2673.3281,435.0938 Q2672.0156,433.4375 2672.0156,430.3125 Q2672.0156,427.1875 2673.3281,425.5313 Q2674.6563,423.875 2677.1563,423.875 Q2677.8594,423.875 2678.5,424.0313 Q2679.1563,424.1875 2679.7188,424.4844 L2679.7188,427.2031 Q2679.0938,426.625 2678.5,426.3594 Q2677.9063,426.0781 2677.2813,426.0781 Q2675.9375,426.0781 2675.25,427.1563 Q2674.5625,428.2188 2674.5625,430.3125 Q2674.5625,432.4063 2675.25,433.4844 Q2675.9375,434.5469 2677.2813,434.5469 Q2677.9063,434.5469 2678.5,434.2813 Q2679.0938,434 2679.7188,433.4219 L2679.7188,436.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="174" x="2697.25" y="435.3467">BasicMatchingRepository</text><line style="stroke:#181818;stroke-width:0.5;" x1="2543.5" x2="2992.5" y1="446.5" y2="446.5"/><rect fill="none" height="6" style="stroke:#C82930;stroke-width:1.0;" width="6" x="2550.5" y="457.1484"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="218" x="2562.5" y="463.4951">JpaMatchingRepository jpaRepo</text><line style="stroke:#181818;stroke-width:0.5;" x1="2543.5" x2="2992.5" y1="470.7969" y2="470.7969"/><ellipse cx="2553.5" cy="484.4453" fill="#84BE84" rx="3" ry="3" style="stroke:#038048;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="425" x="2562.5" y="487.792">findSimilarResumes(vector: float[]): List&lt;MatchingCandidate&gt;</text></g><!--MD5=[fe0b82e959a43cd414239644c0d3610d]
+class JpaMatchingRepository--><g id="elem_JpaMatchingRepository"><rect codeLine="83" fill="#F1F1F1" height="56.2656" id="JpaMatchingRepository" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="189" x="2673.5" y="625.5"/><ellipse cx="2688.5" cy="645.6328" fill="#B4A7E5" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M2684.4219,641.3984 L2684.4219,639.2422 L2691.8125,639.2422 L2691.8125,641.3984 L2689.3438,641.3984 L2689.3438,649.4766 L2691.8125,649.4766 L2691.8125,651.6328 L2684.4219,651.6328 L2684.4219,649.4766 L2686.8906,649.4766 L2686.8906,641.3984 L2684.4219,641.3984 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="2739" y="641.6387">«SpringData»</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="157" x="2702.5" y="657.4639">JpaMatchingRepository</text><line style="stroke:#181818;stroke-width:0.5;" x1="2674.5" x2="2861.5" y1="665.7656" y2="665.7656"/><line style="stroke:#181818;stroke-width:0.5;" x1="2674.5" x2="2861.5" y1="673.7656" y2="673.7656"/></g><!--MD5=[23fce729781f18b50007a86673a73748]
+link MatchingController to MatchingService--><g id="link_MatchingController_MatchingService"><path codeLine="89" d="M1839.34,138.11 C1873.64,156.56 1906.03,181.56 1926,215 C1995.24,330.98 1876.31,487.97 1796,539.5 C1674.29,617.59 639.44,582.71 496,601 C466.74,604.73 435.79,610.08 406.07,615.94 " fill="none" id="MatchingController-to-MatchingService" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="400.93,616.96,410.536,619.1334,405.8345,615.9877,408.9803,611.2862,400.93,616.96" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="1945" y="331.0669">uses</text></g><!--MD5=[200e0498a15a4eb4522ec592ba04858e]
+link MatchingController to MatchingApiMapper--><g id="link_MatchingController_MatchingApiMapper"><path codeLine="90" d="M1693.51,138.07 C1692.8,160.84 1691.96,187.83 1691.28,209.66 " fill="none" id="MatchingController-to-MatchingApiMapper" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="1691.12,214.8,1695.4007,205.9301,1691.2771,209.8025,1687.4047,205.6788,1691.12,214.8" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="1693" y="181.0669">uses</text></g><!--MD5=[11fb960c10e096a5e34a9c98b3b5af2a]
+link MatchingApiMapper to MatchingCandidate--><g id="link_MatchingApiMapper_MatchingCandidate"><path codeLine="91" d="M1471.87,256.81 C1236.19,264.41 877.87,285.35 755,343 C734.95,352.41 716.4,366.95 700.38,382.44 " fill="none" id="MatchingApiMapper-to-MatchingCandidate" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="696.8,385.97,706.0136,382.4902,700.3569,382.456,700.3912,376.7992,696.8,385.97" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="55" x="829" y="331.0669">converts</text></g><!--MD5=[7680bbcfbf55b92f6963bd5af0d7cf2d]
+link MatchingApiMapper to MatchResponse--><g id="link_MatchingApiMapper_MatchResponse"><path codeLine="92" d="M1690,288.06 C1690,315.94 1690,355.5 1690,389 " fill="none" id="MatchingApiMapper-to-MatchResponse" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="1690,394.32,1694,385.32,1690,389.32,1686,385.32,1690,394.32" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="55" x="1691" y="331.0669">converts</text></g><!--MD5=[e789de6f6725b723f7ef8ad5bda4d86b]
+link BasicMatchingService to MatchingService--><g id="link_BasicMatchingService_MatchingService"><path codeLine="94" d="M830.13,503.71 C806.66,516.76 780.35,529.92 755,539.5 C724.87,550.88 570.06,584.97 439.69,612.75 " fill="none" id="BasicMatchingService-to-MatchingService" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="440.85,619.66,419.83,616.97,437.94,605.96,440.85,619.66" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="76" x="704" y="567.0669">implements</text></g><!--MD5=[02111e0bb3d18683b4acb44c545070a6]
+link BasicMatchingService to AiClient--><g id="link_BasicMatchingService_AiClient"><path codeLine="95" d="M862.22,503.57 C833.24,534.35 795.66,574.26 766.7,605.03 " fill="none" id="BasicMatchingService-to-AiClient" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="763.21,608.73,772.2911,604.9177,766.6368,605.089,766.4655,599.4347,763.21,608.73" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="816" y="567.0669">uses</text></g><!--MD5=[3bd374429e6e9861114805c9002e84aa]
+link BasicMatchingService to MatchingRepository--><g id="link_BasicMatchingService_MatchingRepository"><path codeLine="96" d="M975.75,503.57 C1024.57,537.35 1089.3,582.14 1134.99,613.75 " fill="none" id="BasicMatchingService-to-MatchingRepository" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="1139.35,616.76,1134.2195,608.353,1135.2365,613.9177,1129.6718,614.9346,1139.35,616.76" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="1068" y="567.0669">uses</text></g><!--MD5=[f558987cde39385f01f784f94c6d4a65]
+link OllamaAiClient to AiClient--><g id="link_OllamaAiClient_AiClient"><path codeLine="98" d="M2084.89,524.17 C2055.25,542.91 2021.11,560.86 1987,571 C1876.29,603.91 1062.57,586.43 948,601 C938.03,602.27 927.85,603.78 917.6,605.47 " fill="none" id="OllamaAiClient-to-AiClient" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="918.74,612.38,897.83,608.94,916.32,598.59,918.74,612.38" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="76" x="2027" y="567.0669">implements</text></g><!--MD5=[8646330b33ee61487eb1babb5db0f5b7]
+link OllamaAiClient to AiDataMapper--><g id="link_OllamaAiClient_AiDataMapper"><path codeLine="99" d="M2170.84,524.17 C2169.24,550.36 2167.45,579.69 2165.98,603.7 " fill="none" id="OllamaAiClient-to-AiDataMapper" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="2165.67,608.74,2170.2033,599.9965,2165.9703,603.749,2162.2178,599.516,2165.67,608.74" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="2170" y="567.0669">uses</text></g><!--MD5=[4e4f1e1e9a2dbef177d8ab3a486e8204]
+link OllamaAiClient to OllamaRequest--><g id="link_OllamaAiClient_OllamaRequest"><path codeLine="100" d="M2259.31,524.17 C2288.97,548.16 2321.9,574.79 2350.04,597.54 " fill="none" id="OllamaAiClient-to-OllamaRequest" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="2354.15,600.87,2349.6679,592.1001,2350.2624,597.7257,2344.6369,598.3202,2354.15,600.87" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="55" x="2312" y="567.0669">converts</text></g><!--MD5=[e9cf92771d996eda4258a30cfa010cb2]
+link BasicMatchingRepository to MatchingRepository--><g id="link_BasicMatchingRepository_MatchingRepository"><path codeLine="102" d="M2695.87,495.54 C2643.89,521.96 2571.17,554.73 2503,571 C2283,623.49 2220.74,587.1 1995,601 C1807.74,612.53 1595.98,626.11 1436.81,636.44 " fill="none" id="BasicMatchingRepository-to-MatchingRepository" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1437.09,643.43,1416.68,637.74,1436.18,629.46,1437.09,643.43" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="76" x="2556" y="567.0669">implements</text></g><!--MD5=[ff6d312957de6e53796edccc1e8159df]
+link BasicMatchingRepository to JpaMatchingRepository--><g id="link_BasicMatchingRepository_JpaMatchingRepository"><path codeLine="103" d="M2768,495.76 C2768,532.38 2768,586.04 2768,620.12 " fill="none" id="BasicMatchingRepository-to-JpaMatchingRepository" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="2768,625.41,2772,616.41,2768,620.41,2764,616.41,2768,625.41" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="2769" y="567.0669">uses</text></g><!--MD5=[1e73f7930287d241f303887e30f2d91f]
+@startuml
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BackgroundColor<<Domain>> #FFF9C4
+    BackgroundColor<<Infrastructure>> #FFECB3
+    BackgroundColor<<Interface>> #E1BEE7
+}
+
+package "api" {
+    class MatchingController {
+        -MatchingService matchingService
+        -MatchingApiMapper apiMapper
+        +findTopCandidates(vacancyId: Long): List<MatchResponse>
+    }
+    
+    interface MatchingApiMapper <<Interface>> {
+        +toResponse(domain: MatchingCandidate): MatchResponse
+    }
+
+    class MatchResponse <<DTO>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+    }
+}
+
+package "business-logic" {
+    interface MatchingService <<Interface>> {
+        +matchCandidates(vacancyId: Long): List<MatchingCandidate>
+    }
+
+    class BasicMatchingService {
+        -AiClient aiClient
+        -MatchingRepository matchingRepo
+        -VacancyRepository vacancyRepo
+    }
+    
+    interface AiClient <<Interface>> {
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(vacancy: String, resume: String): String
+    }
+    
+    interface MatchingRepository <<Interface>> {
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    class MatchingCandidate <<Domain>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+        +void rank(double score)
+    }
+}
+
+package "infrastructure-ai" {
+    class OllamaAiClient <<Infrastructure>> {
+        -RestTemplate restTemplate
+        -AiDataMapper aiMapper
+        -String modelEndpoint
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(v: String, r: String): String
+    }
+    
+    interface AiDataMapper <<Interface>> {
+        +toOllamaRequest(prompt: String): String
+        +parseEmbedding(json: String): float[]
+    }
+    
+    class OllamaRequest <<DTO>> {
+        +String model
+        +String prompt
+        +boolean stream
+    }
+}
+
+package "data-access" {
+    class BasicMatchingRepository {
+        -JpaMatchingRepository jpaRepo
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    interface JpaMatchingRepository <<SpringData>> {
+        ' Здесь используется pgvector SQL: 
+        ' SELECT * FROM resumes ORDER BY embedding <=> ?
+    }
+}
+
+MatchingController - -> MatchingService : uses
+MatchingController - -> MatchingApiMapper : uses
+MatchingApiMapper ..> MatchingCandidate : converts
+MatchingApiMapper ..> MatchResponse : converts
+
+BasicMatchingService ..|> MatchingService : implements
+BasicMatchingService - -> AiClient : uses
+BasicMatchingService - -> MatchingRepository : uses
+
+OllamaAiClient ..|> AiClient : implements
+OllamaAiClient - -> AiDataMapper : uses
+OllamaAiClient ..> OllamaRequest : converts
+
+BasicMatchingRepository ..|> MatchingRepository : implements
+BasicMatchingRepository - -> JpaMatchingRepository : uses
+@enduml
+
+@startuml
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BackgroundColor<<Domain>> #FFF9C4
+    BackgroundColor<<Infrastructure>> #FFECB3
+    BackgroundColor<<Interface>> #E1BEE7
+}
+
+package "api" {
+    class MatchingController {
+        -MatchingService matchingService
+        -MatchingApiMapper apiMapper
+        +findTopCandidates(vacancyId: Long): List<MatchResponse>
+    }
+    
+    interface MatchingApiMapper <<Interface>> {
+        +toResponse(domain: MatchingCandidate): MatchResponse
+    }
+
+    class MatchResponse <<DTO>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+    }
+}
+
+package "business-logic" {
+    interface MatchingService <<Interface>> {
+        +matchCandidates(vacancyId: Long): List<MatchingCandidate>
+    }
+
+    class BasicMatchingService {
+        -AiClient aiClient
+        -MatchingRepository matchingRepo
+        -VacancyRepository vacancyRepo
+    }
+    
+    interface AiClient <<Interface>> {
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(vacancy: String, resume: String): String
+    }
+    
+    interface MatchingRepository <<Interface>> {
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    class MatchingCandidate <<Domain>> {
+        +Long applicantId
+        +String fullName
+        +double similarityScore
+        +String aiReasoning
+        +void rank(double score)
+    }
+}
+
+package "infrastructure-ai" {
+    class OllamaAiClient <<Infrastructure>> {
+        -RestTemplate restTemplate
+        -AiDataMapper aiMapper
+        -String modelEndpoint
+        +getEmbeddings(text: String): float[]
+        +generateAnalysis(v: String, r: String): String
+    }
+    
+    interface AiDataMapper <<Interface>> {
+        +toOllamaRequest(prompt: String): String
+        +parseEmbedding(json: String): float[]
+    }
+    
+    class OllamaRequest <<DTO>> {
+        +String model
+        +String prompt
+        +boolean stream
+    }
+}
+
+package "data-access" {
+    class BasicMatchingRepository {
+        -JpaMatchingRepository jpaRepo
+        +findSimilarResumes(vector: float[]): List<MatchingCandidate>
+    }
+    
+    interface JpaMatchingRepository <<SpringData>> {
+    }
+}
+
+MatchingController - -> MatchingService : uses
+MatchingController - -> MatchingApiMapper : uses
+MatchingApiMapper ..> MatchingCandidate : converts
+MatchingApiMapper ..> MatchResponse : converts
+
+BasicMatchingService ..|> MatchingService : implements
+BasicMatchingService - -> AiClient : uses
+BasicMatchingService - -> MatchingRepository : uses
+
+OllamaAiClient ..|> AiClient : implements
+OllamaAiClient - -> AiDataMapper : uses
+OllamaAiClient ..> OllamaRequest : converts
+
+BasicMatchingRepository ..|> MatchingRepository : implements
+BasicMatchingRepository - -> JpaMatchingRepository : uses
+@enduml
+
+PlantUML version 1.2022.7(Mon Aug 22 17:01:30 UTC 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

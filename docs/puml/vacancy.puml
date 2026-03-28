@@ -1,0 +1,140 @@
+@startuml
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BackgroundColor<<Domain>> #FFF9C4
+    BackgroundColor<<Entity>> #F1F8E9
+    BackgroundColor<<Interface>> #E1BEE7
+    BackgroundColor<<ValueObject>> #FFFFFF
+}
+
+package "api" {
+    class VacancyController {
+        -VacancyService vacancyService
+        -VacancyApiMapper apiMapper
+        +create(req: VacancyCreateRequest): VacancyResponse
+        +update(req: VacancyUpdateRequest): VacancyResponse
+        +delete(req: VacancyDeleteRequest): void
+        +getById(id: Long): VacancyResponse
+    }
+
+    class BasicVacancyApiMapper {
+    }
+    
+    interface VacancyApiMapper <<Interface>> {
+        +toDomain(dto: VacancyCreateRequest): Vacancy
+        +toDomain(dto: VacancyUpdateRequest): Vacancy
+        +toResponse(v: Vacancy): VacancyResponse
+    }
+
+    class VacancyCreateRequest <<DTO>> {
+        +String title
+        +BigDecimal salary
+        +String currency
+        +String description
+        +Long employerId
+    }
+    
+    class VacancyUpdateRequest <<DTO>> {
+        +Long id
+        +String title
+        +BigDecimal salary
+        +String currency
+        +String description
+    }
+    
+    class VacancyDeleteRequest <<DTO>> {
+        +Long id
+    }
+
+    class VacancyResponse <<DTO>> {
+        +Long id
+        +String title
+        +BigDecimal salary
+        +String currency
+        +String status
+        +LocalDateTime createdAt
+    }
+}
+
+package "business-logic" {
+    interface VacancyService <<Interface>> {
+        +createVacancy(v: Vacancy): Vacancy
+        +updateVacancy(v: Vacancy): Vacancy
+        +deleteVacancy(id: Long): void
+        +getVacancy(id: Long): Vacancy
+    }
+
+    class BasicVacancyService {
+        -VacancyRepository vacancyRepository
+    }
+    
+    interface VacancyRepository <<Interface>> {
+        +save(v: Vacancy): Vacancy
+        +findById(id: Long): Optional<Vacancy>
+        +deleteById(id: Long): void
+        +existsById(id: Long): boolean
+    }
+    
+    class Vacancy <<Domain>> {
+        -Long id
+        -String title
+        -BigDecimal salary
+        -String description
+        -String status
+    }
+}
+
+package "data-access" {
+    class BasicVacancyRepository {
+        -JpaVacancyRepository jpaRepo
+        -VacancyDataMapper dataMapper
+    }
+
+    class BasicVacancyDataMapper {
+    }
+    
+    interface VacancyDataMapper <<Interface>> {
+        +toEntity(v: Vacancy): VacancyEntity
+        +toDomain(e: VacancyEntity): Vacancy
+    }
+    
+    class VacancyEntity <<Entity>> {
+        +Long id
+        +String title
+        +BigDecimal salaryAmount
+        +String salaryCurrency
+        +String description
+        +String status
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+    }
+
+    interface JpaVacancyRepository <<SpringData>> {
+        +save(e: VacancyEntity): VacancyEntity
+        +deleteById(id: Long): void
+        +existsById(id: Long): boolean
+    }
+}
+
+VacancyController --> VacancyService : uses
+VacancyController --> VacancyApiMapper : uses
+VacancyController --> VacancyDeleteRequest : uses
+VacancyApiMapper ..> Vacancy : converts
+VacancyApiMapper ..> VacancyCreateRequest : converts
+VacancyApiMapper ..> VacancyUpdateRequest : converts
+VacancyApiMapper ..> VacancyResponse : converts
+
+BasicVacancyApiMapper ..|> VacancyApiMapper : implements
+
+BasicVacancyService ..|> VacancyService : implements
+BasicVacancyService --> VacancyRepository : uses
+
+BasicVacancyRepository ..|> VacancyRepository : implements
+BasicVacancyRepository --> VacancyDataMapper : uses
+BasicVacancyRepository --> JpaVacancyRepository : uses
+VacancyDataMapper ..> Vacancy : converts
+VacancyDataMapper ..> VacancyEntity : converts
+
+BasicVacancyDataMapper ..|> VacancyDataMapper : implements
+
+@enduml

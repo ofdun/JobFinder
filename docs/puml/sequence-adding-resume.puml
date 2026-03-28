@@ -1,0 +1,117 @@
+@startuml
+actor "Соискатель" as User
+
+participant "WebSPA" as SPA
+
+box "Backend" #WhiteSmoke
+    participant "ResumeController" as CTRL
+    participant "ResumeService" as SVC
+    participant "Репозитории" as REPO
+end box
+
+database "PostgreSQL" as DB
+
+participant "AIService" as AI
+
+database "Qdrant" as VDB
+
+User -> SPA: Сохранить резюме
+activate SPA
+
+SPA -> CTRL: Запрос на создание резюме
+activate CTRL
+
+CTRL -> SVC: Создать резюме
+activate SVC
+
+SVC -> REPO: Сохранить данные резюме
+activate REPO
+REPO -> DB: Запись данных в таблицу
+activate DB
+DB --> REPO: Идентификатор резюме
+deactivate DB
+REPO --> SVC: Объект резюме
+deactivate REPO
+
+SVC -> AI: Получить эмбеддинги текста
+activate AI
+AI --> SVC: Векторное представление
+deactivate AI
+
+SVC -> REPO: Сохранить вектор
+activate REPO
+REPO -> VDB: Запись вектора с привязкой к ID
+activate VDB
+VDB --> REPO: Подтверждение
+deactivate VDB
+REPO --> SVC: Успех
+deactivate REPO
+
+SVC --> CTRL: Данные созданного резюме
+deactivate SVC
+
+CTRL --> SPA: Успешный ответ
+deactivate CTRL
+
+SPA --> User: Уведомление об успехе
+deactivate SPA
+
+@enduml@startuml
+actor "Соискатель" as User
+
+participant "WebSPA" as SPA
+
+box "Backend" #WhiteSmoke
+    participant "ResumeController" as CTRL
+    participant "ResumeService" as SVC
+    participant "Репозитории" as REPO
+end box
+
+database "PostgreSQL" as DB
+
+participant "AIService" as AI
+
+database "Qdrant" as VDB
+
+User -> SPA: Сохранить резюме
+activate SPA
+
+SPA -> CTRL: Запрос на создание резюме
+activate CTRL
+
+CTRL -> SVC: Создать резюме
+activate SVC
+
+SVC -> REPO: Сохранить данные резюме
+activate REPO
+REPO -> DB: Запись данных в таблицу
+activate DB
+DB --> REPO: Идентификатор резюме
+deactivate DB
+REPO --> SVC: Объект резюме
+deactivate REPO
+
+SVC -> AI: Получить эмбеддинги текста
+activate AI
+AI --> SVC: Векторное представление
+deactivate AI
+
+SVC -> REPO: Сохранить вектор
+activate REPO
+REPO -> VDB: Запись вектора с привязкой к ID
+activate VDB
+VDB --> REPO: Подтверждение
+deactivate VDB
+REPO --> SVC: Успех
+deactivate REPO
+
+SVC --> CTRL: Данные созданного резюме
+deactivate SVC
+
+CTRL --> SPA: Успешный ответ
+deactivate CTRL
+
+SPA --> User: Уведомление об успехе
+deactivate SPA
+
+@enduml
