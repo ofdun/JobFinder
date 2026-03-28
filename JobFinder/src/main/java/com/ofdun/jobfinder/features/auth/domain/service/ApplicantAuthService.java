@@ -13,14 +13,23 @@ import java.time.Duration;
 
 @Service
 public class ApplicantAuthService implements AuthService {
-    EncryptionService encryptionService;
-    ApplicantAccountRepository applicantAccountRepository;
-    TokenRepository tokenRepository;
-    JwtProvider jwtProvider;
+    private final EncryptionService encryptionService;
+    private final ApplicantAccountRepository applicantAccountRepository;
+    private final TokenRepository tokenRepository;
+    private final JwtProvider jwtProvider;
+
+    public ApplicantAuthService(@NonNull EncryptionService encryptionService,
+                                @NonNull ApplicantAccountRepository applicantAccountRepository,
+                                @NonNull TokenRepository tokenRepository,
+                                @NonNull JwtProvider jwtProvider) {
+        this.encryptionService = encryptionService;
+        this.applicantAccountRepository = applicantAccountRepository;
+        this.tokenRepository = tokenRepository;
+        this.jwtProvider = jwtProvider;
+    }
 
     @Override
-    @NonNull
-    public TokenPair login(String email, String password) {
+    public TokenPair login(@NonNull String email, @NonNull String password) {
         var applicant = applicantAccountRepository.findByEmail(email);
         if (applicant == null) {
             throw new RuntimeException("Applicant not found");
@@ -41,8 +50,7 @@ public class ApplicantAuthService implements AuthService {
     }
 
     @Override
-    @NonNull
-    public TokenPair refreshToken(String refreshToken) {
+    public TokenPair refreshToken(@NonNull String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken, AccountType.APPLICANT)) {
             throw new RuntimeException("Refresh token invalid");
         }

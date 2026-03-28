@@ -16,7 +16,7 @@ public class OllamaAiClient implements AiClient {
 
     private final RestClient httpClient;
 
-    public OllamaAiClient(String base, String endpoint, String model) {
+    public OllamaAiClient(@NonNull String base, @NonNull String endpoint, @NonNull String model) {
         this.endpoint = endpoint;
         this.model = model;
 
@@ -26,8 +26,7 @@ public class OllamaAiClient implements AiClient {
     }
 
     @Override
-    @NonNull
-    public List<Double> getEmbedding(String content) {
+    public List<Double> getEmbedding(@NonNull String content) {
 
         var response = httpClient.post()
                 .uri(endpoint)

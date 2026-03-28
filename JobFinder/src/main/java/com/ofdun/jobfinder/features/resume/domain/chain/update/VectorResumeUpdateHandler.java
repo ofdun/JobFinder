@@ -11,6 +11,9 @@ public class VectorResumeUpdateHandler extends ResumeHandler {
 
     @Override
     protected ResumeModel execute(ResumeModel resume) {
+        if (resumeRepository.getResumeById(resume.getId()) == null) {
+            throw new IllegalArgumentException("Resume with id " + resume.getId() + " does not exist.");
+        }
         return resumeRepository.updateResume(resume);
     }
 }

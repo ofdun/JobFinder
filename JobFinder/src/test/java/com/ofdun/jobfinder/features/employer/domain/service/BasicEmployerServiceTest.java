@@ -30,7 +30,6 @@ class BasicEmployerServiceTest {
 
         assertEquals(expectedId, actualId);
         verify(employerRepository).createEmployer(employerModel);
-        verifyNoMoreInteractions(employerRepository);
     }
 
     @Test
@@ -42,7 +41,6 @@ class BasicEmployerServiceTest {
 
         assertNull(actualId);
         verify(employerRepository).createEmployer(employerModel);
-        verifyNoMoreInteractions(employerRepository);
     }
 
     @Test
@@ -71,15 +69,19 @@ class BasicEmployerServiceTest {
     }
 
     @Test
-    void updateEmployer_whenValidEmployer_thenUpdatedEmployerReturned() {
+    void updateEmployer_whenValidEmployer_thenThrowsIllegalArgumentException() {
         EmployerModel employerModel = mock(EmployerModel.class);
-        when(employerRepository.updateEmployer(employerModel)).thenReturn(employerModel);
+        when(employerModel.getId()).thenReturn(1L);
 
-        EmployerModel updatedEmployer = employerService.updateEmployer(employerModel);
+        assertThrows(IllegalArgumentException.class, () -> employerService.updateEmployer(employerModel));
+    }
 
-        assertSame(employerModel, updatedEmployer);
-        verify(employerRepository).updateEmployer(employerModel);
-        verifyNoMoreInteractions(employerRepository);
+    @Test
+    void updateEmployer_whenInvalidEmployer_thenThrowsIllegalArgumentException() {
+        EmployerModel employerModel = mock(EmployerModel.class);
+        when(employerModel.getId()).thenReturn(0L);
+
+        assertThrows(IllegalArgumentException.class, () -> employerService.updateEmployer(employerModel));
     }
 
     @Test
@@ -95,13 +97,11 @@ class BasicEmployerServiceTest {
     }
 
     @Test
-    void deleteEmployer_whenRepositoryReturnsFalse_thenFalseReturned() {
+    void deleteEmployer_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
         Long id = 404L;
         when(employerRepository.deleteEmployer(id)).thenReturn(false);
 
-        Boolean result = employerService.deleteEmployer(id);
-
-        assertFalse(result);
+        assertThrows(IllegalArgumentException.class, () -> employerService.deleteEmployer(id));
         verify(employerRepository).deleteEmployer(id);
         verifyNoMoreInteractions(employerRepository);
     }

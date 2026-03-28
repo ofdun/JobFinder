@@ -5,18 +5,28 @@ import com.ofdun.jobfinder.shared.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import lombok.NonNull;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 
+@Service
 public class BasicMatchingService implements MatchingService {
-    VacancyRepository vacancyRepository;
-    VectorResumeRepository vectorResumeRepository;
-    AiClient aiClient;
+    private final VacancyRepository vacancyRepository;
+    private final VectorResumeRepository vectorResumeRepository;
+
+    public BasicMatchingService(@NonNull VacancyRepository vacancyRepository,
+                                @NonNull VectorResumeRepository vectorResumeRepository,
+                                @NonNull AiClient aiClient) {
+        this.vacancyRepository = vacancyRepository;
+        this.vectorResumeRepository = vectorResumeRepository;
+        this.aiClient = aiClient;
+    }
+
+    private final AiClient aiClient;
 
     @Override
-    @NonNull
-    public List<MatchResultModel> findSuitableCandidates(Long vacancyId, Integer maxAmount) {
+    public List<MatchResultModel> findSuitableCandidates(@NonNull Long vacancyId, @NonNull Integer maxAmount) {
         if (maxAmount <= 0) {
             return Collections.emptyList();
         }
@@ -26,8 +36,7 @@ public class BasicMatchingService implements MatchingService {
         return vectorResumeRepository.getMostSimilarResumes(vacancyEmbedding, maxAmount);
     }
 
-    @NonNull
-    private List<Double> getVacancyEmbedding(Long vacancyId) {
+    private List<Double> getVacancyEmbedding(@NonNull Long vacancyId) {
         var vacancy = vacancyRepository.getVacancyById(vacancyId);
         return aiClient.getEmbedding(vacancy.toString());
     }

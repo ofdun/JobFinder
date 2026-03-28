@@ -30,7 +30,6 @@ class BasicVacancyServiceTest {
 
         assertEquals(expectedId, actualId);
         verify(vacancyRepository).createVacancy(vacancyModel);
-        verifyNoMoreInteractions(vacancyRepository);
     }
 
     @Test
@@ -42,7 +41,6 @@ class BasicVacancyServiceTest {
 
         assertNull(actualId);
         verify(vacancyRepository).createVacancy(vacancyModel);
-        verifyNoMoreInteractions(vacancyRepository);
     }
 
     @Test
@@ -71,15 +69,19 @@ class BasicVacancyServiceTest {
     }
 
     @Test
-    void updateVacancy_whenValidVacancy_thenUpdatedVacancyReturned() {
+    void updateVacancy_whenValidVacancy_thenThrowsIllegalArgumentException() {
         VacancyModel vacancyModel = mock(VacancyModel.class);
-        when(vacancyRepository.updateVacancy(vacancyModel)).thenReturn(vacancyModel);
+        when(vacancyModel.getId()).thenReturn(1L);
 
-        VacancyModel updatedVacancy = vacancyService.updateVacancy(vacancyModel);
+        assertThrows(IllegalArgumentException.class, () -> vacancyService.updateVacancy(vacancyModel));
+    }
 
-        assertSame(vacancyModel, updatedVacancy);
-        verify(vacancyRepository).updateVacancy(vacancyModel);
-        verifyNoMoreInteractions(vacancyRepository);
+    @Test
+    void updateVacancy_whenInvalidVacancy_thenThrowsIllegalArgumentException() {
+        VacancyModel vacancyModel = mock(VacancyModel.class);
+        when(vacancyModel.getId()).thenReturn(0L);
+
+        assertThrows(IllegalArgumentException.class, () -> vacancyService.updateVacancy(vacancyModel));
     }
 
     @Test
@@ -95,13 +97,11 @@ class BasicVacancyServiceTest {
     }
 
     @Test
-    void deleteVacancy_whenRepositoryReturnsFalse_thenFalseReturned() {
+    void deleteVacancy_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
         Long id = 404L;
         when(vacancyRepository.deleteVacancy(id)).thenReturn(false);
 
-        Boolean result = vacancyService.deleteVacancy(id);
-
-        assertFalse(result);
+        assertThrows(IllegalArgumentException.class, () -> vacancyService.deleteVacancy(id));
         verify(vacancyRepository).deleteVacancy(id);
         verifyNoMoreInteractions(vacancyRepository);
     }

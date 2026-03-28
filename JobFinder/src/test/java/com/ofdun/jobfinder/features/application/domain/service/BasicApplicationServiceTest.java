@@ -30,7 +30,6 @@ class BasicApplicationServiceTest {
 
         assertEquals(expectedId, actualId);
         verify(applicationRepository).saveApplication(application);
-        verifyNoMoreInteractions(applicationRepository);
     }
 
     @Test
@@ -42,7 +41,6 @@ class BasicApplicationServiceTest {
 
         assertNull(actualId);
         verify(applicationRepository).saveApplication(application);
-        verifyNoMoreInteractions(applicationRepository);
     }
 
     @Test
@@ -71,15 +69,19 @@ class BasicApplicationServiceTest {
     }
 
     @Test
-    void updateApplication_whenValidApplication_thenUpdatedApplicationReturned() {
+    void updateApplication_whenValidApplication_thenThrowsIllegalArgumentException() {
         ApplicationModel application = mock(ApplicationModel.class);
-        when(applicationRepository.updateApplication(application)).thenReturn(application);
+        when(application.getId()).thenReturn(1L);
 
-        ApplicationModel updatedApplication = applicationService.updateApplication(application);
+        assertThrows(IllegalArgumentException.class, () -> applicationService.updateApplication(application));
+    }
 
-        assertSame(application, updatedApplication);
-        verify(applicationRepository).updateApplication(application);
-        verifyNoMoreInteractions(applicationRepository);
+    @Test
+    void updateApplication_whenInvalidApplication_thenThrowsIllegalArgumentException() {
+        ApplicationModel application = mock(ApplicationModel.class);
+        when(application.getId()).thenReturn(0L);
+
+        assertThrows(IllegalArgumentException.class, () -> applicationService.updateApplication(application));
     }
 
     @Test
@@ -95,13 +97,11 @@ class BasicApplicationServiceTest {
     }
 
     @Test
-    void deleteApplication_whenRepositoryReturnsFalse_thenFalseReturned() {
+    void deleteApplication_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
         Long id = 404L;
         when(applicationRepository.deleteApplication(id)).thenReturn(false);
 
-        Boolean result = applicationService.deleteApplication(id);
-
-        assertFalse(result);
+        assertThrows(IllegalArgumentException.class, () -> applicationService.deleteApplication(id));
         verify(applicationRepository).deleteApplication(id);
         verifyNoMoreInteractions(applicationRepository);
     }

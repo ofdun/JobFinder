@@ -7,29 +7,36 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BasicVacancyService implements VacancyService {
-    VacancyRepository vacancyRepository;
+    private final VacancyRepository vacancyRepository;
+
+    public BasicVacancyService(VacancyRepository vacancyRepository) {
+        this.vacancyRepository = vacancyRepository;
+    }
 
     @Override
-    @NonNull
-    public Long createVacancy(VacancyModel vacancyModel) {
+    public Long createVacancy(@NonNull VacancyModel vacancyModel) {
         return vacancyRepository.createVacancy(vacancyModel);
     }
 
     @Override
-    @NonNull
-    public VacancyModel getVacancyById(Long id) {
+    public VacancyModel getVacancyById(@NonNull Long id) {
         return vacancyRepository.getVacancyById(id);
     }
 
     @Override
-    @NonNull
-    public VacancyModel updateVacancy(VacancyModel vacancyModel) {
+    public VacancyModel updateVacancy(@NonNull VacancyModel vacancyModel) {
+        if (vacancyRepository.getVacancyById(vacancyModel.getId()) == null) {
+            throw new IllegalArgumentException("Vacancy with id " + vacancyModel.getId() + " does not exist.");
+        }
         return vacancyRepository.updateVacancy(vacancyModel);
     }
 
     @Override
-    @NonNull
-    public Boolean deleteVacancy(Long id) {
-        return vacancyRepository.deleteVacancy(id);
+    public Boolean deleteVacancy(@NonNull Long id) {
+        if (!vacancyRepository.deleteVacancy(id)) {
+            throw new IllegalArgumentException("Vacancy with id " + id + " does not exist.");
+        }
+        return true;
     }
 }
+

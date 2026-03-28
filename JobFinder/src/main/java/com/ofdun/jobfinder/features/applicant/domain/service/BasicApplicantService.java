@@ -7,29 +7,38 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BasicApplicantService implements ApplicantService {
-    ApplicantRepository applicantRepository;
+    private final ApplicantRepository applicantRepository;
+
+    public BasicApplicantService(@NonNull ApplicantRepository applicantRepository) {
+        this.applicantRepository = applicantRepository;
+    }
 
     @Override
-    @NonNull
-    public Long createApplicant(ApplicantModel applicantModel) {
+    public Long createApplicant(@NonNull ApplicantModel applicantModel) {
+        if (applicantRepository.getApplicantByEmail(applicantModel.getEmail()) != null) {
+            throw new IllegalArgumentException("Applicant with email " + applicantModel.getEmail() + " already exists");
+        }
         return applicantRepository.createApplicant(applicantModel);
     }
 
     @Override
-    @NonNull
-    public ApplicantModel getApplicantById(Long id) {
+    public ApplicantModel getApplicantById(@NonNull Long id) {
         return applicantRepository.getApplicantById(id);
     }
 
     @Override
-    @NonNull
-    public ApplicantModel updateApplicant(ApplicantModel applicantModel) {
+    public ApplicantModel updateApplicant(@NonNull ApplicantModel applicantModel) {
+        if (applicantRepository.getApplicantById(applicantModel.getId()) == null) {
+            throw new IllegalArgumentException("Applicant with id " + applicantModel.getId() + " does not exist");
+        }
         return applicantRepository.updateApplicant(applicantModel);
     }
 
     @Override
-    @NonNull
-    public Boolean deleteApplicant(Long id) {
-        return applicantRepository.deleteApplicant(id);
+    public Boolean deleteApplicant(@NonNull Long id) {
+        if (!applicantRepository.deleteApplicant(id)) {
+            throw new IllegalArgumentException("Applicant with id " + id + " does not exist");
+        }
+        return true;
     }
 }

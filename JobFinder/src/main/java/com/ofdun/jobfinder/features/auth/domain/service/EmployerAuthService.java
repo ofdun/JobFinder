@@ -13,14 +13,23 @@ import java.time.Duration;
 
 @Service
 public class EmployerAuthService implements AuthService {
-    EncryptionService encryptionService;
-    EmployerAccountRepository employerAccountRepository;
-    TokenRepository tokenRepository;
-    JwtProvider jwtProvider;
+    private final EncryptionService encryptionService;
+    private final EmployerAccountRepository employerAccountRepository;
+    private final TokenRepository tokenRepository;
+    private final JwtProvider jwtProvider;
+
+    public EmployerAuthService(@NonNull EncryptionService encryptionService,
+                               @NonNull EmployerAccountRepository employerAccountRepository,
+                               @NonNull TokenRepository tokenRepository,
+                               @NonNull JwtProvider jwtProvider) {
+        this.encryptionService = encryptionService;
+        this.employerAccountRepository = employerAccountRepository;
+        this.tokenRepository = tokenRepository;
+        this.jwtProvider = jwtProvider;
+    }
 
     @Override
-    @NonNull
-    public TokenPair login(String email, String password) {
+    public TokenPair login(@NonNull String email, @NonNull String password) {
         var applicant = employerAccountRepository.findByEmail(email);
         if (applicant == null) {
             throw new RuntimeException("Applicant not found");
@@ -41,8 +50,7 @@ public class EmployerAuthService implements AuthService {
     }
 
     @Override
-    @NonNull
-    public TokenPair refreshToken(String refreshToken) {
+    public TokenPair refreshToken(@NonNull String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken, AccountType.EMPLOYER)) {
             throw new RuntimeException("Refresh token invalid");
         }

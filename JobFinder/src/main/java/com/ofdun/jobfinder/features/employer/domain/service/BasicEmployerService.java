@@ -7,29 +7,39 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BasicEmployerService implements EmployerService {
-    EmployerRepository employerRepository;
+    private final EmployerRepository employerRepository;
+
+    public BasicEmployerService(@NonNull EmployerRepository employerRepository) {
+        this.employerRepository = employerRepository;
+    }
 
     @Override
-    @NonNull
-    public Long createEmployer(EmployerModel employerModel) {
+    public Long createEmployer(@NonNull EmployerModel employerModel) {
+        if (employerRepository.getEmployerByEmail(employerModel.getEmail()) != null) {
+            throw new IllegalArgumentException("Employer with the same email already exists");
+        }
         return employerRepository.createEmployer(employerModel);
     }
 
     @Override
-    @NonNull
-    public EmployerModel getEmployerById(Long id) {
+    public EmployerModel getEmployerById(@NonNull Long id) {
         return employerRepository.getEmployerById(id);
     }
 
     @Override
-    @NonNull
-    public EmployerModel updateEmployer(EmployerModel employerModel) {
+    public EmployerModel updateEmployer(@NonNull EmployerModel employerModel) {
+        if (employerRepository.getEmployerById(employerModel.getId()) == null) {
+            throw new IllegalArgumentException("Employer not found");
+        }
         return employerRepository.updateEmployer(employerModel);
     }
 
     @Override
-    @NonNull
-    public Boolean deleteEmployer(Long id) {
-        return employerRepository.deleteEmployer(id);
+    public Boolean deleteEmployer(@NonNull Long id) {
+        if (!employerRepository.deleteEmployer(id)) {
+            throw new IllegalArgumentException("Employer not found");
+        }
+        return true;
     }
 }
+

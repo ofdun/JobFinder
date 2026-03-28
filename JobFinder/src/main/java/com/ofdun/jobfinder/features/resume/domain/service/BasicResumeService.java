@@ -18,20 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BasicResumeService implements ResumeService {
 
-    RelationalResumeRepository relationalResumeRepository;
-    VectorResumeRepository vectorResumeRepository;
+    private final RelationalResumeRepository relationalResumeRepository;
+    private final VectorResumeRepository vectorResumeRepository;
 
-    private ResumeHandler saveChain;
-    private ResumeHandler getChain;
-    private ResumeHandler updateChain;
+    private final ResumeHandler saveChain;
+    private final ResumeHandler getChain;
+    private final ResumeHandler updateChain;
 
-    public BasicResumeService(EmbeddingResumeHandler embeddingResumeHandler,
-                              RelationalResumeSaveHandler relationalResumeSaveHandler,
-                              VectorResumeSaveHandler vectorResumeSaveHandler,
-                              RelationalResumeUpdateHandler relationalResumeUpdateHandler,
-                              VectorResumeUpdateHandler vectorResumeUpdateHandler,
-                              RelationalResumeGetHandler relationalResumeGetHandler,
-                              VectorResumeGetHandler vectorResumeGetHandler) {
+    public BasicResumeService(@NonNull RelationalResumeRepository relationalResumeRepository,
+                              @NonNull VectorResumeRepository vectorResumeRepository,
+                              @NonNull EmbeddingResumeHandler embeddingResumeHandler,
+                              @NonNull RelationalResumeSaveHandler relationalResumeSaveHandler,
+                              @NonNull VectorResumeSaveHandler vectorResumeSaveHandler,
+                              @NonNull RelationalResumeUpdateHandler relationalResumeUpdateHandler,
+                              @NonNull VectorResumeUpdateHandler vectorResumeUpdateHandler,
+                              @NonNull RelationalResumeGetHandler relationalResumeGetHandler,
+                              @NonNull VectorResumeGetHandler vectorResumeGetHandler) {
+        this.relationalResumeRepository = relationalResumeRepository;
+        this.vectorResumeRepository = vectorResumeRepository;
+
         saveChain = relationalResumeSaveHandler;
         relationalResumeSaveHandler.setNext(embeddingResumeHandler).setNext(vectorResumeSaveHandler);
 
@@ -43,28 +48,24 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
-    @NonNull
-    public Long createResume(ResumeModel resumeModel) {
+    public Long createResume(@NonNull ResumeModel resumeModel) {
         return saveChain.handle(resumeModel).getId();
     }
 
     @Override
-    @NonNull
-    public ResumeModel getResumeById(Long resumeId) {
+    public ResumeModel getResumeById(@NonNull Long resumeId) {
         var startingResume = new ResumeModel(resumeId);
         return getChain.handle(startingResume);
     }
 
     @Override
-    @NonNull
-    public ResumeModel updateResume(ResumeModel resumeModel) {
+    public ResumeModel updateResume(@NonNull ResumeModel resumeModel) {
         return updateChain.handle(resumeModel);
     }
 
     @Override
     @Transactional
-    @NonNull
-    public Boolean deleteResume(Long resumeId) {
+    public Boolean deleteResume(@NonNull Long resumeId) {
         var relationalDelete = relationalResumeRepository.deleteResume(resumeId);
 
         if (!relationalDelete) {

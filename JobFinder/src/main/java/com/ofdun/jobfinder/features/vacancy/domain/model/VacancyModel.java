@@ -1,6 +1,7 @@
 package com.ofdun.jobfinder.features.vacancy.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
+@Data
 @ToString
 public class VacancyModel {
     private Long id;

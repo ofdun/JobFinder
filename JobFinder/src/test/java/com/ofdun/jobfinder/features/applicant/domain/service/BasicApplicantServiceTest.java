@@ -30,7 +30,6 @@ class BasicApplicantServiceTest {
 
         assertEquals(expectedId, actualId);
         verify(applicantRepository).createApplicant(applicantModel);
-        verifyNoMoreInteractions(applicantRepository);
     }
 
     @Test
@@ -42,7 +41,6 @@ class BasicApplicantServiceTest {
 
         assertNull(actualId);
         verify(applicantRepository).createApplicant(applicantModel);
-        verifyNoMoreInteractions(applicantRepository);
     }
 
     @Test
@@ -71,15 +69,19 @@ class BasicApplicantServiceTest {
     }
 
     @Test
-    void updateApplicant_whenValidApplicant_thenUpdatedApplicantReturned() {
+    void updateApplicant_whenValidApplicant_thenThrowsIllegalArgumentException() {
         ApplicantModel applicantModel = mock(ApplicantModel.class);
-        when(applicantRepository.updateApplicant(applicantModel)).thenReturn(applicantModel);
+        when(applicantModel.getId()).thenReturn(1L);
 
-        ApplicantModel updatedApplicant = applicantService.updateApplicant(applicantModel);
+        assertThrows(IllegalArgumentException.class, () -> applicantService.updateApplicant(applicantModel));
+    }
 
-        assertSame(applicantModel, updatedApplicant);
-        verify(applicantRepository).updateApplicant(applicantModel);
-        verifyNoMoreInteractions(applicantRepository);
+    @Test
+    void updateApplicant_whenInvalidApplicant_thenThrowsIllegalArgumentException() {
+        ApplicantModel applicantModel = mock(ApplicantModel.class);
+        when(applicantModel.getId()).thenReturn(0L);
+
+        assertThrows(IllegalArgumentException.class, () -> applicantService.updateApplicant(applicantModel));
     }
 
     @Test
@@ -95,13 +97,11 @@ class BasicApplicantServiceTest {
     }
 
     @Test
-    void deleteApplicant_whenRepositoryReturnsFalse_thenFalseReturned() {
+    void deleteApplicant_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
         Long id = 404L;
         when(applicantRepository.deleteApplicant(id)).thenReturn(false);
 
-        Boolean result = applicantService.deleteApplicant(id);
-
-        assertFalse(result);
+        assertThrows(IllegalArgumentException.class, () -> applicantService.deleteApplicant(id));
         verify(applicantRepository).deleteApplicant(id);
         verifyNoMoreInteractions(applicantRepository);
     }

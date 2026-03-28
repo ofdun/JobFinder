@@ -13,7 +13,6 @@ import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeReposit
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -64,6 +63,8 @@ class BasicResumeServiceTest {
         when(relationalResumeGetHandler.setNext(vectorResumeGetHandler)).thenReturn(vectorResumeGetHandler);
 
         resumeService = new BasicResumeService(
+                relationalResumeRepository,
+                vectorResumeRepository,
                 embeddingResumeHandler,
                 relationalResumeSaveHandler,
                 vectorResumeSaveHandler,
@@ -72,8 +73,6 @@ class BasicResumeServiceTest {
                 relationalResumeGetHandler,
                 vectorResumeGetHandler
         );
-        resumeService.relationalResumeRepository = relationalResumeRepository;
-        resumeService.vectorResumeRepository = vectorResumeRepository;
     }
 
     @Test
@@ -128,13 +127,27 @@ class BasicResumeServiceTest {
     }
 
     @Test
-    void deleteResume_whenRepositoriesMismatch_thenThrowsException() {
+    void deleteResume_whenRelationalDeleteFails_thenThrowsExceptionAndSkipsVectorDelete() {
+        Long id = 1L;
+        when(relationalResumeRepository.deleteResume(id)).thenReturn(false);
+
+        Exception exception = assertThrows(RuntimeException.class, () -> resumeService.deleteResume(id));
+        assertEquals("Failed to delete resume from relational repository", exception.getMessage());
+
+        verify(relationalResumeRepository, times(1)).deleteResume(id);
+        verify(vectorResumeRepository, never()).deleteResume(id);
+    }
+
+    @Test
+    void deleteResume_whenVectorDeleteFails_thenThrowsException() {
         Long id = 1L;
         when(relationalResumeRepository.deleteResume(id)).thenReturn(true);
         when(vectorResumeRepository.deleteResume(id)).thenReturn(false);
 
         Exception exception = assertThrows(RuntimeException.class, () -> resumeService.deleteResume(id));
         assertEquals("Failed to delete resume from both repositories", exception.getMessage());
+
+        verify(relationalResumeRepository, times(1)).deleteResume(id);
+        verify(vectorResumeRepository, times(1)).deleteResume(id);
     }
 }
-
