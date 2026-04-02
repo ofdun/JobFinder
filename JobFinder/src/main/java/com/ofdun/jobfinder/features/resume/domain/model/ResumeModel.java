@@ -1,5 +1,8 @@
 package com.ofdun.jobfinder.features.resume.domain.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
@@ -16,12 +19,21 @@ public class ResumeModel {
     }
 
     private Long id;
+
+    @NotNull
     private Long seekerId;
+
+    @NotBlank
     private String category;
+
+    @NotBlank
     private String description;
-    private List<String> skills;
-    private List<EducationModel> educations;
-    private List<JobExperience> jobExperiences;
+
+    private List<@NotBlank String> skills;
+    private List<@Valid EducationModel> educations;
+    private List<@Valid JobExperience> jobExperiences;
+
+    @NotNull
     private Date publishedDate;
 
     private List<Double> embedding;

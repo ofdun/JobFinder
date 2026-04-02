@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.features.application.domain.model;
+package com.ofdun.jobfinder.shared.application.domain.enums;
 
 public enum ApplicationStatus {
     CREATED,

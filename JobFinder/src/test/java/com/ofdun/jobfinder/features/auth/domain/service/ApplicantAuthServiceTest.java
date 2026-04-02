@@ -1,12 +1,12 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.features.auth.domain.model.AccountType;
+import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.domain.model.ApplicantAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
-import com.ofdun.jobfinder.shared.domain.encrypt.EncryptionService;
+import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

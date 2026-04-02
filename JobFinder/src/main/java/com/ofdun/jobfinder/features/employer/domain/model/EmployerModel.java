@@ -1,18 +1,40 @@
 package com.ofdun.jobfinder.features.employer.domain.model;
 
+import com.ofdun.jobfinder.shared.domain.model.LocationModel;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 @AllArgsConstructor
 @Data
 public class EmployerModel {
     private Long id;
+
+    @NotBlank
+    @Size(min = 2, max = 100)
     private String name;
+
+    @NotBlank
     private String description;
+
+    @NotBlank
     private String address;
+
+    @NotBlank
+    @URL(message = "Site URL should be valid")
     private String siteUrl;
+
+    @NotBlank
+    @Email(message = "Email should be valid")
     private String email;
-    private String city;
-    private String country;
+
+    @NotNull
+    @Valid
+    private LocationModel location;
 }
 

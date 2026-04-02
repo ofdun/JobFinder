@@ -1,8 +1,7 @@
-package com.ofdun.jobfinder.features.vacancy.domain.model;
+package com.ofdun.jobfinder.shared.vacancy.domain.enums;
 
 public enum EmploymentType {
     FULL_TIME,
     PART_TIME,
-    INTERN,
     FREELANCE
 }

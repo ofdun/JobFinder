@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.matching.service;
 
-import com.ofdun.jobfinder.shared.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.shared.matching.domain.model.MatchResultModel;
 
 import java.util.List;
 

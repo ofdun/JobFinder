@@ -1,11 +1,15 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
+import com.ofdun.jobfinder.features.applicant.exception.ApplicantAlreadyExistsException;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.features.auth.domain.model.AccountType;
+import com.ofdun.jobfinder.features.auth.exception.InvalidPasswordException;
+import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
+import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
+import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
-import com.ofdun.jobfinder.shared.domain.encrypt.EncryptionService;
+import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +36,11 @@ public class ApplicantAuthService implements AuthService {
     public TokenPair login(@NonNull String email, @NonNull String password) {
         var applicant = applicantAccountRepository.findByEmail(email);
         if (applicant == null) {
-            throw new RuntimeException("Applicant not found");
+            throw new ApplicantAlreadyExistsException(email);
         }
 
         if (!encryptionService.encrypt(password).equals(applicant.getPasswordHash())) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidPasswordException();
         }
 
         var accessToken = jwtProvider.generateAccessToken(AccountType.APPLICANT, applicant.getId());
@@ -52,13 +56,13 @@ public class ApplicantAuthService implements AuthService {
     @Override
     public TokenPair refreshToken(@NonNull String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken, AccountType.APPLICANT)) {
-            throw new RuntimeException("Refresh token invalid");
+            throw new InvalidRefreshTokenException();
         }
 
         Long userId = tokenRepository.getUserIdByToken(refreshToken);
 
         if (userId == null) {
-            throw new RuntimeException("Session is over or invalid");
+            throw new SessionIsOverException();
         }
 
         tokenRepository.deleteToken(refreshToken);

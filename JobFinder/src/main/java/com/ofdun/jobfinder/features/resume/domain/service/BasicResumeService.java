@@ -11,6 +11,7 @@ import com.ofdun.jobfinder.features.resume.domain.chain.update.VectorResumeUpdat
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +49,7 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
-    public Long createResume(@NonNull ResumeModel resumeModel) {
+    public Long createResume(@NonNull @Valid ResumeModel resumeModel) {
         return saveChain.handle(resumeModel).getId();
     }
 
@@ -59,7 +60,7 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
-    public ResumeModel updateResume(@NonNull ResumeModel resumeModel) {
+    public ResumeModel updateResume(@NonNull @Valid ResumeModel resumeModel) {
         return updateChain.handle(resumeModel);
     }
 

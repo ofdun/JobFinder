@@ -1,7 +1,7 @@
 package com.ofdun.jobfinder.features.auth.data.jwt.impl;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.features.auth.domain.model.AccountType;
+import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.NonNull;

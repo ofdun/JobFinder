@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.auth.domain.jwt;
 
-import com.ofdun.jobfinder.features.auth.domain.model.AccountType;
+import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import lombok.NonNull;
 
 public interface JwtProvider {

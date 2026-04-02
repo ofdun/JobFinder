@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.features.auth.domain.model;
+package com.ofdun.jobfinder.shared.auth.domain.enums;
 
 public enum AccountType {
     APPLICANT,

@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.features.vacancy.domain.model;
+package com.ofdun.jobfinder.shared.vacancy.domain.enums;
 
 public enum PaymentFrequency {
     HOURLY,

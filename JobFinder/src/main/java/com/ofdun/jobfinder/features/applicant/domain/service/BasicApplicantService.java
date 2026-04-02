@@ -2,22 +2,21 @@ package com.ofdun.jobfinder.features.applicant.domain.service;
 
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
+import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
+import jakarta.validation.Valid;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BasicApplicantService implements ApplicantService {
     private final ApplicantRepository applicantRepository;
-
-    public BasicApplicantService(@NonNull ApplicantRepository applicantRepository) {
-        this.applicantRepository = applicantRepository;
-    }
+    private final ApplicantValidator applicantValidator;
 
     @Override
-    public Long createApplicant(@NonNull ApplicantModel applicantModel) {
-        if (applicantRepository.getApplicantByEmail(applicantModel.getEmail()) != null) {
-            throw new IllegalArgumentException("Applicant with email " + applicantModel.getEmail() + " already exists");
-        }
+    public Long createApplicant(@NonNull @Valid ApplicantModel applicantModel) {
+        applicantValidator.validateApplicantForCreate(applicantModel);
         return applicantRepository.createApplicant(applicantModel);
     }
 
@@ -27,18 +26,14 @@ public class BasicApplicantService implements ApplicantService {
     }
 
     @Override
-    public ApplicantModel updateApplicant(@NonNull ApplicantModel applicantModel) {
-        if (applicantRepository.getApplicantById(applicantModel.getId()) == null) {
-            throw new IllegalArgumentException("Applicant with id " + applicantModel.getId() + " does not exist");
-        }
+    public ApplicantModel updateApplicant(@NonNull @Valid ApplicantModel applicantModel) {
+        applicantValidator.validateApplicantForUpdate(applicantModel);
         return applicantRepository.updateApplicant(applicantModel);
     }
 
     @Override
     public Boolean deleteApplicant(@NonNull Long id) {
-        if (!applicantRepository.deleteApplicant(id)) {
-            throw new IllegalArgumentException("Applicant with id " + id + " does not exist");
-        }
-        return true;
+        applicantValidator.validateApplicantForDelete(id);
+        return applicantRepository.deleteApplicant(id);
     }
 }

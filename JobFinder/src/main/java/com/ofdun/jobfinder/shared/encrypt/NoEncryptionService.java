@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.shared.domain.encrypt;
+package com.ofdun.jobfinder.shared.encrypt;
 
 import org.springframework.stereotype.Service;
 

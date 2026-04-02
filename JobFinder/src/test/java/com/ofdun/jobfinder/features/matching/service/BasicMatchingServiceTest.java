@@ -4,7 +4,7 @@ import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.shared.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.shared.matching.domain.model.MatchResultModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

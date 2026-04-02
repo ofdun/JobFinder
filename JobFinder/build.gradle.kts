@@ -28,6 +28,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.hibernate.orm:hibernate-core:7.3.0.Final")
     implementation("org.hibernate.validator:hibernate-validator:9.1.0.Final")
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")

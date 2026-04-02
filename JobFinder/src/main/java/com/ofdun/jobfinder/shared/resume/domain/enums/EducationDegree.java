@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.features.resume.domain.model;
+package com.ofdun.jobfinder.shared.resume.domain.enums;
 
 public enum EducationDegree {
     BACHELOR,

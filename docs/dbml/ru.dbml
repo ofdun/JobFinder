@@ -1,0 +1,172 @@
+неактуально уже
+
+Table Employer {
+  Идентификатор int [pk, increment]
+  Название varchar
+  Описание text
+  Адрес varchar
+  Ссылка_на_сайт varchar
+  Email varchar
+  Хеш_пароля varchar
+}
+
+Table Applicant {
+  Идентификатор int [pk, increment]
+  Имя varchar
+  Email varchar
+  Хеш_пароля varchar
+  Номер_телефона varchar
+  Локация_ID int
+}
+
+Enum PaymentFrequency {
+  monthly [note: 'Ежемесячно']
+  weekly  [note: 'Еженедельно']
+  hourly  [note: 'Почасовая']
+  project [note: 'За проект']
+}
+
+Enum WorkFormat {
+  remote  [note: 'Удаленная работа']
+  office  [note: 'Офис']
+  hybrid  [note: 'Гибрид']
+}
+
+Enum EmploymentType {
+  full_time [note: 'Полная занятость']
+  part_time [note: 'Частичная занятость']
+  internship [note: 'Стажировка']
+  freelance  [note: 'Фриланс']
+}
+
+Enum ApplicationStatus {
+  new         [note: 'Новый']
+  invitation  [note: 'Приглашение']
+  rejection   [note: 'Отказ']
+}
+
+Enum EducationDegree {
+  bachelor    [note: 'Бакалавр']
+  master      [note: 'Магистр']
+  specialist  [note: 'Специалист']
+  phd         [note: 'Кандидат наук']
+}
+
+Enum LanguageLevel {
+  A1 [note: 'Начальный']
+  A2 [note: 'Элементарный']
+  B1 [note: 'Средний']
+  B2 [note: 'Выше среднего']
+  C1 [note: 'Продвинутый']
+  C2 [note: 'Носитель']
+}
+
+Table Vacancy {
+  Идентификатор int [pk, increment]
+  Работодатель_ID int
+  Локация_ID int
+  Зарплата decimal
+  Частота_выплат PaymentFrequency
+  Опыт_работы varchar
+  Формат_работы WorkFormat
+  Описание text
+  Дата_публикации datetime
+  Тип_занятости EmploymentType
+  Адрес varchar
+}
+
+Table Application {
+  Идентификатор int [pk, increment]
+  Вакансия_ID int
+  Резюме_ID int
+  Дата datetime
+  Статус ApplicationStatus
+}
+
+Table Education {
+  Идентификатор int [pk, increment]
+  Резюме_ID int
+  Учебное_заведение varchar
+  Факультет varchar
+  Кафедра varchar
+  Год_окончания int
+  Степень EducationDegree
+}
+
+Table LangSkill {
+  Идентификатор int [pk, increment]
+  Язык_ID int
+  Резюме_ID int
+  Вакансия_ID int
+  Уровень_владения LanguageLevel
+}
+
+Table Resume {
+  Идентификатор int [pk, increment]
+  Соискатель_ID int
+  Категория_ID int
+  Описание text
+  Дата_создания datetime
+}
+
+Table Category {
+  Идентификатор int [pk, increment]
+  Название varchar
+}
+
+Table Location {
+  Идентификатор int [pk, increment]
+  Город varchar
+  Страна varchar
+}
+
+Table Experience {
+  Идентификатор int [pk, increment]
+  Резюме_ID int
+  Должность varchar
+  Дата_начала date
+  Дата_окончания date
+  Название_компании varchar
+  Описание text
+}
+
+Table Skill {
+  Идентификатор int [pk, increment]
+  Название varchar
+}
+
+Table Language {
+  Идентификатор int [pk, increment]
+  Название varchar
+}
+
+Table VacancySkills {
+  Вакансия_ID int
+  Навык_ID int
+}
+
+Table ResumeSkills {
+  Резюме_ID int
+  Навык_ID int
+}
+
+Ref: Employer.Идентификатор < Vacancy.Работодатель_ID
+
+Ref: Vacancy.Идентификатор < Application.Вакансия_ID
+Ref: Vacancy.Локация_ID - Location.Идентификатор
+Ref: Vacancy.Идентификатор < VacancySkills.Вакансия_ID
+Ref: Skill.Идентификатор < VacancySkills.Навык_ID
+
+Ref: Applicant.Идентификатор < Resume.Соискатель_ID
+Ref: Category.Идентификатор < Resume.Категория_ID
+Ref: Resume.Идентификатор < Application.Резюме_ID
+Ref: Resume.Идентификатор < Experience.Резюме_ID
+Ref: Resume.Идентификатор < Education.Резюме_ID
+Ref: Resume.Идентификатор < ResumeSkills.Резюме_ID
+Ref: Skill.Идентификатор < ResumeSkills.Навык_ID
+
+Ref: Language.Идентификатор < LangSkill.Язык_ID
+Ref: Resume.Идентификатор < LangSkill.Резюме_ID
+Ref: Vacancy.Идентификатор < LangSkill.Вакансия_ID
+
+Ref: Location.Идентификатор < Applicant.Локация_ID

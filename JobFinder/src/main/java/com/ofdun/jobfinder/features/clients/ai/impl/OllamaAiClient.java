@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.clients.ai.impl;
 import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaRequest;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaResponse;
+import com.ofdun.jobfinder.features.clients.ai.exception.AiEmptyRespondException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.web.client.RestClient;
@@ -35,7 +36,7 @@ public class OllamaAiClient implements AiClient {
                 .body(OllamaResponse.class);
 
         if (response == null || response.embeddings() == null || response.embeddings().isEmpty()) {
-            throw new RuntimeException("ai response empty"); // TODO
+            throw new AiEmptyRespondException();
         }
 
         return response.embeddings().getFirst();

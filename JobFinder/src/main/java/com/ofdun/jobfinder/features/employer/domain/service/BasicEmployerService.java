@@ -2,22 +2,21 @@ package com.ofdun.jobfinder.features.employer.domain.service;
 
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import com.ofdun.jobfinder.features.employer.domain.validator.EmployerValidator;
+import jakarta.validation.Valid;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BasicEmployerService implements EmployerService {
     private final EmployerRepository employerRepository;
-
-    public BasicEmployerService(@NonNull EmployerRepository employerRepository) {
-        this.employerRepository = employerRepository;
-    }
+    private final EmployerValidator employerValidator;
 
     @Override
-    public Long createEmployer(@NonNull EmployerModel employerModel) {
-        if (employerRepository.getEmployerByEmail(employerModel.getEmail()) != null) {
-            throw new IllegalArgumentException("Employer with the same email already exists");
-        }
+    public Long createEmployer(@NonNull @Valid EmployerModel employerModel) {
+        employerValidator.validateEmployerForCreate(employerModel);
         return employerRepository.createEmployer(employerModel);
     }
 
@@ -27,19 +26,15 @@ public class BasicEmployerService implements EmployerService {
     }
 
     @Override
-    public EmployerModel updateEmployer(@NonNull EmployerModel employerModel) {
-        if (employerRepository.getEmployerById(employerModel.getId()) == null) {
-            throw new IllegalArgumentException("Employer not found");
-        }
+    public EmployerModel updateEmployer(@NonNull @Valid EmployerModel employerModel) {
+        employerValidator.validateEmployerForUpdate(employerModel);
         return employerRepository.updateEmployer(employerModel);
     }
 
     @Override
     public Boolean deleteEmployer(@NonNull Long id) {
-        if (!employerRepository.deleteEmployer(id)) {
-            throw new IllegalArgumentException("Employer not found");
-        }
-        return true;
+        employerValidator.validateEmployerForDelete(id);
+        return employerRepository.deleteEmployer(id);
     }
 }
 

@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.shared.domain.model;
+package com.ofdun.jobfinder.shared.matching.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -2,7 +2,7 @@ package com.ofdun.jobfinder.features.resume.data.repository;
 
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
-import com.ofdun.jobfinder.shared.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.shared.matching.domain.model.MatchResultModel;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

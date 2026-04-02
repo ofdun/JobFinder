@@ -1,0 +1,174 @@
+table employer {
+  id int [pk, increment]
+  name varchar
+  description text
+  address varchar
+  website_link varchar
+  email varchar
+  password_hash varchar
+}
+
+table applicant {
+  id int [pk, increment]
+  name varchar
+  email varchar
+  password_hash varchar
+  phone_number varchar
+  location_id int
+}
+
+enum payment_frequency {
+  monthly [note: 'Ежемесячно']
+  weekly  [note: 'Еженедельно']
+  hourly  [note: 'Почасовая']
+  project [note: 'За проект']
+}
+
+enum work_format {
+  remote  [note: 'Удаленная работа']
+  office  [note: 'Офис']
+  hybrid  [note: 'Гибрид']
+}
+
+enum employment_type {
+  full_time  [note: 'Полная занятость']
+  part_time  [note: 'Частичная занятость']
+  internship [note: 'Стажировка']
+  freelance  [note: 'Фриланс']
+}
+
+enum application_status {
+  new         [note: 'Новый']
+  invitation  [note: 'Приглашение']
+  rejection   [note: 'Отказ']
+}
+
+enum education_degree {
+  bachelor    [note: 'Бакалавр']
+  master      [note: 'Магистр']
+  specialist  [note: 'Специалист']
+  phd         [note: 'Кандидат наук']
+}
+
+enum language_level {
+  a1 [note: 'Начальный']
+  a2 [note: 'Элементарный']
+  b1 [note: 'Средний']
+  b2 [note: 'Выше среднего']
+  c1 [note: 'Продвинутый']
+  c2 [note: 'Носитель']
+}
+
+table vacancy {
+  id int [pk, increment]
+  employer_id int
+  location_id int
+  salary decimal
+  payment_frequency payment_frequency
+  work_experience varchar
+  work_format work_format
+  description text
+  publication_date datetime
+  employment_type employment_type
+  address varchar
+}
+
+table application {
+  id int [pk, increment]
+  vacancy_id int
+  resume_id int
+  date datetime
+  status application_status
+}
+
+table education {
+  id int [pk, increment]
+  resume_id int
+  institution varchar
+  faculty varchar
+  department varchar
+  graduation_year int
+  degree education_degree
+}
+
+table language_resume {
+  language_id int
+  resume_id int
+}
+
+table language_vacancy {
+  language_id int
+  vacancy_id int
+}
+
+table language {
+  id int [pk, increment]
+  name varchar
+  proficiency_level language_level
+}
+
+table resume {
+  id int [pk, increment]
+  applicant_id int
+  category_id int
+  description text
+  creation_date datetime
+}
+
+table category {
+  id int [pk, increment]
+  name varchar
+}
+
+table location {
+  id int [pk, increment]
+  city varchar
+  country varchar
+}
+
+table experience {
+  id int [pk, increment]
+  resume_id int
+  position varchar
+  start_date date
+  end_date date
+  company_name varchar
+  description text
+}
+
+table skill {
+  id int [pk, increment]
+  name varchar
+}
+
+table vacancy_skills {
+  vacancy_id int
+  skill_id int
+}
+
+table resume_skills {
+  resume_id int
+  skill_id int
+}
+
+ref: employer.id < vacancy.employer_id
+
+ref: vacancy.id < application.vacancy_id
+ref: vacancy.location_id - location.id
+ref: vacancy.id < vacancy_skills.vacancy_id
+ref: skill.id < vacancy_skills.skill_id
+
+ref: applicant.id < resume.applicant_id
+ref: category.id < resume.category_id
+ref: resume.id < application.resume_id
+ref: resume.id < experience.resume_id
+ref: resume.id < education.resume_id
+ref: resume.id < resume_skills.resume_id
+ref: skill.id < resume_skills.skill_id
+
+ref: language.id < language_resume.language_id
+ref: resume.id < language_resume.resume_id
+ref: language.id < language_vacancy.language_id
+ref: vacancy.id < language_vacancy.vacancy_id
+
+ref: location.id < applicant.location_id

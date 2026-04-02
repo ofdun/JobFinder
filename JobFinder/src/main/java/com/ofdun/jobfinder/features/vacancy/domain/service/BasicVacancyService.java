@@ -2,19 +2,21 @@ package com.ofdun.jobfinder.features.vacancy.domain.service;
 
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
+import com.ofdun.jobfinder.features.vacancy.domain.validator.VacancyValidator;
+import jakarta.validation.Valid;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BasicVacancyService implements VacancyService {
     private final VacancyRepository vacancyRepository;
-
-    public BasicVacancyService(VacancyRepository vacancyRepository) {
-        this.vacancyRepository = vacancyRepository;
-    }
+    private final VacancyValidator vacancyValidator;
 
     @Override
-    public Long createVacancy(@NonNull VacancyModel vacancyModel) {
+    public Long createVacancy(@NonNull @Valid VacancyModel vacancyModel) {
+        vacancyValidator.validateVacancyForCreate(vacancyModel);
         return vacancyRepository.createVacancy(vacancyModel);
     }
 
@@ -24,19 +26,15 @@ public class BasicVacancyService implements VacancyService {
     }
 
     @Override
-    public VacancyModel updateVacancy(@NonNull VacancyModel vacancyModel) {
-        if (vacancyRepository.getVacancyById(vacancyModel.getId()) == null) {
-            throw new IllegalArgumentException("Vacancy with id " + vacancyModel.getId() + " does not exist.");
-        }
+    public VacancyModel updateVacancy(@NonNull @Valid VacancyModel vacancyModel) {
+        vacancyValidator.validateVacancyForUpdate(vacancyModel);
         return vacancyRepository.updateVacancy(vacancyModel);
     }
 
     @Override
     public Boolean deleteVacancy(@NonNull Long id) {
-        if (!vacancyRepository.deleteVacancy(id)) {
-            throw new IllegalArgumentException("Vacancy with id " + id + " does not exist.");
-        }
-        return true;
+        vacancyValidator.validateVacancyForDelete(id);
+        return vacancyRepository.deleteVacancy(id);
     }
 }
 

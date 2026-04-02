@@ -1,4 +1,4 @@
-package com.ofdun.jobfinder.shared.domain.encrypt;
+package com.ofdun.jobfinder.shared.encrypt;
 
 public interface EncryptionService {
     String encrypt(String content);
