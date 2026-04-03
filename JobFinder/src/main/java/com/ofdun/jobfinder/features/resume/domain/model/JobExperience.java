@@ -21,7 +21,6 @@ public class JobExperience {
     @NotBlank
     private String companyName;
 
-    @NotBlank
     private String description;
 
     @NotNull

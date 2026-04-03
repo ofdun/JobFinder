@@ -19,13 +19,10 @@ public class EmployerModel {
     @Size(min = 2, max = 100)
     private String name;
 
-    @NotBlank
     private String description;
 
-    @NotBlank
     private String address;
 
-    @NotBlank
     @URL(message = "Site URL should be valid")
     private String siteUrl;
 

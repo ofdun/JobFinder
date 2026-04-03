@@ -26,7 +26,6 @@ public class ResumeModel {
     @NotBlank
     private String category;
 
-    @NotBlank
     private String description;
 
     private List<@NotBlank String> skills;

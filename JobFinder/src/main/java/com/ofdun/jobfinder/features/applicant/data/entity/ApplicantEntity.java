@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.shared.data.entity.LocationEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ApplicantEntity {
 
     @NotNull
     @Size(min = 1, max = 50)
+    @Pattern(regexp = ".*\\S.*", message = "Name cannot be only whitespace")
     private String name;
 
     @NotNull
@@ -31,8 +33,6 @@ public class ApplicantEntity {
     @Size(min = 1, max = 255)
     private String passwordHash;
 
-    @NotNull
-    @Size(min = 1, max = 50)
     private String address;
 
     @NotNull

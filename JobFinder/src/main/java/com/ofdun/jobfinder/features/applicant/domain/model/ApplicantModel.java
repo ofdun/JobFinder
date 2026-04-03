@@ -14,6 +14,7 @@ public class ApplicantModel {
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100)
+    @Pattern(regexp = ".*\\S.*", message = "Name cannot be only whitespace")
     private String name;
 
     @NotBlank(message = "Email is required")
@@ -23,7 +24,6 @@ public class ApplicantModel {
     @NotBlank(message = "Password hash is required")
     private String passwordHash;
 
-    @NotBlank(message = "Address is required")
     private String address;
 
     @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Phone number is invalid")
