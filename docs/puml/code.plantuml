@@ -1,0 +1,619 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class AccountModel {
+  + AccountModel(): 
+  # passwordHash: String
+  # id: Long
+  # email: String
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   id: Long
+   email: String
+   passwordHash: String
+}
+enum AccountType << enumeration >> {
+  + AccountType(): 
+  + valueOf(String): AccountType
+  + values(): AccountType[]
+}
+interface AiClient << interface >> {
+  + getEmbedding(String): List<Double>
+}
+class ApplicantAccountModel {
+  + ApplicantAccountModel(): 
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+}
+interface ApplicantAccountRepository << interface >> {
+  + findByEmail(String): ApplicantAccountModel
+}
+class ApplicantAuthService {
+  + ApplicantAuthService(EncryptionService, ApplicantAccountRepository, TokenRepository, JwtProvider): 
+  + login(String, String): TokenPair
+  + logout(String): void
+  + refreshToken(String): TokenPair
+}
+class ApplicantModel {
+  + ApplicantModel(Long, String, String, String, String, String, String): 
+  - email: String
+  - phoneNumber: String
+  - address: String
+  - name: String
+  - country: String
+  - id: Long
+  - city: String
+  + equals(Object): boolean
+  + toString(): String
+  # canEqual(Object): boolean
+  + hashCode(): int
+   name: String
+   id: Long
+   email: String
+   country: String
+   phoneNumber: String
+   city: String
+   address: String
+}
+interface ApplicantRepository << interface >> {
+  + createApplicant(ApplicantModel): Long
+  + getApplicantById(Long): ApplicantModel
+  + deleteApplicant(Long): Boolean
+  + updateApplicant(ApplicantModel): ApplicantModel
+  + getApplicantByEmail(String): ApplicantModel
+}
+interface ApplicantService << interface >> {
+  + updateApplicant(ApplicantModel): ApplicantModel
+  + createApplicant(ApplicantModel): Long
+  + deleteApplicant(Long): Boolean
+  + getApplicantById(Long): ApplicantModel
+}
+class ApplicationModel {
+  + ApplicationModel(Long, Long, Long, Date, ApplicationStatus): 
+  - vacancyId: Long
+  - applicationDate: Date
+  - id: Long
+  - applicationStatus: ApplicationStatus
+  - resumeId: Long
+  + hashCode(): int
+  + equals(Object): boolean
+  + toString(): String
+  # canEqual(Object): boolean
+   resumeId: Long
+   vacancyId: Long
+   applicationStatus: ApplicationStatus
+   id: Long
+   applicationDate: Date
+}
+interface ApplicationRepository << interface >> {
+  + updateApplication(ApplicationModel): ApplicationModel
+  + getApplication(Long): ApplicationModel
+  + saveApplication(ApplicationModel): Long
+  + deleteApplication(Long): Boolean
+}
+interface ApplicationService << interface >> {
+  + saveApplication(ApplicationModel): Long
+  + getApplication(Long): ApplicationModel
+  + deleteApplication(Long): Boolean
+  + updateApplication(ApplicationModel): ApplicationModel
+}
+enum ApplicationStatus << enumeration >> {
+  + ApplicationStatus(): 
+  + values(): ApplicationStatus[]
+  + valueOf(String): ApplicationStatus
+}
+interface AuthService << interface >> {
+  + logout(String): void
+  + login(String, String): TokenPair
+  + refreshToken(String): TokenPair
+}
+class BasicApplicantService {
+  + BasicApplicantService(ApplicantRepository): 
+  + updateApplicant(ApplicantModel): ApplicantModel
+  + getApplicantById(Long): ApplicantModel
+  + createApplicant(ApplicantModel): Long
+  + deleteApplicant(Long): Boolean
+}
+class BasicApplicationService {
+  + BasicApplicationService(ApplicationRepository): 
+  + saveApplication(ApplicationModel): Long
+  + getApplication(Long): ApplicationModel
+  + deleteApplication(Long): Boolean
+  + updateApplication(ApplicationModel): ApplicationModel
+}
+class BasicEmployerService {
+  + BasicEmployerService(EmployerRepository): 
+  + getEmployerById(Long): EmployerModel
+  + deleteEmployer(Long): Boolean
+  + createEmployer(EmployerModel): Long
+  + updateEmployer(EmployerModel): EmployerModel
+}
+class BasicJwtProvider {
+  + BasicJwtProvider(String, Long, Long): 
+  + validateToken(String, AccountType): Boolean
+  + generateRefreshToken(AccountType, Long): String
+  + generateAccessToken(AccountType, Long): String
+   refreshTokenExpiration: Long
+}
+class BasicMatchingService {
+  + BasicMatchingService(VacancyRepository, VectorResumeRepository, AiClient): 
+  - getVacancyEmbedding(Long): List<Double>
+  + findSuitableCandidates(Long, Integer): List<MatchResultModel>
+}
+class BasicResumeService {
+  + BasicResumeService(RelationalResumeRepository, VectorResumeRepository, EmbeddingResumeHandler, RelationalResumeSaveHandler, VectorResumeSaveHandler, RelationalResumeUpdateHandler, VectorResumeUpdateHandler, RelationalResumeGetHandler, VectorResumeGetHandler): 
+  + createResume(ResumeModel): Long
+  + getResumeById(Long): ResumeModel
+  + deleteResume(Long): Boolean
+  + updateResume(ResumeModel): ResumeModel
+}
+class BasicVacancyService {
+  + BasicVacancyService(VacancyRepository): 
+  + createVacancy(VacancyModel): Long
+  + getVacancyById(Long): VacancyModel
+  + deleteVacancy(Long): Boolean
+  + updateVacancy(VacancyModel): VacancyModel
+}
+enum EducationDegree << enumeration >> {
+  + EducationDegree(): 
+  + values(): EducationDegree[]
+  + valueOf(String): EducationDegree
+}
+class EducationModel {
+  + EducationModel(Long, EducationDegree, String, String, String, Year): 
+  - college: String
+  - institutionName: String
+  - resumeId: Long
+  - educationDegree: EducationDegree
+  - yearOfGraduation: Year
+  - department: String
+  + hashCode(): int
+  + toString(): String
+  # canEqual(Object): boolean
+  + equals(Object): boolean
+   institutionName: String
+   resumeId: Long
+   department: String
+   yearOfGraduation: Year
+   college: String
+   educationDegree: EducationDegree
+}
+class EmbeddingResumeHandler {
+  + EmbeddingResumeHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+class EmployerAccountModel {
+  + EmployerAccountModel(): 
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+}
+interface EmployerAccountRepository << interface >> {
+  + findByEmail(String): EmployerAccountModel
+}
+class EmployerAuthService {
+  + EmployerAuthService(EncryptionService, EmployerAccountRepository, TokenRepository, JwtProvider): 
+  + refreshToken(String): TokenPair
+  + login(String, String): TokenPair
+  + logout(String): void
+}
+class EmployerModel {
+  + EmployerModel(Long, String, String, String, String, String, String, String): 
+  - siteUrl: String
+  - id: Long
+  - email: String
+  - description: String
+  - name: String
+  - address: String
+  - country: String
+  - city: String
+  # canEqual(Object): boolean
+  + equals(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   siteUrl: String
+   name: String
+   description: String
+   id: Long
+   email: String
+   country: String
+   city: String
+   address: String
+}
+interface EmployerRepository << interface >> {
+  + getEmployerById(Long): EmployerModel
+  + getEmployerByEmail(String): EmployerModel
+  + updateEmployer(EmployerModel): EmployerModel
+  + deleteEmployer(Long): Boolean
+  + createEmployer(EmployerModel): Long
+}
+interface EmployerService << interface >> {
+  + getEmployerById(Long): EmployerModel
+  + createEmployer(EmployerModel): Long
+  + deleteEmployer(Long): Boolean
+  + updateEmployer(EmployerModel): EmployerModel
+}
+enum EmploymentType << enumeration >> {
+  + EmploymentType(): 
+  + values(): EmploymentType[]
+  + valueOf(String): EmploymentType
+}
+interface EncryptionService << interface >> {
+  + encrypt(String): String
+}
+class JobExperience {
+  + JobExperience(Long, String, String, String, Date, Date): 
+  - startDate: Date
+  - endDate: Date
+  - resumeId: Long
+  - position: String
+  - companyName: String
+  - description: String
+  + equals(Object): boolean
+  + hashCode(): int
+  # canEqual(Object): boolean
+  + toString(): String
+   endDate: Date
+   description: String
+   startDate: Date
+   position: String
+   resumeId: Long
+   companyName: String
+}
+class JobFinderApplication {
+  + JobFinderApplication(AiClient): 
+  + run(ApplicationArguments): void
+  + main(String[]): void
+}
+enum JobFormat << enumeration >> {
+  + JobFormat(): 
+  + valueOf(String): JobFormat
+  + values(): JobFormat[]
+}
+interface JwtProvider << interface >> {
+  + generateAccessToken(AccountType, Long): String
+  + generateRefreshToken(AccountType, Long): String
+  + validateToken(String, AccountType): Boolean
+   refreshTokenExpiration: Long
+}
+class JwtProviderConfiguration {
+  + JwtProviderConfiguration(): 
+  + basicJwtProvider(JwtProviderProperties): BasicJwtProvider
+}
+class JwtProviderProperties {
+  + JwtProviderProperties(): 
+  - refreshExpirationTimeMs: Long
+  - secretKey: String
+  - accessExpirationTimeMs: Long
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   accessExpirationTimeMs: Long
+   secretKey: String
+   refreshExpirationTimeMs: Long
+}
+class MatchResultModel {
+  + MatchResultModel(Long, Double): 
+  - id: Long
+  - score: Double
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   id: Long
+   score: Double
+}
+interface MatchingService << interface >> {
+  + findSuitableCandidates(Long, Integer): List<MatchResultModel>
+}
+class NoEncryptionService {
+  + NoEncryptionService(): 
+  + encrypt(String): String
+}
+class OllamaAiClient {
+  + OllamaAiClient(String, String, RestClient): 
+  + OllamaAiClient(String, String, String): 
+  + getEmbedding(String): List<Double>
+}
+class OllamaAiClientConfiguration {
+  + OllamaAiClientConfiguration(): 
+  + ollamaAiClient(OllamaClientProperties): OllamaAiClient
+}
+class OllamaClientProperties {
+  + OllamaClientProperties(): 
+  - endpoint: String
+  - base: String
+  - model: String
+  + equals(Object): boolean
+  # canEqual(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   model: String
+   base: String
+   endpoint: String
+}
+entity OllamaRequest << record >> {
+  + OllamaRequest(String, String): 
+  + input(): String
+  + model(): String
+}
+entity OllamaResponse << record >> {
+  + OllamaResponse(String, List<List<Double>>, Long, Long, Long): 
+  + model(): String
+  + embeddings(): List<List<Double>>
+  + loadDuration(): Long
+  + promptEvalCount(): Long
+  + totalDuration(): Long
+}
+enum PaymentFrequency << enumeration >> {
+  + PaymentFrequency(): 
+  + valueOf(String): PaymentFrequency
+  + values(): PaymentFrequency[]
+}
+class PosgreSQLApplicantAccountRepository {
+  + PosgreSQLApplicantAccountRepository(): 
+  + findByEmail(String): ApplicantAccountModel
+}
+class PosgreSQLEmployerAccountRepository {
+  + PosgreSQLEmployerAccountRepository(): 
+  + findByEmail(String): EmployerAccountModel
+}
+class PostgreSQLApplicantRepository {
+  + PostgreSQLApplicantRepository(): 
+  + getApplicantById(Long): ApplicantModel
+  + createApplicant(ApplicantModel): Long
+  + getApplicantByEmail(String): ApplicantModel
+  + updateApplicant(ApplicantModel): ApplicantModel
+  + deleteApplicant(Long): Boolean
+}
+class PostgreSQLApplicationRepository {
+  + PostgreSQLApplicationRepository(): 
+  + updateApplication(ApplicationModel): ApplicationModel
+  + saveApplication(ApplicationModel): Long
+  + getApplication(Long): ApplicationModel
+  + deleteApplication(Long): Boolean
+}
+class PostgreSQLEmployerRepository {
+  + PostgreSQLEmployerRepository(): 
+  + getEmployerByEmail(String): EmployerModel
+  + updateEmployer(EmployerModel): EmployerModel
+  + deleteEmployer(Long): Boolean
+  + createEmployer(EmployerModel): Long
+  + getEmployerById(Long): EmployerModel
+}
+class PostgreSQLResumeRepository {
+  + PostgreSQLResumeRepository(): 
+  + deleteResume(Long): Boolean
+  + getResumeById(Long): ResumeModel
+  + createResume(ResumeModel): Long
+  + updateResume(ResumeModel): ResumeModel
+}
+class PostgreSQLVacancyRepository {
+  + PostgreSQLVacancyRepository(): 
+  + deleteVacancy(Long): Boolean
+  + createVacancy(VacancyModel): Long
+  + updateVacancy(VacancyModel): VacancyModel
+  + getVacancyById(Long): VacancyModel
+}
+class QdrantResumeRepository {
+  + QdrantResumeRepository(): 
+  + createResume(ResumeModel): Long
+  + updateResume(ResumeModel): ResumeModel
+  + getMostSimilarResumes(List<Double>, Integer): List<MatchResultModel>
+  + deleteResume(Long): Boolean
+  + getResumeById(Long): ResumeModel
+}
+class RedisTokenRepository {
+  + RedisTokenRepository(): 
+  + getUserIdByToken(String): Long
+  + deleteToken(String): Boolean
+  + saveToken(String, Long, Duration): Boolean
+}
+class RelationalResumeGetHandler {
+  + RelationalResumeGetHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+interface RelationalResumeRepository << interface >> {
+  + getResumeById(Long): ResumeModel
+  + deleteResume(Long): Boolean
+  + createResume(ResumeModel): Long
+  + updateResume(ResumeModel): ResumeModel
+}
+class RelationalResumeSaveHandler {
+  + RelationalResumeSaveHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+class RelationalResumeUpdateHandler {
+  + RelationalResumeUpdateHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+class ResumeHandler {
+  + ResumeHandler(): 
+  - next: ResumeHandler
+  + handle(ResumeModel): ResumeModel
+  # execute(ResumeModel): ResumeModel
+   next: ResumeHandler
+}
+class ResumeModel {
+  + ResumeModel(Long, Long, String, String, List<String>, List<EducationModel>, List<JobExperience>, Date, List<Double>): 
+  + ResumeModel(Long): 
+  - description: String
+  - id: Long
+  - seekerId: Long
+  - jobExperiences: List<JobExperience>
+  - publishedDate: Date
+  - embedding: List<Double>
+  - category: String
+  - skills: List<String>
+  - educations: List<EducationModel>
+  # canEqual(Object): boolean
+  + toString(): String
+  + equals(Object): boolean
+  + hashCode(): int
+   description: String
+   jobExperiences: List<JobExperience>
+   seekerId: Long
+   id: Long
+   publishedDate: Date
+   educations: List<EducationModel>
+   embedding: List<Double>
+   category: String
+   skills: List<String>
+}
+interface ResumeService << interface >> {
+  + createResume(ResumeModel): Long
+  + getResumeById(Long): ResumeModel
+  + updateResume(ResumeModel): ResumeModel
+  + deleteResume(Long): Boolean
+}
+entity TokenPair << record >> {
+  + TokenPair(String, String): 
+  + refreshToken(): String
+  + accessToken(): String
+}
+interface TokenRepository << interface >> {
+  + getUserIdByToken(String): Long
+  + saveToken(String, Long, Duration): Boolean
+  + deleteToken(String): Boolean
+}
+class VacancyModel {
+  + VacancyModel(Long, Long, String, String, BigDecimal, List<String>, PaymentFrequency, String, JobFormat, EmploymentType, String, Date, String): 
+  - employerId: Long
+  - id: Long
+  - employmentType: EmploymentType
+  - paymentFrequency: PaymentFrequency
+  - publicationDate: Date
+  - jobFormat: JobFormat
+  - salary: BigDecimal
+  - country: String
+  - city: String
+  - description: String
+  - skills: List<String>
+  - experience: String
+  - address: String
+  # canEqual(Object): boolean
+  + equals(Object): boolean
+  + hashCode(): int
+  + toString(): String
+   employmentType: EmploymentType
+   description: String
+   employerId: Long
+   id: Long
+   address: String
+   paymentFrequency: PaymentFrequency
+   publicationDate: Date
+   jobFormat: JobFormat
+   country: String
+   salary: BigDecimal
+   city: String
+   experience: String
+   skills: List<String>
+}
+interface VacancyRepository << interface >> {
+  + deleteVacancy(Long): Boolean
+  + getVacancyById(Long): VacancyModel
+  + createVacancy(VacancyModel): Long
+  + updateVacancy(VacancyModel): VacancyModel
+}
+interface VacancyService << interface >> {
+  + createVacancy(VacancyModel): Long
+  + getVacancyById(Long): VacancyModel
+  + deleteVacancy(Long): Boolean
+  + updateVacancy(VacancyModel): VacancyModel
+}
+class VectorResumeGetHandler {
+  + VectorResumeGetHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+interface VectorResumeRepository << interface >> {
+  + updateResume(ResumeModel): ResumeModel
+  + getResumeById(Long): ResumeModel
+  + createResume(ResumeModel): Long
+  + getMostSimilarResumes(List<Double>, Integer): List<MatchResultModel>
+  + deleteResume(Long): Boolean
+}
+class VectorResumeSaveHandler {
+  + VectorResumeSaveHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+class VectorResumeUpdateHandler {
+  + VectorResumeUpdateHandler(): 
+  # execute(ResumeModel): ResumeModel
+}
+
+ApplicantAccountModel                -[#000082,plain]-^  AccountModel                        
+ApplicantAuthService                "1" *-[#595959,plain]-> "applicantAccountRepository\n1" ApplicantAccountRepository          
+ApplicantAuthService                 -[#008200,dashed]-^  AuthService                         
+ApplicantAuthService                "1" *-[#595959,plain]-> "encryptionService\n1" EncryptionService                   
+ApplicantAuthService                "1" *-[#595959,plain]-> "jwtProvider\n1" JwtProvider                         
+ApplicantAuthService                 -[#595959,dashed]->  TokenPair                           : "«create»"
+ApplicantAuthService                "1" *-[#595959,plain]-> "tokenRepository\n1" TokenRepository                     
+ApplicationModel                    "1" *-[#595959,plain]-> "applicationStatus\n1" ApplicationStatus                   
+BasicApplicantService               "1" *-[#595959,plain]-> "applicantRepository\n1" ApplicantRepository                 
+BasicApplicantService                -[#008200,dashed]-^  ApplicantService                    
+BasicApplicationService             "1" *-[#595959,plain]-> "applicationRepository\n1" ApplicationRepository               
+BasicApplicationService              -[#008200,dashed]-^  ApplicationService                  
+BasicEmployerService                "1" *-[#595959,plain]-> "employerRepository\n1" EmployerRepository                  
+BasicEmployerService                 -[#008200,dashed]-^  EmployerService                     
+BasicJwtProvider                     -[#008200,dashed]-^  JwtProvider                         
+BasicMatchingService                "1" *-[#595959,plain]-> "aiClient\n1" AiClient                            
+BasicMatchingService                 -[#008200,dashed]-^  MatchingService                     
+BasicMatchingService                "1" *-[#595959,plain]-> "vacancyRepository\n1" VacancyRepository                   
+BasicMatchingService                "1" *-[#595959,plain]-> "vectorResumeRepository\n1" VectorResumeRepository              
+BasicResumeService                  "1" *-[#595959,plain]-> "relationalResumeRepository\n1" RelationalResumeRepository          
+BasicResumeService                  "1" *-[#595959,plain]-> "saveChain\n1" ResumeHandler                       
+BasicResumeService                   -[#595959,dashed]->  ResumeModel                         : "«create»"
+BasicResumeService                   -[#008200,dashed]-^  ResumeService                       
+BasicResumeService                  "1" *-[#595959,plain]-> "vectorResumeRepository\n1" VectorResumeRepository              
+BasicVacancyService                 "1" *-[#595959,plain]-> "vacancyRepository\n1" VacancyRepository                   
+BasicVacancyService                  -[#008200,dashed]-^  VacancyService                      
+EducationModel                      "1" *-[#595959,plain]-> "educationDegree\n1" EducationDegree                     
+EmbeddingResumeHandler              "1" *-[#595959,plain]-> "aiClient\n1" AiClient                            
+EmbeddingResumeHandler               -[#000082,plain]-^  ResumeHandler                       
+EmployerAccountModel                 -[#000082,plain]-^  AccountModel                        
+EmployerAuthService                  -[#008200,dashed]-^  AuthService                         
+EmployerAuthService                 "1" *-[#595959,plain]-> "employerAccountRepository\n1" EmployerAccountRepository           
+EmployerAuthService                 "1" *-[#595959,plain]-> "encryptionService\n1" EncryptionService                   
+EmployerAuthService                 "1" *-[#595959,plain]-> "jwtProvider\n1" JwtProvider                         
+EmployerAuthService                  -[#595959,dashed]->  TokenPair                           : "«create»"
+EmployerAuthService                 "1" *-[#595959,plain]-> "tokenRepository\n1" TokenRepository                     
+JobFinderApplication                "1" *-[#595959,plain]-> "aiClient\n1" AiClient                            
+JwtProviderConfiguration             -[#595959,dashed]->  BasicJwtProvider                    : "«create»"
+NoEncryptionService                  -[#008200,dashed]-^  EncryptionService                   
+OllamaAiClient                       -[#008200,dashed]-^  AiClient                            
+OllamaAiClient                       -[#595959,dashed]->  OllamaRequest                       : "«create»"
+OllamaAiClientConfiguration          -[#595959,dashed]->  OllamaAiClient                      : "«create»"
+PosgreSQLApplicantAccountRepository  -[#008200,dashed]-^  ApplicantAccountRepository          
+PosgreSQLEmployerAccountRepository   -[#008200,dashed]-^  EmployerAccountRepository           
+PostgreSQLApplicantRepository        -[#008200,dashed]-^  ApplicantRepository                 
+PostgreSQLApplicationRepository      -[#008200,dashed]-^  ApplicationRepository               
+PostgreSQLEmployerRepository         -[#008200,dashed]-^  EmployerRepository                  
+PostgreSQLResumeRepository           -[#008200,dashed]-^  RelationalResumeRepository          
+PostgreSQLVacancyRepository          -[#008200,dashed]-^  VacancyRepository                   
+QdrantResumeRepository               -[#008200,dashed]-^  VectorResumeRepository              
+RedisTokenRepository                 -[#008200,dashed]-^  TokenRepository                     
+RelationalResumeGetHandler          "1" *-[#595959,plain]-> "resumeRepository\n1" RelationalResumeRepository          
+RelationalResumeGetHandler           -[#000082,plain]-^  ResumeHandler                       
+RelationalResumeSaveHandler         "1" *-[#595959,plain]-> "resumeRepository\n1" RelationalResumeRepository          
+RelationalResumeSaveHandler          -[#000082,plain]-^  ResumeHandler                       
+RelationalResumeUpdateHandler       "1" *-[#595959,plain]-> "resumeRepository\n1" RelationalResumeRepository          
+RelationalResumeUpdateHandler        -[#000082,plain]-^  ResumeHandler                       
+ResumeModel                         "1" *-[#595959,plain]-> "educations\n*" EducationModel                      
+ResumeModel                         "1" *-[#595959,plain]-> "jobExperiences\n*" JobExperience                       
+VacancyModel                        "1" *-[#595959,plain]-> "employmentType\n1" EmploymentType                      
+VacancyModel                        "1" *-[#595959,plain]-> "jobFormat\n1" JobFormat                           
+VacancyModel                        "1" *-[#595959,plain]-> "paymentFrequency\n1" PaymentFrequency                    
+VectorResumeGetHandler               -[#000082,plain]-^  ResumeHandler                       
+VectorResumeGetHandler              "1" *-[#595959,plain]-> "resumeRepository\n1" VectorResumeRepository              
+VectorResumeSaveHandler              -[#000082,plain]-^  ResumeHandler                       
+VectorResumeSaveHandler             "1" *-[#595959,plain]-> "resumeRepository\n1" VectorResumeRepository              
+VectorResumeUpdateHandler            -[#000082,plain]-^  ResumeHandler                       
+VectorResumeUpdateHandler           "1" *-[#595959,plain]-> "resumeRepository\n1" VectorResumeRepository              
+@enduml
