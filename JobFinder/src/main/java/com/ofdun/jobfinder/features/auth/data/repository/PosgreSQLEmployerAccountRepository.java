@@ -1,13 +1,20 @@
 package com.ofdun.jobfinder.features.auth.data.repository;
 
+import com.ofdun.jobfinder.features.auth.data.mapper.EmployerAccountMapper;
 import com.ofdun.jobfinder.features.auth.domain.model.EmployerAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
+import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PosgreSQLEmployerAccountRepository implements EmployerAccountRepository {
+    private final EmployerRepository employerRepository;
+
     @Override
     public EmployerAccountModel findByEmail(String email) {
-        return null;
+        var employer = employerRepository.getEmployerByEmail(email);
+        return employer == null ? null : EmployerAccountMapper.toModel(employer);
     }
 }

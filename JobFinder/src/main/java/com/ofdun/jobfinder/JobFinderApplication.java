@@ -16,7 +16,7 @@ public class JobFinderApplication implements ApplicationRunner {
     private final AiClient aiClient;
 
     @Override
-    public void run(@NonNull ApplicationArguments args) throws Exception {
+    public void run(@NonNull ApplicationArguments args) {
         var response = aiClient.getEmbedding("Acoustic regard");
 
         System.out.println(response);
@@ -25,5 +25,4 @@ public class JobFinderApplication implements ApplicationRunner {
     public static void main(String[] args) {
         SpringApplication.run(JobFinderApplication.class, args);
     }
-
 }

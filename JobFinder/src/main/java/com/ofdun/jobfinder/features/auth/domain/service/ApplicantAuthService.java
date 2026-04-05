@@ -2,18 +2,17 @@ package com.ofdun.jobfinder.features.auth.domain.service;
 
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantAlreadyExistsException;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.features.auth.exception.InvalidPasswordException;
-import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
-import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
-import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
+import com.ofdun.jobfinder.features.auth.exception.InvalidPasswordException;
+import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
+import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
+import com.ofdun.jobfinder.shared.auth.enums.AccountType;
 import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
+import java.time.Duration;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 
 @Service
 public class ApplicantAuthService implements AuthService {
@@ -22,10 +21,11 @@ public class ApplicantAuthService implements AuthService {
     private final TokenRepository tokenRepository;
     private final JwtProvider jwtProvider;
 
-    public ApplicantAuthService(@NonNull EncryptionService encryptionService,
-                                @NonNull ApplicantAccountRepository applicantAccountRepository,
-                                @NonNull TokenRepository tokenRepository,
-                                @NonNull JwtProvider jwtProvider) {
+    public ApplicantAuthService(
+            @NonNull EncryptionService encryptionService,
+            @NonNull ApplicantAccountRepository applicantAccountRepository,
+            @NonNull TokenRepository tokenRepository,
+            @NonNull JwtProvider jwtProvider) {
         this.encryptionService = encryptionService;
         this.applicantAccountRepository = applicantAccountRepository;
         this.tokenRepository = tokenRepository;
@@ -44,9 +44,11 @@ public class ApplicantAuthService implements AuthService {
         }
 
         var accessToken = jwtProvider.generateAccessToken(AccountType.APPLICANT, applicant.getId());
-        var refreshToken = jwtProvider.generateRefreshToken(AccountType.APPLICANT, applicant.getId());
+        var refreshToken =
+                jwtProvider.generateRefreshToken(AccountType.APPLICANT, applicant.getId());
 
-        tokenRepository.saveToken(refreshToken,
+        tokenRepository.saveToken(
+                refreshToken,
                 applicant.getId(),
                 Duration.ofMillis(jwtProvider.getRefreshTokenExpiration()));
 

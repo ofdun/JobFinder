@@ -2,11 +2,13 @@ package com.ofdun.jobfinder.features.applicant.data.mapper;
 
 import com.ofdun.jobfinder.features.applicant.data.entity.ApplicantEntity;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
-import com.ofdun.jobfinder.shared.data.entity.LocationEntity;
-import com.ofdun.jobfinder.shared.domain.model.LocationModel;
+import com.ofdun.jobfinder.shared.location.mapper.LocationMapper;
 
 public class ApplicantMapper {
     public static ApplicantEntity toEntity(ApplicantModel applicant) {
+        if (applicant == null) {
+            return null;
+        }
         return new ApplicantEntity(
                 applicant.getId(),
                 applicant.getName(),
@@ -14,11 +16,13 @@ public class ApplicantMapper {
                 applicant.getPasswordHash(),
                 applicant.getAddress(),
                 applicant.getPhoneNumber(),
-                new LocationEntity(null, applicant.getLocation().getCity(), applicant.getLocation().getCountry())
-        );
+                LocationMapper.toEntity(applicant.getLocation()));
     }
 
     public static ApplicantModel toModel(ApplicantEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return new ApplicantModel(
                 entity.getId(),
                 entity.getName(),
@@ -26,7 +30,6 @@ public class ApplicantMapper {
                 entity.getPasswordHash(),
                 entity.getAddress(),
                 entity.getPhoneNumber(),
-                new LocationModel(entity.getLocation().getId(), entity.getLocation().getCity(), entity.getLocation().getCountry())
-        );
+                LocationMapper.toModel(entity.getLocation()));
     }
 }

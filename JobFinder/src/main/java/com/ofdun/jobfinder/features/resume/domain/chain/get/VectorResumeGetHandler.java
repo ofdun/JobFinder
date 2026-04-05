@@ -12,6 +12,8 @@ public class VectorResumeGetHandler extends ResumeHandler {
 
     @Override
     protected ResumeModel execute(ResumeModel resume) {
-        return resumeRepository.getResumeById(resume.getId());
+        var resumeEmbeddings = resumeRepository.getResumeById(resume.getId());
+        resume.setEmbedding(resumeEmbeddings.getEmbedding());
+        return resume;
     }
 }

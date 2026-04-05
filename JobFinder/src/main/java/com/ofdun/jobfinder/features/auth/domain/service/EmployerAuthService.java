@@ -1,15 +1,14 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
+import com.ofdun.jobfinder.shared.auth.enums.AccountType;
 import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
+import java.time.Duration;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 
 @Service
 public class EmployerAuthService implements AuthService {
@@ -18,10 +17,11 @@ public class EmployerAuthService implements AuthService {
     private final TokenRepository tokenRepository;
     private final JwtProvider jwtProvider;
 
-    public EmployerAuthService(@NonNull EncryptionService encryptionService,
-                               @NonNull EmployerAccountRepository employerAccountRepository,
-                               @NonNull TokenRepository tokenRepository,
-                               @NonNull JwtProvider jwtProvider) {
+    public EmployerAuthService(
+            @NonNull EncryptionService encryptionService,
+            @NonNull EmployerAccountRepository employerAccountRepository,
+            @NonNull TokenRepository tokenRepository,
+            @NonNull JwtProvider jwtProvider) {
         this.encryptionService = encryptionService;
         this.employerAccountRepository = employerAccountRepository;
         this.tokenRepository = tokenRepository;
@@ -40,9 +40,11 @@ public class EmployerAuthService implements AuthService {
         }
 
         var accessToken = jwtProvider.generateAccessToken(AccountType.EMPLOYER, applicant.getId());
-        var refreshToken = jwtProvider.generateRefreshToken(AccountType.EMPLOYER, applicant.getId());
+        var refreshToken =
+                jwtProvider.generateRefreshToken(AccountType.EMPLOYER, applicant.getId());
 
-        tokenRepository.saveToken(refreshToken,
+        tokenRepository.saveToken(
+                refreshToken,
                 applicant.getId(),
                 Duration.ofMillis(jwtProvider.getRefreshTokenExpiration()));
 

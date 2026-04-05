@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.applicant.domain.model;
 
-import com.ofdun.jobfinder.shared.domain.model.LocationModel;
+import com.ofdun.jobfinder.shared.location.model.LocationModel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

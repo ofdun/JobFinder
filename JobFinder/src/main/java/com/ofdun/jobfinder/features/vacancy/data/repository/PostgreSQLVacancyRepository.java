@@ -1,28 +1,40 @@
 package com.ofdun.jobfinder.features.vacancy.data.repository;
 
+import com.ofdun.jobfinder.features.vacancy.data.mapper.VacancyMapper;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostgreSQLVacancyRepository implements VacancyRepository {
+    VacancyJpaRepository vacancyJpaRepository;
+
     @Override
     public Long createVacancy(VacancyModel vacancyModel) {
-        return 0L;
+        return vacancyJpaRepository.save(VacancyMapper.toEntity(vacancyModel)).getId();
     }
 
     @Override
     public VacancyModel getVacancyById(Long id) {
-        return null;
+        return vacancyJpaRepository.findById(id).map(VacancyMapper::toModel).orElse(null);
     }
 
     @Override
     public VacancyModel updateVacancy(VacancyModel vacancyModel) {
-        return vacancyModel;
+        return vacancyJpaRepository.save(VacancyMapper.toEntity(vacancyModel)).getId() != null
+                ? vacancyModel
+                : null;
     }
 
     @Override
     public Boolean deleteVacancy(Long id) {
-        return false;
+        return vacancyJpaRepository
+                .findById(id)
+                .map(
+                        entity -> {
+                            vacancyJpaRepository.delete(entity);
+                            return true;
+                        })
+                .orElse(false);
     }
 }

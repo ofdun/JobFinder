@@ -15,40 +15,34 @@ public class PostgreSQLApplicantRepository implements ApplicantRepository {
 
     @Override
     public Long createApplicant(ApplicantModel applicantModel) {
-        return applicantJpaRepository
-                .save(ApplicantMapper.toEntity(applicantModel))
-                .getId();
+        return applicantJpaRepository.save(ApplicantMapper.toEntity(applicantModel)).getId();
     }
 
     @Override
     public ApplicantModel getApplicantById(Long id) {
-        return applicantJpaRepository
-                .findById(id)
-                .map(ApplicantMapper::toModel)
-                .orElse(null);
+        return applicantJpaRepository.findById(id).map(ApplicantMapper::toModel).orElse(null);
     }
 
     @Override
     public ApplicantModel getApplicantByEmail(String email) {
-        var entity = applicantJpaRepository
-                .findByEmail(email);
-        return entity != null ? ApplicantMapper.toModel(entity) : null;
+        return applicantJpaRepository.findByEmail(email).map(ApplicantMapper::toModel).orElse(null);
     }
 
     @Override
     public ApplicantModel updateApplicant(ApplicantModel applicantModel) {
-        var entity = applicantJpaRepository
-                .save(ApplicantMapper.toEntity(applicantModel));
+        var entity = applicantJpaRepository.save(ApplicantMapper.toEntity(applicantModel));
         return ApplicantMapper.toModel(entity);
     }
 
     @Override
     public Boolean deleteApplicant(Long id) {
-        return applicantJpaRepository.findById(id)
-                .map(entity -> {
-                    applicantJpaRepository.delete(entity);
-                    return true;
-                })
+        return applicantJpaRepository
+                .findById(id)
+                .map(
+                        entity -> {
+                            applicantJpaRepository.delete(entity);
+                            return true;
+                        })
                 .orElse(false);
     }
 }

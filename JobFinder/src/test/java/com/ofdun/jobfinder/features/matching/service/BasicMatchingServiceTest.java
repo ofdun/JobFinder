@@ -1,42 +1,38 @@
 package com.ofdun.jobfinder.features.matching.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.shared.matching.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.shared.matching.model.MatchResultModel;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class BasicMatchingServiceTest {
 
-    @Mock
-    private VacancyRepository vacancyRepository;
+    @Mock private VacancyRepository vacancyRepository;
 
-    @Mock
-    private VectorResumeRepository vectorResumeRepository;
+    @Mock private VectorResumeRepository vectorResumeRepository;
 
-    @Mock
-    private AiClient aiClient;
+    @Mock private AiClient aiClient;
 
-    @InjectMocks
-    private BasicMatchingService matchingService;
+    @InjectMocks private BasicMatchingService matchingService;
 
     @Test
     void findSuitableCandidates_whenMaxAmountIsZeroOrLess_thenEmptyListReturned() {
         Long vacancyId = 1L;
         Integer maxAmount = 0;
 
-        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
@@ -47,7 +43,8 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = -1;
 
-        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
@@ -59,7 +56,9 @@ class BasicMatchingServiceTest {
         Integer maxAmount = 5;
         when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(null);
 
-        assertThrows(NullPointerException.class, () -> matchingService.findSuitableCandidates(vacancyId, maxAmount));
+        assertThrows(
+                NullPointerException.class,
+                () -> matchingService.findSuitableCandidates(vacancyId, maxAmount));
         verify(vacancyRepository).getVacancyById(vacancyId);
         verifyNoInteractions(aiClient, vectorResumeRepository);
     }
@@ -75,9 +74,11 @@ class BasicMatchingServiceTest {
         when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(mockVacancy);
         when(mockVacancy.toString()).thenReturn("vacancyString");
         when(aiClient.getEmbedding("vacancyString")).thenReturn(mockEmbedding);
-        when(vectorResumeRepository.getMostSimilarResumes(mockEmbedding, maxAmount)).thenReturn(expectedResults);
+        when(vectorResumeRepository.getMostSimilarResumes(mockEmbedding, maxAmount))
+                .thenReturn(expectedResults);
 
-        List<MatchResultModel> actualResults = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> actualResults =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertEquals(expectedResults, actualResults);
         verify(vacancyRepository).getVacancyById(vacancyId);

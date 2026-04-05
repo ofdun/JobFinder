@@ -1,42 +1,36 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.shared.auth.domain.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.domain.model.EmployerAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
+import com.ofdun.jobfinder.shared.auth.enums.AccountType;
 import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class EmployerAuthServiceTest {
 
-    @Mock
-    private EncryptionService encryptionService;
+    @Mock private EncryptionService encryptionService;
 
-    @Mock
-    private EmployerAccountRepository employerAccountRepository;
+    @Mock private EmployerAccountRepository employerAccountRepository;
 
-    @Mock
-    private TokenRepository tokenRepository;
+    @Mock private TokenRepository tokenRepository;
 
-    @Mock
-    private JwtProvider jwtProvider;
+    @Mock private JwtProvider jwtProvider;
 
-    @InjectMocks
-    private EmployerAuthService employerAuthService;
+    @InjectMocks private EmployerAuthService employerAuthService;
 
     @Test
     void login_whenValidCredentials_thenReturnTokenPair() {
@@ -53,8 +47,10 @@ class EmployerAuthServiceTest {
         when(employer.getId()).thenReturn(employerId);
         when(employerAccountRepository.findByEmail(email)).thenReturn(employer);
         when(encryptionService.encrypt(password)).thenReturn(hashedPassword);
-        when(jwtProvider.generateAccessToken(AccountType.EMPLOYER, employerId)).thenReturn(accessToken);
-        when(jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employerId)).thenReturn(refreshToken);
+        when(jwtProvider.generateAccessToken(AccountType.EMPLOYER, employerId))
+                .thenReturn(accessToken);
+        when(jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employerId))
+                .thenReturn(refreshToken);
         when(jwtProvider.getRefreshTokenExpiration()).thenReturn(duration);
 
         TokenPair tokenPair = employerAuthService.login(email, password);
@@ -71,7 +67,9 @@ class EmployerAuthServiceTest {
         String password = "password";
         when(employerAccountRepository.findByEmail(email)).thenReturn(null);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> employerAuthService.login(email, password));
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class, () -> employerAuthService.login(email, password));
 
         assertEquals("Applicant not found", exception.getMessage());
         verify(employerAccountRepository).findByEmail(email);
@@ -87,7 +85,9 @@ class EmployerAuthServiceTest {
         when(employerAccountRepository.findByEmail(email)).thenReturn(employer);
         when(encryptionService.encrypt(password)).thenReturn("differentHash");
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> employerAuthService.login(email, password));
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class, () -> employerAuthService.login(email, password));
 
         assertEquals("Invalid password", exception.getMessage());
         verify(employerAccountRepository).findByEmail(email);
@@ -121,7 +121,8 @@ class EmployerAuthServiceTest {
         String token = "invalidToken";
         when(jwtProvider.validateToken(token, AccountType.EMPLOYER)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
+        RuntimeException exception =
+                assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
 
         assertEquals("Refresh token invalid", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.EMPLOYER);
@@ -134,7 +135,8 @@ class EmployerAuthServiceTest {
         when(jwtProvider.validateToken(token, AccountType.EMPLOYER)).thenReturn(true);
         when(tokenRepository.getUserIdByToken(token)).thenReturn(null);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
+        RuntimeException exception =
+                assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
 
         assertEquals("Session is over or invalid", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.EMPLOYER);

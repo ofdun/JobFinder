@@ -1,39 +1,59 @@
 package com.ofdun.jobfinder.features.resume.domain.model;
 
+import com.ofdun.jobfinder.shared.category.model.CategoryModel;
+import com.ofdun.jobfinder.shared.education.model.EducationModel;
+import com.ofdun.jobfinder.shared.experience.model.JobExperienceModel;
+import com.ofdun.jobfinder.shared.skill.model.SkillModel;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
-
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@AllArgsConstructor
 @Data
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResumeModel {
     public ResumeModel(Long id) {
         this.id = id;
     }
 
+    public ResumeModel(
+            Long id,
+            Long applicantId,
+            CategoryModel category,
+            String description,
+            List<SkillModel> skills,
+            List<EducationModel> educations,
+            List<JobExperienceModel> jobExperiences,
+            Date publishedDate) {
+        this.id = id;
+        this.applicantId = applicantId;
+        this.category = category;
+        this.description = description;
+        this.skills = skills;
+        this.educations = educations;
+        this.jobExperiences = jobExperiences;
+        this.date = publishedDate;
+    }
+
     private Long id;
 
-    @NotNull
-    private Long seekerId;
+    @NotNull private Long applicantId;
 
-    @NotBlank
-    private String category;
+    @Valid private CategoryModel category;
 
     private String description;
 
-    private List<@NotBlank String> skills;
-    private List<@Valid EducationModel> educations;
-    private List<@Valid JobExperience> jobExperiences;
+    private List<@NotNull @Valid SkillModel> skills;
+    private List<@NotNull @Valid EducationModel> educations;
+    private List<@NotNull @Valid JobExperienceModel> jobExperiences;
 
-    @NotNull
-    private Date publishedDate;
+    @NotNull private Date date;
 
-    private List<Double> embedding;
+    private List<@NotNull Float> embedding;
 }

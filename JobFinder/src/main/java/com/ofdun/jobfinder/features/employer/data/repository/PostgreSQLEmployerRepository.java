@@ -1,33 +1,44 @@
 package com.ofdun.jobfinder.features.employer.data.repository;
 
+import com.ofdun.jobfinder.features.employer.data.mapper.EmployerMapper;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostgreSQLEmployerRepository implements EmployerRepository {
+    EmployerJpaRepository jpaRepository;
+
     @Override
     public Long createEmployer(EmployerModel employerModel) {
-        return 0L;
+        return jpaRepository.save(EmployerMapper.toEntity(employerModel)).getId();
     }
 
     @Override
     public EmployerModel getEmployerById(Long id) {
-        return null;
+        return jpaRepository.findById(id).map(EmployerMapper::toModel).orElse(null);
     }
 
     @Override
     public EmployerModel getEmployerByEmail(String email) {
-        return null;
+        return jpaRepository.findByEmail(email).map(EmployerMapper::toModel).orElse(null);
     }
 
     @Override
     public EmployerModel updateEmployer(EmployerModel employerModel) {
-        return employerModel;
+        var entity = jpaRepository.save(EmployerMapper.toEntity(employerModel));
+        return EmployerMapper.toModel(entity);
     }
 
     @Override
     public Boolean deleteEmployer(Long id) {
-        return true;
+        return jpaRepository
+                .findById(id)
+                .map(
+                        entity -> {
+                            jpaRepository.delete(entity);
+                            return true;
+                        })
+                .orElse(false);
     }
 }
