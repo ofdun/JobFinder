@@ -29,15 +29,13 @@ jobs:
           java-version: ${{ matrix.java-version }}
           cache: gradle
 
-      - name: Prepare Gradle command (use wrapper if present)
+      - name: Prepare Gradle wrapper
         run: |
-          if [ -x JobFinder/gradlew ]; then
-            echo "GRADLE_CMD=./gradlew" >> $GITHUB_ENV
-            chmod +x JobFinder/gradlew || true
-          else
-            echo "GRADLE_CMD=gradle" >> $GITHUB_ENV
-            sudo apt-get update && sudo apt-get install -y gradle
-          fi
+          sudo apt-get update && sudo apt-get install -y gradle
+          cd JobFinder
+          gradle wrapper
+          chmod +x gradlew
+          echo "GRADLE_CMD=./gradlew" >> $GITHUB_ENV
         shell: bash
 
       - name: Spotless check
