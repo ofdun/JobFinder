@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, lint & format check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [25]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java-version }}
+          cache: gradle
+
+      - name: Make gradle wrapper executable
+        run: chmod +x JobFinder/gradlew
+
+      - name: Spotless check
+        run: ./gradlew --no-daemon spotlessCheck
+        working-directory: JobFinder
+
+      - name: Run Gradle checks (lint/tests)
+        run: ./gradlew --no-daemon check
+        working-directory: JobFinder
+
+      - name: Build
+        run: ./gradlew --no-daemon build
+        working-directory: JobFinder
