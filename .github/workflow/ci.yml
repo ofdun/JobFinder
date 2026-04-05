@@ -35,17 +35,16 @@ jobs:
           cd JobFinder
           gradle wrapper
           chmod +x gradlew
-          echo "GRADLE_CMD=./gradlew" >> $GITHUB_ENV
         shell: bash
 
       - name: Spotless check
-        run: $GRADLE_CMD --no-daemon spotlessCheck
+        run: ./gradlew --no-daemon spotlessCheck
         working-directory: JobFinder
 
       - name: Run Gradle checks (lint/tests)
-        run: $GRADLE_CMD --no-daemon check
+        run: ./gradlew --no-daemon check
         working-directory: JobFinder
 
       - name: Build
-        run: $GRADLE_CMD --no-daemon build
+        run: ./gradlew --no-daemon build
         working-directory: JobFinder

@@ -3,11 +3,13 @@ package com.ofdun.jobfinder.features.vacancy.data.repository;
 import com.ofdun.jobfinder.features.vacancy.data.mapper.VacancyMapper;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PostgreSQLVacancyRepository implements VacancyRepository {
-    VacancyJpaRepository vacancyJpaRepository;
+    private final VacancyJpaRepository vacancyJpaRepository;
 
     @Override
     public Long createVacancy(VacancyModel vacancyModel) {
