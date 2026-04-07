@@ -68,7 +68,7 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = 5;
         VacancyModel mockVacancy = mock(VacancyModel.class);
-        List<Double> mockEmbedding = List.of(0.1, 0.2, 0.3);
+        List<Float> mockEmbedding = List.of(0.1f, 0.2f, 0.3f);
         List<MatchResultModel> expectedResults = List.of(mock(MatchResultModel.class));
 
         when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(mockVacancy);

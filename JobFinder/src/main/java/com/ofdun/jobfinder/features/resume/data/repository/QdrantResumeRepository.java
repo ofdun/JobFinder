@@ -8,11 +8,13 @@ import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.VectorsFactory;
 import io.qdrant.client.grpc.Points;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class QdrantResumeRepository implements VectorResumeRepository {
-    VectorClient client;
+    private final VectorClient client;
 
     @Override
     public Long createResume(ResumeModel resumeModel) {
@@ -28,9 +30,13 @@ public class QdrantResumeRepository implements VectorResumeRepository {
             var resp =
                     client.getClient()
                             .retrieveAsync(
-                                    client.getCollectionName(), PointIdFactory.id(resumeId), null)
+                                    client.getCollectionName(),
+                                    PointIdFactory.id(resumeId),
+                                    true,
+                                    true,
+                                    null)
                             .get();
-            embedding = resp.getFirst().getVectors().getVector().getDataList();
+            embedding = resp.getFirst().getVectors().getVector().getDense().getDataList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -83,14 +89,19 @@ public class QdrantResumeRepository implements VectorResumeRepository {
         var id = PointIdFactory.id(resumeModel.getId());
         var vectors = VectorsFactory.vectors(resumeModel.getEmbedding());
 
-        client.getClient()
-                .upsertAsync(
-                        client.getCollectionName(),
-                        List.of(
-                                Points.PointStruct.newBuilder()
-                                        .setId(id)
-                                        .setVectors(vectors)
-                                        .build()));
+        try {
+            client.getClient()
+                    .upsertAsync(
+                            client.getCollectionName(),
+                            List.of(
+                                    Points.PointStruct.newBuilder()
+                                            .setId(id)
+                                            .setVectors(vectors)
+                                            .build()))
+                    .get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return resumeModel;
     }

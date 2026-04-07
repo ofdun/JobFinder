@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.resume.data.entity;
 import com.ofdun.jobfinder.shared.category.entity.CategoryEntity;
 import com.ofdun.jobfinder.shared.education.entity.EducationEntity;
 import com.ofdun.jobfinder.shared.experience.entity.JobExperienceEntity;
+import com.ofdun.jobfinder.shared.language.entity.LanguageEntity;
 import com.ofdun.jobfinder.shared.skill.entity.SkillEntity;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -46,6 +47,14 @@ public class ResumeEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "resumeId")
     private List<@NotBlank @Valid JobExperienceEntity> jobExperiences;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            schema = "jobfinder",
+            name = "language_resume",
+            joinColumns = @JoinColumn(name = "resume_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id"))
+    private List<@NotBlank @Valid LanguageEntity> languages;
 
     @NotNull private Date creationDate;
 }

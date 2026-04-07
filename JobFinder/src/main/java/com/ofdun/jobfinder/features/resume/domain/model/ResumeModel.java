@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.resume.domain.model;
 import com.ofdun.jobfinder.shared.category.model.CategoryModel;
 import com.ofdun.jobfinder.shared.education.model.EducationModel;
 import com.ofdun.jobfinder.shared.experience.model.JobExperienceModel;
+import com.ofdun.jobfinder.shared.language.model.LanguageModel;
 import com.ofdun.jobfinder.shared.skill.model.SkillModel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,7 @@ public class ResumeModel {
             List<SkillModel> skills,
             List<EducationModel> educations,
             List<JobExperienceModel> jobExperiences,
+            List<LanguageModel> languages,
             Date publishedDate) {
         this.id = id;
         this.applicantId = applicantId;
@@ -38,6 +40,7 @@ public class ResumeModel {
         this.skills = skills;
         this.educations = educations;
         this.jobExperiences = jobExperiences;
+        this.languages = languages;
         this.date = publishedDate;
     }
 
@@ -45,13 +48,14 @@ public class ResumeModel {
 
     @NotNull private Long applicantId;
 
-    @Valid private CategoryModel category;
+    @NotNull @Valid private CategoryModel category;
 
     private String description;
 
     private List<@NotNull @Valid SkillModel> skills;
     private List<@NotNull @Valid EducationModel> educations;
     private List<@NotNull @Valid JobExperienceModel> jobExperiences;
+    private List<@NotNull @Valid LanguageModel> languages;
 
     @NotNull private Date date;
 

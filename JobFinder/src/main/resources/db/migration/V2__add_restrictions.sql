@@ -39,8 +39,7 @@ ALTER TABLE jobfinder.applications
   ALTER COLUMN vacancy_id SET NOT NULL,
   ALTER COLUMN resume_id SET NOT NULL,
   ALTER COLUMN date SET NOT NULL,
-  ALTER COLUMN status SET NOT NULL,
-  ADD CONSTRAINT applications_status_valid CHECK (status IN ('new', 'invitation', 'rejection'));
+  ALTER COLUMN status SET NOT NULL;
 
 ALTER TABLE jobfinder.educations
   ALTER COLUMN resume_id SET NOT NULL,
@@ -54,13 +53,20 @@ ALTER TABLE jobfinder.educations
   ADD CONSTRAINT educations_department_not_empty CHECK (btrim(department) <> ''),
   ADD CONSTRAINT educations_graduation_year_valid CHECK (graduation_year >= 1900 AND graduation_year <= EXTRACT(YEAR FROM CURRENT_DATE) + 10);
 
-ALTER TABLE jobfinder.lang_skills
-  ALTER COLUMN language_id SET NOT NULL,
+ALTER TABLE jobfinder.languages
+  ALTER COLUMN name SET NOT NULL,
   ALTER COLUMN proficiency_level SET NOT NULL,
-  ADD CONSTRAINT lang_skills_resume_or_vacancy_required CHECK (resume_id IS NOT NULL OR vacancy_id IS NOT NULL),
-  ADD CONSTRAINT lang_skills_only_one_owner CHECK (NOT (resume_id IS NOT NULL AND vacancy_id IS NOT NULL)),
-  ADD CONSTRAINT lang_skills_resume_unique UNIQUE (resume_id, language_id),
-  ADD CONSTRAINT lang_skills_vacancy_unique UNIQUE (vacancy_id, language_id);
+  ADD CONSTRAINT languages_name_not_empty CHECK (btrim(name) <> '');
+
+ALTER TABLE jobfinder.language_resume
+  ALTER COLUMN language_id SET NOT NULL,
+  ALTER COLUMN resume_id SET NOT NULL,
+  ADD CONSTRAINT language_resume_unique UNIQUE (resume_id, language_id);
+
+ALTER TABLE jobfinder.language_vacancy
+  ALTER COLUMN language_id SET NOT NULL,
+  ALTER COLUMN vacancy_id SET NOT NULL,
+  ADD CONSTRAINT language_vacancy_unique UNIQUE (vacancy_id, language_id);
 
 ALTER TABLE jobfinder.resumes
   ALTER COLUMN applicant_id SET NOT NULL,
@@ -95,11 +101,6 @@ ALTER TABLE jobfinder.skills
   ADD CONSTRAINT skills_name_unique UNIQUE (name),
   ADD CONSTRAINT skills_name_not_empty CHECK (btrim(name) <> '');
 
-ALTER TABLE jobfinder.languages
-  ALTER COLUMN name SET NOT NULL,
-  ADD CONSTRAINT languages_name_unique UNIQUE (name),
-  ADD CONSTRAINT languages_name_not_empty CHECK (btrim(name) <> '');
-
 ALTER TABLE jobfinder.vacancy_skills
   ALTER COLUMN vacancy_id SET NOT NULL,
   ALTER COLUMN skill_id SET NOT NULL,
@@ -122,8 +123,9 @@ ALTER TABLE jobfinder.experiences ADD CONSTRAINT fk_experiences_resume FOREIGN K
 ALTER TABLE jobfinder.educations ADD CONSTRAINT fk_educations_resume FOREIGN KEY (resume_id) REFERENCES jobfinder.resumes (id) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE jobfinder.resume_skills ADD CONSTRAINT fk_resume_skills_resume FOREIGN KEY (resume_id) REFERENCES jobfinder.resumes (id) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE jobfinder.resume_skills ADD CONSTRAINT fk_resume_skills_skill FOREIGN KEY (skill_id) REFERENCES jobfinder.skills (id) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE jobfinder.lang_skills ADD CONSTRAINT fk_lang_skills_language FOREIGN KEY (language_id) REFERENCES jobfinder.languages (id) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE jobfinder.lang_skills ADD CONSTRAINT fk_lang_skills_resume FOREIGN KEY (resume_id) REFERENCES jobfinder.resumes (id) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE jobfinder.lang_skills ADD CONSTRAINT fk_lang_skills_vacancy FOREIGN KEY (vacancy_id) REFERENCES jobfinder.vacancies (id) DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE jobfinder.language_resume ADD CONSTRAINT fk_language_resume_language FOREIGN KEY (language_id) REFERENCES jobfinder.languages (id) DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE jobfinder.language_resume ADD CONSTRAINT fk_language_resume_resume FOREIGN KEY (resume_id) REFERENCES jobfinder.resumes (id) DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE jobfinder.language_vacancy ADD CONSTRAINT fk_language_vacancy_language FOREIGN KEY (language_id) REFERENCES jobfinder.languages (id) DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE jobfinder.language_vacancy ADD CONSTRAINT fk_language_vacancy_vacancy FOREIGN KEY (vacancy_id) REFERENCES jobfinder.vacancies (id) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE jobfinder.applicants ADD CONSTRAINT fk_applicants_location FOREIGN KEY (location_id) REFERENCES jobfinder.locations (id) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE jobfinder.employers ADD CONSTRAINT fk_applicants_location FOREIGN KEY (location_id) REFERENCES jobfinder.locations (id) DEFERRABLE INITIALLY IMMEDIATE;

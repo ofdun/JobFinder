@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PostgreSQLResumeRepository implements RelationalResumeRepository {
-    ResumeJpaRepository resumeJpaRepository;
+    private final ResumeJpaRepository resumeJpaRepository;
 
     @Override
     public Long createResume(ResumeModel resumeModel) {

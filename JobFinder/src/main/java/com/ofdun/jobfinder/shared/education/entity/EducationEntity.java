@@ -8,6 +8,8 @@ import java.time.Year;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
@@ -22,7 +24,8 @@ public class EducationEntity {
     @NotNull private Long resumeId;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "jobfinder.education_degree")
     private EducationDegree degree;
 
     @NotBlank private String institution;

@@ -1,5 +1,6 @@
 package com.ofdun.jobfinder.features.vacancy.domain.model;
 
+import com.ofdun.jobfinder.shared.language.model.LanguageModel;
 import com.ofdun.jobfinder.shared.location.model.LocationModel;
 import com.ofdun.jobfinder.shared.skill.model.SkillModel;
 import com.ofdun.jobfinder.shared.vacancy.enums.EmploymentType;
@@ -27,7 +28,9 @@ public class VacancyModel {
 
     @NotNull private BigDecimal salary;
 
-    private List<@NotNull SkillModel> skills;
+    private List<@NotNull @Valid SkillModel> skills;
+
+    private List<@NotNull @Valid LanguageModel> languages;
 
     @NotNull private PaymentFrequency paymentFrequency;
 

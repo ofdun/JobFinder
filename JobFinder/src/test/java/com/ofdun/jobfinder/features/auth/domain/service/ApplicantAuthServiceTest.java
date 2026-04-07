@@ -71,7 +71,7 @@ class ApplicantAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.login(email, password));
 
-        assertEquals("Applicant not found", exception.getMessage());
+        assertEquals("Applicant with string " + email + " already exists", exception.getMessage());
         verify(applicantAccountRepository).findByEmail(email);
         verifyNoInteractions(encryptionService, tokenRepository, jwtProvider);
     }
@@ -89,7 +89,7 @@ class ApplicantAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.login(email, password));
 
-        assertEquals("Invalid password", exception.getMessage());
+        assertEquals("Password is invalid", exception.getMessage());
         verify(applicantAccountRepository).findByEmail(email);
         verify(encryptionService).encrypt(password);
         verifyNoInteractions(tokenRepository, jwtProvider);
@@ -126,7 +126,7 @@ class ApplicantAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.refreshToken(token));
 
-        assertEquals("Refresh token invalid", exception.getMessage());
+        assertEquals("Refresh token is invalid", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.APPLICANT);
         verifyNoInteractions(tokenRepository);
     }
@@ -141,7 +141,7 @@ class ApplicantAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.refreshToken(token));
 
-        assertEquals("Session is over or invalid", exception.getMessage());
+        assertEquals("Session is over", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.APPLICANT);
         verify(tokenRepository).getUserIdByToken(token);
         verify(tokenRepository, never()).deleteToken(anyString());

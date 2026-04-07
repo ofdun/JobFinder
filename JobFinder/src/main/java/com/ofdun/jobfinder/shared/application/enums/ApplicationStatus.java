@@ -1,7 +1,7 @@
 package com.ofdun.jobfinder.shared.application.enums;
 
 public enum ApplicationStatus {
-    CREATED,
+    NEW,
     INVITATION,
     REJECTION
 }

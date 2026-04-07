@@ -1,45 +1,50 @@
 package com.ofdun.jobfinder.features.application.domain.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
+import com.ofdun.jobfinder.features.application.domain.validator.ApplicationValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class BasicApplicationServiceTest {
 
-    @Mock
-    private ApplicationRepository applicationRepository;
+    @Mock private ApplicationRepository applicationRepository;
 
-    @InjectMocks
-    private BasicApplicationService applicationService;
+    @Mock private ApplicationValidator applicationValidator;
+
+    @InjectMocks private BasicApplicationService applicationService;
 
     @Test
     void saveApplication_whenValidApplication_thenIdReturned() {
         ApplicationModel application = mock(ApplicationModel.class);
         Long expectedId = 1L;
+        doNothing().when(applicationValidator).validateApplicationForCreate(application);
         when(applicationRepository.saveApplication(application)).thenReturn(expectedId);
 
         Long actualId = applicationService.saveApplication(application);
 
         assertEquals(expectedId, actualId);
+        verify(applicationValidator).validateApplicationForCreate(application);
         verify(applicationRepository).saveApplication(application);
     }
 
     @Test
     void saveApplication_whenRepositoryReturnsNull_thenNullReturned() {
         ApplicationModel application = mock(ApplicationModel.class);
+        doNothing().when(applicationValidator).validateApplicationForCreate(application);
         when(applicationRepository.saveApplication(application)).thenReturn(null);
 
         Long actualId = applicationService.saveApplication(application);
 
         assertNull(actualId);
+        verify(applicationValidator).validateApplicationForCreate(application);
         verify(applicationRepository).saveApplication(application);
     }
 
@@ -69,39 +74,55 @@ class BasicApplicationServiceTest {
     }
 
     @Test
-    void updateApplication_whenValidApplication_thenThrowsIllegalArgumentException() {
+    void updateApplication_whenValidApplication_thenRepositoryCalledAndModelReturned() {
         ApplicationModel application = mock(ApplicationModel.class);
-        when(application.getId()).thenReturn(1L);
+        doNothing().when(applicationValidator).validateApplicationForUpdate(application);
+        when(applicationRepository.updateApplication(application)).thenReturn(application);
 
-        assertThrows(IllegalArgumentException.class, () -> applicationService.updateApplication(application));
+        ApplicationModel actual = applicationService.updateApplication(application);
+
+        assertSame(application, actual);
+        verify(applicationValidator).validateApplicationForUpdate(application);
+        verify(applicationRepository).updateApplication(application);
     }
 
     @Test
     void updateApplication_whenInvalidApplication_thenThrowsIllegalArgumentException() {
         ApplicationModel application = mock(ApplicationModel.class);
-        when(application.getId()).thenReturn(0L);
+        doThrow(new IllegalArgumentException())
+                .when(applicationValidator)
+                .validateApplicationForUpdate(application);
 
-        assertThrows(IllegalArgumentException.class, () -> applicationService.updateApplication(application));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> applicationService.updateApplication(application));
+        verify(applicationValidator).validateApplicationForUpdate(application);
     }
 
     @Test
     void deleteApplication_whenExists_thenTrueReturned() {
         Long id = 1L;
+        doNothing().when(applicationValidator).validateApplicationForDelete(id);
         when(applicationRepository.deleteApplication(id)).thenReturn(true);
 
         Boolean result = applicationService.deleteApplication(id);
 
         assertTrue(result);
+        verify(applicationValidator).validateApplicationForDelete(id);
         verify(applicationRepository).deleteApplication(id);
         verifyNoMoreInteractions(applicationRepository);
     }
 
     @Test
-    void deleteApplication_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
+    void deleteApplication_whenRepositoryReturnsFalse_thenFalseReturned() {
         Long id = 404L;
+        doNothing().when(applicationValidator).validateApplicationForDelete(id);
         when(applicationRepository.deleteApplication(id)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> applicationService.deleteApplication(id));
+        Boolean result = applicationService.deleteApplication(id);
+
+        assertFalse(result);
+        verify(applicationValidator).validateApplicationForDelete(id);
         verify(applicationRepository).deleteApplication(id);
         verifyNoMoreInteractions(applicationRepository);
     }

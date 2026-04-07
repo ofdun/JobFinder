@@ -1,5 +1,6 @@
 package com.ofdun.jobfinder.features.vacancy.data.entity;
 
+import com.ofdun.jobfinder.shared.language.entity.LanguageEntity;
 import com.ofdun.jobfinder.shared.location.entity.LocationEntity;
 import com.ofdun.jobfinder.shared.skill.entity.SkillEntity;
 import com.ofdun.jobfinder.shared.vacancy.enums.EmploymentType;
@@ -15,6 +16,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
@@ -42,20 +45,31 @@ public class VacancyEntity {
             name = "vacancy_skills",
             joinColumns = @JoinColumn(name = "vacancy_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<@NotNull SkillEntity> skills;
+    private List<@NotNull @Valid SkillEntity> skills;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            schema = "jobfinder",
+            name = "language_vacancy",
+            joinColumns = @JoinColumn(name = "vacancy_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id"))
+    private List<@NotNull @Valid LanguageEntity> languages;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "jobfinder.payment_frequency")
     private PaymentFrequency paymentFrequency;
 
     @NotBlank private String workExperience;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "jobfinder.work_format")
     private JobFormat workFormat;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "jobfinder.employment_type")
     private EmploymentType employmentType;
 
     @NotBlank private String description;

@@ -27,7 +27,7 @@ public class EmployerModel {
     private String address;
 
     @URL(message = "Site URL should be valid")
-    private String siteUrl;
+    private String websiteLink;
 
     @NotBlank
     @Email(message = "Email should be valid")

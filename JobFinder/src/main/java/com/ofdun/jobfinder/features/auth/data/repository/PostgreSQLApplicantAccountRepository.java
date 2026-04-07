@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class PosgreSQLApplicantAccountRepository implements ApplicantAccountRepository {
+public class PostgreSQLApplicantAccountRepository implements ApplicantAccountRepository {
     private final ApplicantRepository applicantRepository;
 
     @Override

@@ -1,3 +1,5 @@
 .DS_Store
 *.bkp
 .idea
+cities500.txt
+countryInfo.txt

@@ -1,45 +1,50 @@
 package com.ofdun.jobfinder.features.applicant.domain.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
+import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class BasicApplicantServiceTest {
 
-    @Mock
-    private ApplicantRepository applicantRepository;
+    @Mock private ApplicantRepository applicantRepository;
 
-    @InjectMocks
-    private BasicApplicantService applicantService;
+    @Mock private ApplicantValidator applicantValidator;
+
+    @InjectMocks private BasicApplicantService applicantService;
 
     @Test
     void createApplicant_whenValidApplicant_thenIdReturned() {
         ApplicantModel applicantModel = mock(ApplicantModel.class);
         Long expectedId = 1L;
+        doNothing().when(applicantValidator).validateApplicantForCreate(applicantModel);
         when(applicantRepository.createApplicant(applicantModel)).thenReturn(expectedId);
 
         Long actualId = applicantService.createApplicant(applicantModel);
 
         assertEquals(expectedId, actualId);
+        verify(applicantValidator).validateApplicantForCreate(applicantModel);
         verify(applicantRepository).createApplicant(applicantModel);
     }
 
     @Test
     void createApplicant_whenRepositoryReturnsNull_thenNullReturned() {
         ApplicantModel applicantModel = mock(ApplicantModel.class);
+        doNothing().when(applicantValidator).validateApplicantForCreate(applicantModel);
         when(applicantRepository.createApplicant(applicantModel)).thenReturn(null);
 
         Long actualId = applicantService.createApplicant(applicantModel);
 
         assertNull(actualId);
+        verify(applicantValidator).validateApplicantForCreate(applicantModel);
         verify(applicantRepository).createApplicant(applicantModel);
     }
 
@@ -69,39 +74,55 @@ class BasicApplicantServiceTest {
     }
 
     @Test
-    void updateApplicant_whenValidApplicant_thenThrowsIllegalArgumentException() {
+    void updateApplicant_whenValidApplicant_thenRepositoryCalledAndModelReturned() {
         ApplicantModel applicantModel = mock(ApplicantModel.class);
-        when(applicantModel.getId()).thenReturn(1L);
+        doNothing().when(applicantValidator).validateApplicantForUpdate(applicantModel);
+        when(applicantRepository.updateApplicant(applicantModel)).thenReturn(applicantModel);
 
-        assertThrows(IllegalArgumentException.class, () -> applicantService.updateApplicant(applicantModel));
+        ApplicantModel actual = applicantService.updateApplicant(applicantModel);
+
+        assertSame(applicantModel, actual);
+        verify(applicantValidator).validateApplicantForUpdate(applicantModel);
+        verify(applicantRepository).updateApplicant(applicantModel);
     }
 
     @Test
     void updateApplicant_whenInvalidApplicant_thenThrowsIllegalArgumentException() {
         ApplicantModel applicantModel = mock(ApplicantModel.class);
-        when(applicantModel.getId()).thenReturn(0L);
+        doThrow(new IllegalArgumentException())
+                .when(applicantValidator)
+                .validateApplicantForUpdate(applicantModel);
 
-        assertThrows(IllegalArgumentException.class, () -> applicantService.updateApplicant(applicantModel));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> applicantService.updateApplicant(applicantModel));
+        verify(applicantValidator).validateApplicantForUpdate(applicantModel);
     }
 
     @Test
     void deleteApplicant_whenExists_thenTrueReturned() {
         Long id = 1L;
+        doNothing().when(applicantValidator).validateApplicantForDelete(id);
         when(applicantRepository.deleteApplicant(id)).thenReturn(true);
 
         Boolean result = applicantService.deleteApplicant(id);
 
         assertTrue(result);
+        verify(applicantValidator).validateApplicantForDelete(id);
         verify(applicantRepository).deleteApplicant(id);
         verifyNoMoreInteractions(applicantRepository);
     }
 
     @Test
-    void deleteApplicant_whenRepositoryReturnsFalse_thenThrowsIllegalArgumentException() {
+    void deleteApplicant_whenRepositoryReturnsFalse_thenFalseReturned() {
         Long id = 404L;
+        doNothing().when(applicantValidator).validateApplicantForDelete(id);
         when(applicantRepository.deleteApplicant(id)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> applicantService.deleteApplicant(id));
+        Boolean result = applicantService.deleteApplicant(id);
+
+        assertFalse(result);
+        verify(applicantValidator).validateApplicantForDelete(id);
         verify(applicantRepository).deleteApplicant(id);
         verifyNoMoreInteractions(applicantRepository);
     }

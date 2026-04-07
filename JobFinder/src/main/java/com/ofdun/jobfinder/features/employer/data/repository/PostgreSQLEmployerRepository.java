@@ -3,11 +3,13 @@ package com.ofdun.jobfinder.features.employer.data.repository;
 import com.ofdun.jobfinder.features.employer.data.mapper.EmployerMapper;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PostgreSQLEmployerRepository implements EmployerRepository {
-    EmployerJpaRepository jpaRepository;
+    private final EmployerJpaRepository jpaRepository;
 
     @Override
     public Long createEmployer(EmployerModel employerModel) {

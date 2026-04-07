@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.vacancy.data.mapper;
 
 import com.ofdun.jobfinder.features.vacancy.data.entity.VacancyEntity;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
+import com.ofdun.jobfinder.shared.language.mapper.LanguageMapper;
 import com.ofdun.jobfinder.shared.location.mapper.LocationMapper;
 import com.ofdun.jobfinder.shared.skill.mapper.SkillMapper;
 
@@ -15,7 +16,12 @@ public class VacancyMapper {
                 model.getEmployerId(),
                 LocationMapper.toEntity(model.getLocation()),
                 model.getSalary(),
-                model.getSkills().stream().map(SkillMapper::toEntity).toList(),
+                model.getSkills() == null
+                        ? null
+                        : model.getSkills().stream().map(SkillMapper::toEntity).toList(),
+                model.getLanguages() == null
+                        ? null
+                        : model.getLanguages().stream().map(LanguageMapper::toEntity).toList(),
                 model.getPaymentFrequency(),
                 model.getExperience(),
                 model.getJobFormat(),
@@ -34,7 +40,12 @@ public class VacancyMapper {
                 entity.getEmployerId(),
                 LocationMapper.toModel(entity.getLocation()),
                 entity.getSalary(),
-                entity.getSkills().stream().map(SkillMapper::toModel).toList(),
+                entity.getSkills() == null
+                        ? null
+                        : entity.getSkills().stream().map(SkillMapper::toModel).toList(),
+                entity.getLanguages() == null
+                        ? null
+                        : entity.getLanguages().stream().map(LanguageMapper::toModel).toList(),
                 entity.getPaymentFrequency(),
                 entity.getWorkExperience(),
                 entity.getWorkFormat(),

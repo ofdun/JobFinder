@@ -3,15 +3,13 @@ package com.ofdun.jobfinder.features.applicant.data.repository;
 import com.ofdun.jobfinder.features.applicant.data.mapper.ApplicantMapper;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PostgreSQLApplicantRepository implements ApplicantRepository {
     private final ApplicantJpaRepository applicantJpaRepository;
-
-    public PostgreSQLApplicantRepository(ApplicantJpaRepository applicantJpaRepository) {
-        this.applicantJpaRepository = applicantJpaRepository;
-    }
 
     @Override
     public Long createApplicant(ApplicantModel applicantModel) {

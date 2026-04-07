@@ -15,7 +15,7 @@ public class EmployerMapper {
                 model.getPasswordHash(),
                 model.getDescription(),
                 model.getAddress(),
-                model.getSiteUrl(),
+                model.getWebsiteLink(),
                 model.getEmail(),
                 LocationMapper.toEntity(model.getLocation()));
     }
