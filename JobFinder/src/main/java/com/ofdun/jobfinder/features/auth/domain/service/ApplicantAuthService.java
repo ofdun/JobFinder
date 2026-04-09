@@ -8,38 +8,27 @@ import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
 import com.ofdun.jobfinder.features.auth.exception.InvalidPasswordException;
 import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
 import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
-import com.ofdun.jobfinder.shared.auth.enums.AccountType;
-import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
+import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import java.time.Duration;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ApplicantAuthService implements AuthService {
     private final EncryptionService encryptionService;
     private final ApplicantAccountRepository applicantAccountRepository;
     private final TokenRepository tokenRepository;
     private final JwtProvider jwtProvider;
 
-    public ApplicantAuthService(
-            @NonNull EncryptionService encryptionService,
-            @NonNull ApplicantAccountRepository applicantAccountRepository,
-            @NonNull TokenRepository tokenRepository,
-            @NonNull JwtProvider jwtProvider) {
-        this.encryptionService = encryptionService;
-        this.applicantAccountRepository = applicantAccountRepository;
-        this.tokenRepository = tokenRepository;
-        this.jwtProvider = jwtProvider;
-    }
-
     @Override
     public TokenPair login(@NonNull String email, @NonNull String password) {
-        var applicant = applicantAccountRepository.findByEmail(email);
-        if (applicant == null) {
-            throw new ApplicantAlreadyExistsException(email);
-        }
+        var applicant = applicantAccountRepository.findByEmail(email)
+                .orElseThrow(() -> new ApplicantAlreadyExistsException(email));
 
-        if (!encryptionService.encrypt(password).equals(applicant.getPasswordHash())) {
+        if (!encryptionService.matches(password, applicant.getPasswordHash())) {
             throw new InvalidPasswordException();
         }
 

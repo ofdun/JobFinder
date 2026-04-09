@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
-import com.ofdun.jobfinder.shared.category.model.CategoryModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -51,7 +50,7 @@ class PostgreSQLResumeRepositoryIT {
                 new ResumeModel(
                         null,
                         1L,
-                        new CategoryModel(1L, "Software Development"),
+                        1L,
                         "New resume description",
                         null,
                         null,
@@ -63,37 +62,38 @@ class PostgreSQLResumeRepositoryIT {
 
         assertNotNull(id);
 
-        ResumeModel fromDb = resumeRepository.getResumeById(id);
-        assertNotNull(fromDb);
-        assertEquals("New resume description", fromDb.getDescription());
+        var fromDbOpt = resumeRepository.getResumeById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals("New resume description", fromDbOpt.get().getDescription());
     }
 
     @Test
     void getResumeById_whenExists_thenReturnResume() {
         long id = 1L;
 
-        ResumeModel fromDb = resumeRepository.getResumeById(id);
+        var fromDbOpt = resumeRepository.getResumeById(id);
 
-        assertNotNull(fromDb);
-        assertEquals(id, fromDb.getId());
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(id, fromDbOpt.get().getId());
     }
 
     @Test
     void updateResume_whenExists_thenFieldsUpdated() {
         long id = 2L;
-        ResumeModel saved = resumeRepository.getResumeById(id);
-        assertNotNull(saved);
+        var savedOpt = resumeRepository.getResumeById(id);
+        assertTrue(savedOpt.isPresent());
+        ResumeModel saved = savedOpt.get();
 
         ResumeModel updated =
                 new ResumeModel(
                         saved.getId(),
                         saved.getApplicantId(),
-                        saved.getCategory(),
+                        saved.getCategoryId(),
                         "Updated description",
-                        saved.getSkills(),
+                        saved.getSkillIds(),
                         saved.getEducations(),
                         saved.getJobExperiences(),
-                        saved.getLanguages(),
+                        saved.getLanguageIds(),
                         saved.getDate());
 
         ResumeModel result = resumeRepository.updateResume(updated);
@@ -101,27 +101,26 @@ class PostgreSQLResumeRepositoryIT {
         assertNotNull(result);
         assertEquals("Updated description", result.getDescription());
 
-        ResumeModel fromDb = resumeRepository.getResumeById(id);
-        assertEquals("Updated description", fromDb.getDescription());
+        var fromDbOpt = resumeRepository.getResumeById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals("Updated description", fromDbOpt.get().getDescription());
     }
 
     @Test
     void deleteResume_whenExists_thenReturnTrueAndNotFound() {
         long id = 2L;
-        ResumeModel existing = resumeRepository.getResumeById(id);
-        assertNotNull(existing);
+        var existingOpt = resumeRepository.getResumeById(id);
+        assertTrue(existingOpt.isPresent());
 
         Boolean deleted = resumeRepository.deleteResume(id);
 
         assertTrue(deleted);
-        ResumeModel fromDb = resumeRepository.getResumeById(id);
-        assertNull(fromDb);
+        assertTrue(resumeRepository.getResumeById(id).isEmpty());
     }
 
     @Test
     void getResumeById_whenMissing_thenNullReturned() {
         long missingId = 9999L;
-        ResumeModel fromDb = resumeRepository.getResumeById(missingId);
-        assertNull(fromDb);
+        assertTrue(resumeRepository.getResumeById(missingId).isEmpty());
     }
 }

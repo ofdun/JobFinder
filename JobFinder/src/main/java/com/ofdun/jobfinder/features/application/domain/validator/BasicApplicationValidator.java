@@ -28,11 +28,17 @@ public class BasicApplicationValidator implements ApplicationValidator {
     @Override
     public void validateApplicationForDelete(Long applicationId) {
         validateId(applicationId);
-        validateExists(applicationId);
+        validateNotExists(applicationId);
+    }
+
+    private void validateNotExists(Long id) {
+        if (applicationRepository.getApplicationById(id).isPresent()) {
+            throw new ApplicationAlreadyExistsException(id);
+        }
     }
 
     private void validateExists(Long id) {
-        if (applicationRepository.getApplication(id) == null) {
+        if (applicationRepository.getApplicationById(id).isEmpty()) {
             throw new ApplicationAlreadyExistsException(id);
         }
     }

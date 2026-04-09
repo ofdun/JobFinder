@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.validator.VacancyValidator;
+import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +54,7 @@ class BasicVacancyServiceTest {
     void getVacancyById_whenExists_thenVacancyReturned() {
         Long id = 1L;
         VacancyModel expectedVacancy = mock(VacancyModel.class);
-        when(vacancyRepository.getVacancyById(id)).thenReturn(expectedVacancy);
+        when(vacancyRepository.getVacancyById(id)).thenReturn(Optional.of(expectedVacancy));
 
         VacancyModel actualVacancy = vacancyService.getVacancyById(id);
 
@@ -62,13 +64,12 @@ class BasicVacancyServiceTest {
     }
 
     @Test
-    void getVacancyById_whenMissing_thenNullReturned() {
+    void getVacancyById_whenMissing_thenThrowsNotFound() {
         Long id = 404L;
-        when(vacancyRepository.getVacancyById(id)).thenReturn(null);
+        when(vacancyRepository.getVacancyById(id)).thenReturn(Optional.empty());
 
-        VacancyModel actualVacancy = vacancyService.getVacancyById(id);
+        assertThrows(VacancyNotFoundException.class, () -> vacancyService.getVacancyById(id));
 
-        assertNull(actualVacancy);
         verify(vacancyRepository).getVacancyById(id);
         verifyNoMoreInteractions(vacancyRepository);
     }

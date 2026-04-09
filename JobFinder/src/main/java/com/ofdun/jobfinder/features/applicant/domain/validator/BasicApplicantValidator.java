@@ -27,13 +27,13 @@ public class BasicApplicantValidator implements ApplicantValidator {
     }
 
     private void validateAlreadyExists(String email) {
-        if (applicantRepository.getApplicantByEmail(email) != null) {
+        if (applicantRepository.getApplicantByEmail(email).isPresent()) {
             throw new ApplicantAlreadyExistsException(email);
         }
     }
 
     private void validateDoesNotExist(Long id) {
-        if (applicantRepository.getApplicantById(id) == null) {
+        if (applicantRepository.getApplicantById(id).isEmpty()) {
             throw new ApplicantNotFoundException(id);
         }
     }

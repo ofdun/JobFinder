@@ -1,7 +1,8 @@
 package com.ofdun.jobfinder.features.auth.data.jwt.impl;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
-import com.ofdun.jobfinder.shared.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -41,8 +42,7 @@ public class BasicJwtProvider implements JwtProvider {
     public String generateRefreshToken(AccountType type, Long userId) {
         return Jwts.builder()
                 .subject(userId.toString())
-                .claim("role", type)
-                .claim("type", type.name())
+                .claim("role", type.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + this.refreshExpirationTimeMs))
                 .signWith(secret)
@@ -52,13 +52,32 @@ public class BasicJwtProvider implements JwtProvider {
     @Override
     public Boolean validateToken(@NonNull String token, AccountType type) {
         try {
-            var claims =
-                    Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
-
-            String role = claims.get("role", String.class);
-            return role != null && role.equals(type.name());
+            return getAccountType(token) == type;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public Long getUserId(@NonNull String token) {
+        Claims claims =
+                Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
+        String sub = claims.getSubject();
+        if (sub == null) {
+            throw new IllegalArgumentException("JWT subject is null");
+        }
+        return Long.parseLong(sub);
+    }
+
+    @Override
+    public AccountType getAccountType(@NonNull String token) {
+        Claims claims =
+                Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
+
+        String role = claims.get("role", String.class);
+        if (role == null || role.isBlank()) {
+            throw new IllegalArgumentException("JWT role/type claim is missing");
+        }
+        return AccountType.valueOf(role);
     }
 }

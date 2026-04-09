@@ -3,15 +3,18 @@ package com.ofdun.jobfinder.features.resume.domain.chain.get;
 import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-public class RelationalResumeGetHandler extends ResumeHandler {
+import java.util.Optional;
 
-    RelationalResumeRepository resumeRepository;
+@Component
+@RequiredArgsConstructor
+public class RelationalResumeGetHandler extends ResumeHandler {
+    private final RelationalResumeRepository resumeRepository;
 
     @Override
-    protected ResumeModel execute(ResumeModel resume) {
+    protected Optional<ResumeModel> execute(ResumeModel resume) {
         return resumeRepository.getResumeById(resume.getId());
     }
 }

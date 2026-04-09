@@ -11,10 +11,13 @@ import com.ofdun.jobfinder.features.resume.domain.chain.update.VectorResumeUpdat
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
+import com.ofdun.jobfinder.features.resume.exception.FailedToCreateResumeException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -56,18 +59,20 @@ public class BasicResumeService implements ResumeService {
 
     @Override
     public Long createResume(@NonNull @Valid ResumeModel resumeModel) {
-        return saveChain.handle(resumeModel).getId();
+        return saveChain.handle(resumeModel)
+                .orElseThrow(() -> new FailedToCreateResumeException(resumeModel.getApplicantId()))
+                .getId();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ResumeModel getResumeById(@NonNull Long resumeId) {
+    public Optional<ResumeModel> getResumeById(@NonNull Long resumeId) {
         var startingResume = new ResumeModel(resumeId);
         return getChain.handle(startingResume);
     }
 
     @Override
-    public ResumeModel updateResume(@NonNull @Valid ResumeModel resumeModel) {
+    public Optional<ResumeModel> updateResume(@NonNull @Valid ResumeModel resumeModel) {
         return updateChain.handle(resumeModel);
     }
 

@@ -5,6 +5,8 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class PostgreSQLApplicationRepository implements ApplicationRepository {
     private final ApplicationJpaRepository applicationJpaRepository;
@@ -14,18 +16,17 @@ public class PostgreSQLApplicationRepository implements ApplicationRepository {
     }
 
     @Override
-    public Long saveApplication(ApplicationModel application) {
+    public Long createApplication(ApplicationModel application) {
         return applicationJpaRepository
                 .save(ApplicationMapper.toEntity(application))
                 .getId();
     }
 
     @Override
-    public ApplicationModel getApplication(Long id) {
-        var entity = applicationJpaRepository
+    public Optional<ApplicationModel> getApplicationById(Long id) {
+        return applicationJpaRepository
                 .findById(id)
-                .orElse(null);
-        return entity != null ? ApplicationMapper.toModel(entity) : null;
+                .map(ApplicationMapper::toModel);
     }
 
     @Override

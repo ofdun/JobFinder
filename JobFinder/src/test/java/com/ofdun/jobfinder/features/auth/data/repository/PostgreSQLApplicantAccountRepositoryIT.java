@@ -47,18 +47,18 @@ class PostgreSQLApplicantAccountRepositoryIT {
 
     @Test
     void findByEmail_whenExists_thenReturnAccountModel() {
-        ApplicantAccountModel account = applicantAccountRepository.findByEmail("alice@example.com");
+        var account = applicantAccountRepository.findByEmail("alice@example.com");
 
-        assertNotNull(account);
-        assertEquals(1L, account.getId());
-        assertEquals("alice@example.com", account.getEmail());
-        assertEquals("passHash", account.getPasswordHash());
+        assertTrue(account.isPresent());
+        assertEquals(1L, account.get().getId());
+        assertEquals("alice@example.com", account.get().getEmail());
+        assertEquals("passHash", account.get().getPasswordHash());
     }
 
     @Test
     void findByEmail_whenMissing_thenReturnNull() {
-        ApplicantAccountModel account =
+        var account =
                 applicantAccountRepository.findByEmail("missing@example.com");
-        assertNull(account);
+        assertTrue(account.isEmpty());
     }
 }

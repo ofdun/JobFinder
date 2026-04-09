@@ -1,0 +1,27 @@
+package com.ofdun.jobfinder.features.location.data.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(schema = "jobfinder", name = "locations")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class LocationEntity {
+    @Id private Long id;
+
+    @NotNull
+    @Size(min = 1, max = 55)
+    private String city;
+
+    @NotNull
+    @Size(min = 1, max = 55)
+    private String country;
+}

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
-import com.ofdun.jobfinder.shared.location.model.LocationModel;
 import jakarta.validation.ConstraintViolationException;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,24 +52,26 @@ class PostgreSQLEmployerRepositoryIT {
 
     @Test
     void getEmployerById_whenExists_thenReturnModel() {
-        EmployerModel employer = employerRepository.getEmployerById(1L);
+        Optional<EmployerModel> employerOpt = employerRepository.getEmployerById(1L);
 
-        assertNotNull(employer);
+        assertTrue(employerOpt.isPresent());
+        EmployerModel employer = employerOpt.orElseThrow();
         assertEquals(1L, employer.getId());
         assertEquals("Test Employer", employer.getName());
         assertEquals("employer@example.com", employer.getEmail());
     }
 
     @Test
-    void getEmployerById_whenMissing_thenReturnNull() {
-        EmployerModel employer = employerRepository.getEmployerById(999L);
-        assertNull(employer);
+    void getEmployerById_whenMissing_thenReturnEmpty() {
+        Optional<EmployerModel> employerOpt = employerRepository.getEmployerById(999L);
+        assertTrue(employerOpt.isEmpty());
     }
 
     @Test
     void getEmployerByEmail_whenExists_thenReturnModel() {
-        EmployerModel employer = employerRepository.getEmployerByEmail("employer@example.com");
-        assertNotNull(employer);
+        Optional<EmployerModel> employerOpt = employerRepository.getEmployerByEmail("employer@example.com");
+        assertTrue(employerOpt.isPresent());
+        EmployerModel employer = employerOpt.orElseThrow();
         assertEquals(1L, employer.getId());
         assertEquals("Test Employer", employer.getName());
     }
@@ -85,21 +87,20 @@ class PostgreSQLEmployerRepositoryIT {
                         "Addr",
                         "https://newco.example",
                         "newco@example.com",
-                        new LocationModel(1L, "Vila", "Andorra"));
+                        1L);
 
         Long id = employerRepository.createEmployer(newEmployer);
-        EmployerModel created = employerRepository.getEmployerById(id);
+        Optional<EmployerModel> createdOpt = employerRepository.getEmployerById(id);
 
-        assertNotNull(created);
+        assertTrue(createdOpt.isPresent());
+        EmployerModel created = createdOpt.orElseThrow();
         assertEquals("New Co", created.getName());
         assertEquals("newco@example.com", created.getEmail());
     }
 
     @Test
     void createEmployer_whenMissingRequired_thenThrow() {
-        EmployerModel newEmployer =
-                new EmployerModel(
-                        null, "", "", null, null, "", "", new LocationModel(1L, "Vila", "Andorra"));
+        EmployerModel newEmployer = new EmployerModel(null, "", "", null, null, "", "", 1L);
 
         assertThrows(
                 ConstraintViolationException.class,
@@ -108,7 +109,7 @@ class PostgreSQLEmployerRepositoryIT {
 
     @Test
     void updateEmployer_thenPersistChanges() {
-        EmployerModel employer = employerRepository.getEmployerById(1L);
+        EmployerModel employer = employerRepository.getEmployerById(1L).orElseThrow();
         employer.setName("Updated Name");
         employer.setWebsiteLink("https://updated.example");
 
@@ -124,7 +125,7 @@ class PostgreSQLEmployerRepositoryIT {
     void deleteEmployer_whenExists_thenReturnTrue() {
         Boolean deleted = employerRepository.deleteEmployer(1L);
         assertTrue(deleted);
-        assertNull(employerRepository.getEmployerById(1L));
+        assertTrue(employerRepository.getEmployerById(1L).isEmpty());
     }
 
     @Test

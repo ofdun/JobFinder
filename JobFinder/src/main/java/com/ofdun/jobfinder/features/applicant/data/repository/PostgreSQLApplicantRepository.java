@@ -6,6 +6,8 @@ import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class PostgreSQLApplicantRepository implements ApplicantRepository {
@@ -17,13 +19,13 @@ public class PostgreSQLApplicantRepository implements ApplicantRepository {
     }
 
     @Override
-    public ApplicantModel getApplicantById(Long id) {
-        return applicantJpaRepository.findById(id).map(ApplicantMapper::toModel).orElse(null);
+    public Optional<ApplicantModel> getApplicantById(Long id) {
+        return applicantJpaRepository.findById(id).map(ApplicantMapper::toModel);
     }
 
     @Override
-    public ApplicantModel getApplicantByEmail(String email) {
-        return applicantJpaRepository.findByEmail(email).map(ApplicantMapper::toModel).orElse(null);
+    public Optional<ApplicantModel> getApplicantByEmail(String email) {
+        return applicantJpaRepository.findByEmail(email).map(ApplicantMapper::toModel);
     }
 
     @Override
