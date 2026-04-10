@@ -29,13 +29,13 @@ public class BasicVacancyValidator implements VacancyValidator {
     }
 
     private void validateVacancyExists(Long id) {
-        if (vacancyRepository.getVacancyById(id) == null) {
+        if (vacancyRepository.getVacancyById(id).isEmpty()) {
             throw new VacancyNotFoundException(id);
         }
     }
 
     private void validateVacancyDoesNotExist(Long id) {
-        if (vacancyRepository.getVacancyById(id) != null) {
+        if (vacancyRepository.getVacancyById(id).isPresent()) {
             throw new VacancyAlreadyExistsException(id);
         }
     }

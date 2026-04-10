@@ -11,7 +11,7 @@ public class OllamaAiClientConfiguration {
     @Bean
     public OllamaAiClient ollamaAiClient(OllamaClientProperties ollamaClientProperties) {
         return new OllamaAiClient(
-                ollamaClientProperties.getBase(),
+                ollamaClientProperties.getUrl(),
                 ollamaClientProperties.getEndpoint(),
                 ollamaClientProperties.getModel());
     }

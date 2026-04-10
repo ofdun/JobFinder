@@ -30,13 +30,13 @@ public class BasicEmployerValidator implements EmployerValidator {
     }
 
     private void validateNotExists(Long id) {
-        if (employerRepository.getEmployerById(id) == null) {
+        if (employerRepository.getEmployerById(id).isEmpty()) {
             throw new EmployerNotFoundException(id);
         }
     }
 
     private void validateAlreadyExists(String email) {
-        if (employerRepository.getEmployerByEmail(email) != null) {
+        if (employerRepository.getEmployerByEmail(email).isPresent()) {
             throw new EmployerAlreadyExistsException(email);
         }
     }

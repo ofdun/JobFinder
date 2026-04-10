@@ -1,11 +1,10 @@
 package com.ofdun.jobfinder.features.auth.domain.model;
 
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 public class EmployerAccountModel extends AccountModel {
+    public EmployerAccountModel(Long id, String email, String passwordHash) {
+        super(id, email, passwordHash);
+    }
 }

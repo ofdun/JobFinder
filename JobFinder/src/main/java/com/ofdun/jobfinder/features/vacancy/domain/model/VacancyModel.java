@@ -1,19 +1,16 @@
 package com.ofdun.jobfinder.features.vacancy.domain.model;
 
-import com.ofdun.jobfinder.shared.domain.model.LocationModel;
-import com.ofdun.jobfinder.shared.vacancy.domain.enums.EmploymentType;
-import com.ofdun.jobfinder.shared.vacancy.domain.enums.JobFormat;
-import com.ofdun.jobfinder.shared.vacancy.domain.enums.PaymentFrequency;
-import jakarta.validation.Valid;
+import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
+import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
+import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.ToString;
 
 @AllArgsConstructor
 @Data
@@ -21,36 +18,27 @@ import java.util.List;
 public class VacancyModel {
     private Long id;
 
-    @NotNull
-    private Long employerId;
+    @NotNull private Long employerId;
 
-    @NotNull
-    @Valid
-    private LocationModel location;
+    @NotNull private Long locationId;
 
-    @NotNull
-    private BigDecimal salary;
+    @NotNull private BigDecimal salary;
 
-    private List<@NotNull String> skills;
+    private List<@NotNull Long> skillIds;
 
-    @NotNull
-    private PaymentFrequency paymentFrequency;
+    private List<@NotNull Long> languageIds;
 
-    @NotBlank
-    private String experience;
+    @NotNull private PaymentFrequency paymentFrequency;
 
-    @NotNull
-    private JobFormat jobFormat;
+    @NotBlank private String experience;
 
-    @NotNull
-    private EmploymentType employmentType;
+    @NotNull private JobFormat jobFormat;
 
-    @NotBlank
-    private String description;
+    @NotNull private EmploymentType employmentType;
 
-    @NotNull
-    private Date publicationDate;
+    @NotBlank private String description;
 
-    @NotBlank
-    private String address;
+    @NotNull private Date publicationDate;
+
+    @NotBlank private String address;
 }
