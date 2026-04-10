@@ -1,7 +1,5 @@
 package com.ofdun.jobfinder.features.employer.domain.model;
 
-import com.ofdun.jobfinder.shared.domain.model.LocationModel;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,19 +17,19 @@ public class EmployerModel {
     @Size(min = 2, max = 100)
     private String name;
 
+    @NotBlank(message = "Password hash is required")
+    private String passwordHash;
+
     private String description;
 
     private String address;
 
     @URL(message = "Site URL should be valid")
-    private String siteUrl;
+    private String websiteLink;
 
     @NotBlank
     @Email(message = "Email should be valid")
     private String email;
 
-    @NotNull
-    @Valid
-    private LocationModel location;
+    @NotNull private Long locationId;
 }
-

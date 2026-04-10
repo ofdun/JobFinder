@@ -10,13 +10,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Data
 public class OllamaClientProperties {
-    @NotEmpty
-    private String endpoint;
+    @NotEmpty private String endpoint;
 
-    @NotEmpty
-    @URL
-    private String base;
+    @NotEmpty @URL private String url;
 
-    @NotEmpty
-    private String model;
+    @NotEmpty private String model;
 }

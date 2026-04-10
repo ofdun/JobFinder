@@ -4,11 +4,10 @@ import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaRequest;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaResponse;
 import com.ofdun.jobfinder.features.clients.ai.exception.AiEmptyRespondException;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.web.client.RestClient;
-
-import java.util.List;
 
 @AllArgsConstructor
 public class OllamaAiClient implements AiClient {
@@ -21,19 +20,19 @@ public class OllamaAiClient implements AiClient {
         this.endpoint = endpoint;
         this.model = model;
 
-        httpClient = RestClient.builder()
-            .baseUrl(base)
-            .build();
+        httpClient = RestClient.builder().baseUrl(base).build();
     }
 
     @Override
-    public List<Double> getEmbedding(@NonNull String content) {
+    public List<Float> getEmbedding(@NonNull String content) {
 
-        var response = httpClient.post()
-                .uri(endpoint)
-                .body(new OllamaRequest(model, content))
-                .retrieve()
-                .body(OllamaResponse.class);
+        var response =
+                httpClient
+                        .post()
+                        .uri(endpoint)
+                        .body(new OllamaRequest(model, content))
+                        .retrieve()
+                        .body(OllamaResponse.class);
 
         if (response == null || response.embeddings() == null || response.embeddings().isEmpty()) {
             throw new AiEmptyRespondException();

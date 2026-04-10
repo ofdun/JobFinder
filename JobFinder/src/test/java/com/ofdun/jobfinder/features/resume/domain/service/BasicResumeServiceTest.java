@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -81,7 +83,7 @@ class BasicResumeServiceTest {
         ResumeModel finalModel = mock(ResumeModel.class);
         Long expectedId = 1L;
         when(finalModel.getId()).thenReturn(expectedId);
-        when(relationalResumeSaveHandler.handle(inputModel)).thenReturn(finalModel);
+        when(relationalResumeSaveHandler.handle(inputModel)).thenReturn(Optional.of(finalModel));
 
         Long actualId = resumeService.createResume(inputModel);
 
@@ -93,11 +95,12 @@ class BasicResumeServiceTest {
     void getResumeById_whenExists_thenResumeReturned() {
         Long id = 1L;
         ResumeModel mockResponse = mock(ResumeModel.class);
-        when(relationalResumeGetHandler.handle(any(ResumeModel.class))).thenReturn(mockResponse);
+        when(relationalResumeGetHandler.handle(any(ResumeModel.class))).thenReturn(Optional.of(mockResponse));
 
-        ResumeModel actualResume = resumeService.getResumeById(id);
+        var actualResumeOpt = resumeService.getResumeById(id);
 
-        assertEquals(mockResponse, actualResume);
+        assertTrue(actualResumeOpt.isPresent());
+        assertEquals(mockResponse, actualResumeOpt.get());
         verify(relationalResumeGetHandler, times(1)).handle(any(ResumeModel.class));
     }
 
@@ -105,11 +108,12 @@ class BasicResumeServiceTest {
     void updateResume_whenValidModel_thenUpdatedModelReturned() {
         ResumeModel inputModel = mock(ResumeModel.class);
         ResumeModel updatedModel = mock(ResumeModel.class);
-        when(relationalResumeUpdateHandler.handle(inputModel)).thenReturn(updatedModel);
+        when(relationalResumeUpdateHandler.handle(inputModel)).thenReturn(Optional.of(updatedModel));
 
-        ResumeModel actualModel = resumeService.updateResume(inputModel);
+        var actualOpt = resumeService.updateResume(inputModel);
 
-        assertEquals(updatedModel, actualModel);
+        assertTrue(actualOpt.isPresent());
+        assertEquals(updatedModel, actualOpt.get());
         verify(relationalResumeUpdateHandler, times(1)).handle(inputModel);
     }
 

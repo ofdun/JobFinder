@@ -1,6 +1,5 @@
 package com.ofdun.jobfinder.features.applicant.data.entity;
 
-import com.ofdun.jobfinder.shared.data.entity.LocationEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -12,11 +11,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "applicants")
+@Table(schema = "jobfinder", name = "applicants")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicantEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -35,11 +35,8 @@ public class ApplicantEntity {
 
     private String address;
 
-    @NotNull
-    private String phoneNumber;
+    @NotNull private String phoneNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
     @NotNull
-    private LocationEntity location;
+    private Long locationId;
 }

@@ -1,7 +1,5 @@
 package com.ofdun.jobfinder.features.applicant.domain.model;
 
-import com.ofdun.jobfinder.shared.domain.model.LocationModel;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +28,5 @@ public class ApplicantModel {
     private String phoneNumber;
 
     @NotNull(message = "Location is required")
-    @Valid
-    private LocationModel location;
+    private Long locationId;
 }

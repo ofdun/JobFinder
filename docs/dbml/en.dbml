@@ -11,6 +11,7 @@ table employer {
 table applicant {
   id int [pk, increment]
   name varchar
+  address varchar
   email varchar
   password_hash varchar
   phone_number varchar

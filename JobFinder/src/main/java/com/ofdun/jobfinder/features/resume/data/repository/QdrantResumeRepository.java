@@ -1,37 +1,112 @@
 package com.ofdun.jobfinder.features.resume.data.repository;
 
+import com.ofdun.jobfinder.features.clients.vector.VectorClient;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
-import com.ofdun.jobfinder.shared.matching.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
+import io.qdrant.client.PointIdFactory;
+import io.qdrant.client.VectorsFactory;
+import io.qdrant.client.grpc.Points;
+import java.util.List;
+import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-
 @Component
+@RequiredArgsConstructor
 public class QdrantResumeRepository implements VectorResumeRepository {
+    private final VectorClient client;
+
     @Override
     public Long createResume(ResumeModel resumeModel) {
-        return 0L;
+        return saveResume(resumeModel).getId();
     }
 
     @Override
-    public ResumeModel getResumeById(Long resumeId) {
-        return null;
+    public Optional<ResumeModel> getResumeById(Long resumeId) {
+        try {
+            var resp =
+                    client.getClient()
+                            .retrieveAsync(
+                                    client.getCollectionName(),
+                                    PointIdFactory.id(resumeId),
+                                    true,
+                                    true,
+                                    null)
+                            .get();
+
+            if (resp == null || resp.isEmpty()) {
+                return Optional.empty();
+            }
+
+            var embedding = resp.getFirst().getVectors().getVector().getDense().getDataList();
+
+            var model = new ResumeModel(resumeId);
+            model.setEmbedding(embedding);
+            return Optional.of(model);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public ResumeModel updateResume(ResumeModel resumeModel) {
-        return resumeModel;
+        return saveResume(resumeModel);
     }
 
     @Override
-    public List<MatchResultModel> getMostSimilarResumes(List<Double> embedding, Integer maxAmount) {
-        return Collections.emptyList();
+    public List<MatchResultModel> getMostSimilarResumes(List<Float> embedding, Integer maxAmount) {
+        try {
+            var points =
+                    client.getClient()
+                            .searchAsync(
+                                    Points.SearchPoints.newBuilder()
+                                            .setCollectionName(client.getCollectionName())
+                                            .addAllVector(embedding)
+                                            .setLimit(maxAmount)
+                                            .build())
+                            .get();
+            return points.stream()
+                    .map(p -> new MatchResultModel(p.getId().getNum(), p.getScore()))
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Boolean deleteResume(Long resumeId) {
-        return false;
+        var id = PointIdFactory.id(resumeId);
+
+        var res = true;
+        try {
+            client.getClient().deleteAsync(client.getCollectionName(), List.of(id)).get();
+        } catch (Exception e) {
+            res = false;
+        }
+
+        return res;
+    }
+
+    private ResumeModel saveResume(ResumeModel resumeModel) {
+        var id = PointIdFactory.id(resumeModel.getId());
+        var vectors = VectorsFactory.vectors(resumeModel.getEmbedding());
+
+        try {
+            client.getClient()
+                    .upsertAsync(
+                            client.getCollectionName(),
+                            List.of(
+                                    Points.PointStruct.newBuilder()
+                                            .setId(id)
+                                            .setVectors(vectors)
+                                            .build()))
+                    .get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return resumeModel;
     }
 }

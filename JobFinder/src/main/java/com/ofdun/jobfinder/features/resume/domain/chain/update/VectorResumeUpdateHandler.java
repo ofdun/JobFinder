@@ -3,18 +3,17 @@ package com.ofdun.jobfinder.features.resume.domain.chain.update;
 import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
-import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class VectorResumeUpdateHandler extends ResumeHandler {
-    VectorResumeRepository resumeRepository;
+    private final VectorResumeRepository resumeRepository;
 
     @Override
-    protected ResumeModel execute(ResumeModel resume) {
-        if (resumeRepository.getResumeById(resume.getId()) == null) {
-            throw new ResumeNotFoundException(resume.getId());
-        }
-        return resumeRepository.updateResume(resume);
+    protected Optional<ResumeModel> execute(ResumeModel resume) {
+        return Optional.ofNullable(resumeRepository.updateResume(resume));
     }
 }

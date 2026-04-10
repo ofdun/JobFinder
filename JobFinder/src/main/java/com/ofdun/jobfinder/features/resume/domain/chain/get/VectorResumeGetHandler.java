@@ -3,15 +3,22 @@ package com.ofdun.jobfinder.features.resume.domain.chain.get;
 import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
+import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-public class VectorResumeGetHandler extends ResumeHandler {
+import java.util.Optional;
 
-    VectorResumeRepository resumeRepository;
+@Component
+@RequiredArgsConstructor
+public class VectorResumeGetHandler extends ResumeHandler {
+    private final VectorResumeRepository resumeRepository;
 
     @Override
-    protected ResumeModel execute(ResumeModel resume) {
-        return resumeRepository.getResumeById(resume.getId());
+    protected Optional<ResumeModel> execute(ResumeModel resume) {
+        var resumeEmbeddings = resumeRepository.getResumeById(resume.getId())
+                .orElseThrow(() -> new ResumeNotFoundException(resume.getId()));
+        resume.setEmbedding(resumeEmbeddings.getEmbedding());
+        return Optional.of(resume);
     }
 }
