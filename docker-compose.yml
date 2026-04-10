@@ -31,7 +31,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./JobFinder/src/main/resources/db/migration:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:8.6
+    container_name: jobfinder-redis
+    ports:
+      - "6379:6379"
 
 volumes:
   ollama_data:

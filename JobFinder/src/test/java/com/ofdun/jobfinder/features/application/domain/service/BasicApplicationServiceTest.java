@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.domain.validator.ApplicationValidator;
+import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,50 +28,49 @@ class BasicApplicationServiceTest {
         ApplicationModel application = mock(ApplicationModel.class);
         Long expectedId = 1L;
         doNothing().when(applicationValidator).validateApplicationForCreate(application);
-        when(applicationRepository.saveApplication(application)).thenReturn(expectedId);
+        when(applicationRepository.createApplication(application)).thenReturn(expectedId);
 
         Long actualId = applicationService.saveApplication(application);
 
         assertEquals(expectedId, actualId);
         verify(applicationValidator).validateApplicationForCreate(application);
-        verify(applicationRepository).saveApplication(application);
+        verify(applicationRepository).createApplication(application);
     }
 
     @Test
     void saveApplication_whenRepositoryReturnsNull_thenNullReturned() {
         ApplicationModel application = mock(ApplicationModel.class);
         doNothing().when(applicationValidator).validateApplicationForCreate(application);
-        when(applicationRepository.saveApplication(application)).thenReturn(null);
+        when(applicationRepository.createApplication(application)).thenReturn(null);
 
         Long actualId = applicationService.saveApplication(application);
 
         assertNull(actualId);
         verify(applicationValidator).validateApplicationForCreate(application);
-        verify(applicationRepository).saveApplication(application);
+        verify(applicationRepository).createApplication(application);
     }
 
     @Test
     void getApplication_whenExists_thenApplicationReturned() {
         Long id = 1L;
         ApplicationModel expectedApplication = mock(ApplicationModel.class);
-        when(applicationRepository.getApplication(id)).thenReturn(expectedApplication);
+        when(applicationRepository.getApplicationById(id)).thenReturn(Optional.of(expectedApplication));
 
         ApplicationModel actualApplication = applicationService.getApplication(id);
 
         assertSame(expectedApplication, actualApplication);
-        verify(applicationRepository).getApplication(id);
+        verify(applicationRepository).getApplicationById(id);
         verifyNoMoreInteractions(applicationRepository);
     }
 
     @Test
-    void getApplication_whenMissing_thenNullReturned() {
+    void getApplication_whenMissing_thenThrowsNotFound() {
         Long id = 99L;
-        when(applicationRepository.getApplication(id)).thenReturn(null);
+        when(applicationRepository.getApplicationById(id)).thenReturn(Optional.empty());
 
-        ApplicationModel actualApplication = applicationService.getApplication(id);
+        assertThrows(ApplicationNotFoundException.class, () -> applicationService.getApplication(id));
 
-        assertNull(actualApplication);
-        verify(applicationRepository).getApplication(id);
+        verify(applicationRepository).getApplicationById(id);
         verifyNoMoreInteractions(applicationRepository);
     }
 

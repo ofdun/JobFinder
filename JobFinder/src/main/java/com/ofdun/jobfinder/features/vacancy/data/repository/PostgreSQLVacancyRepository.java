@@ -6,6 +6,8 @@ import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class PostgreSQLVacancyRepository implements VacancyRepository {
@@ -17,8 +19,8 @@ public class PostgreSQLVacancyRepository implements VacancyRepository {
     }
 
     @Override
-    public VacancyModel getVacancyById(Long id) {
-        return vacancyJpaRepository.findById(id).map(VacancyMapper::toModel).orElse(null);
+    public Optional<VacancyModel> getVacancyById(Long id) {
+        return vacancyJpaRepository.findById(id).map(VacancyMapper::toModel);
     }
 
     @Override

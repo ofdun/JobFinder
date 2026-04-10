@@ -129,10 +129,10 @@ class QdrantResumeRepositoryIT {
 
         assertNotNull(id);
 
-        ResumeModel fromDb = resumeRepository.getResumeById(id);
-        assertNotNull(fromDb);
-        assertEquals(3, fromDb.getEmbedding().size());
-        assertEquals(1.0f, fromDb.getEmbedding().get(0));
+        var fromDbOpt = resumeRepository.getResumeById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(3, fromDbOpt.get().getEmbedding().size());
+        assertEquals(1.0f, fromDbOpt.get().getEmbedding().get(0));
     }
 
     @Test
@@ -148,8 +148,9 @@ class QdrantResumeRepositoryIT {
 
         assertNotNull(updated);
 
-        ResumeModel fromDb = resumeRepository.getResumeById(2L);
-        assertEquals(1.0f, fromDb.getEmbedding().get(2));
+        var fromDbOpt = resumeRepository.getResumeById(2L);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(1.0f, fromDbOpt.get().getEmbedding().get(2));
     }
 
     @Test
@@ -163,6 +164,6 @@ class QdrantResumeRepositoryIT {
 
         assertTrue(deleted);
 
-        assertThrows(RuntimeException.class, () -> resumeRepository.getResumeById(20L));
+        assertTrue(resumeRepository.getResumeById(20L).isEmpty());
     }
 }

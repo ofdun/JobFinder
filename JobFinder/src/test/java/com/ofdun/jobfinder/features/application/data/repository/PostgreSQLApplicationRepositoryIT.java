@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
-import com.ofdun.jobfinder.shared.application.enums.ApplicationStatus;
+import com.ofdun.jobfinder.features.application.enums.ApplicationStatus;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,36 +51,37 @@ class PostgreSQLApplicationRepositoryIT {
     void cleanup() {}
 
     @Test
-    void saveApplication_whenValidApplication_thenIdReturned() {
+    void createApplication_whenValidApplication_thenIdReturned() {
         ApplicationModel model =
                 buildApplicationModel(null, 1L, 1L, new Date(), ApplicationStatus.NEW);
 
-        Long id = applicationRepository.saveApplication(model);
+        Long id = applicationRepository.createApplication(model);
 
         assertNotNull(id);
 
-        ApplicationModel fromDb = applicationRepository.getApplication(id);
-        assertNotNull(fromDb);
-        assertEquals(1L, fromDb.getVacancyId());
-        assertEquals(1L, fromDb.getResumeId());
-        assertEquals(ApplicationStatus.NEW, fromDb.getApplicationStatus());
+        var fromDbOpt = applicationRepository.getApplicationById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(1L, fromDbOpt.get().getVacancyId());
+        assertEquals(1L, fromDbOpt.get().getResumeId());
+        assertEquals(ApplicationStatus.NEW, fromDbOpt.get().getApplicationStatus());
     }
 
     @Test
     void getApplication_whenExists_thenReturnApplication() {
         Long id = 1L;
 
-        ApplicationModel fromDb = applicationRepository.getApplication(id);
+        var fromDbOpt = applicationRepository.getApplicationById(id);
 
-        assertNotNull(fromDb);
-        assertEquals(id, fromDb.getId());
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(id, fromDbOpt.get().getId());
     }
 
     @Test
     void updateApplication_whenApplicationExists_thenFieldsUpdated() {
         Long id = 1L;
-        ApplicationModel saved = applicationRepository.getApplication(id);
-        assertNotNull(saved);
+        var savedOpt = applicationRepository.getApplicationById(id);
+        assertTrue(savedOpt.isPresent());
+        ApplicationModel saved = savedOpt.get();
 
         ApplicationModel updated =
                 new ApplicationModel(
@@ -95,28 +96,27 @@ class PostgreSQLApplicationRepositoryIT {
         assertNotNull(result);
         assertEquals(ApplicationStatus.INVITATION, result.getApplicationStatus());
 
-        ApplicationModel fromDb = applicationRepository.getApplication(id);
-        assertEquals(ApplicationStatus.INVITATION, fromDb.getApplicationStatus());
+        var fromDbOpt = applicationRepository.getApplicationById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals(ApplicationStatus.INVITATION, fromDbOpt.get().getApplicationStatus());
     }
 
     @Test
     void deleteApplication_whenApplicationExists_thenReturnTrueAndNotFound() {
         Long id = 2L;
-        ApplicationModel existing = applicationRepository.getApplication(id);
-        assertNotNull(existing);
+        var existingOpt = applicationRepository.getApplicationById(id);
+        assertTrue(existingOpt.isPresent());
 
         Boolean deleted = applicationRepository.deleteApplication(id);
 
         assertTrue(deleted);
-        ApplicationModel fromDb = applicationRepository.getApplication(id);
-        assertNull(fromDb);
+        assertTrue(applicationRepository.getApplicationById(id).isEmpty());
     }
 
     @Test
     void getApplication_whenMissing_thenNullReturned() {
         Long missingId = 9999L;
-        ApplicationModel fromDb = applicationRepository.getApplication(missingId);
-        assertNull(fromDb);
+        assertTrue(applicationRepository.getApplicationById(missingId).isEmpty());
     }
 
     private ApplicationModel buildApplicationModel(

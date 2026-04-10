@@ -2,6 +2,8 @@ package com.ofdun.jobfinder.features.resume.domain.chain;
 
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 
+import java.util.Optional;
+
 public abstract class ResumeHandler {
     private ResumeHandler next;
 
@@ -10,13 +12,13 @@ public abstract class ResumeHandler {
         return next;
     }
 
-    public ResumeModel handle(ResumeModel resume) {
-        ResumeModel processed = execute(resume);
-        if (next != null) {
-            return next.handle(processed);
+    public Optional<ResumeModel> handle(ResumeModel resume) {
+        var processed = execute(resume);
+        if (next != null && processed.isPresent()) {
+            return next.handle(processed.get());
         }
         return processed;
     }
 
-    protected abstract ResumeModel execute(ResumeModel resume);
+    protected abstract Optional<ResumeModel> execute(ResumeModel resume);
 }

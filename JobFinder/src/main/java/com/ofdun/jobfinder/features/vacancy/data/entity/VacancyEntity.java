@@ -1,11 +1,8 @@
 package com.ofdun.jobfinder.features.vacancy.data.entity;
 
-import com.ofdun.jobfinder.shared.language.entity.LanguageEntity;
-import com.ofdun.jobfinder.shared.location.entity.LocationEntity;
-import com.ofdun.jobfinder.shared.skill.entity.SkillEntity;
-import com.ofdun.jobfinder.shared.vacancy.enums.EmploymentType;
-import com.ofdun.jobfinder.shared.vacancy.enums.JobFormat;
-import com.ofdun.jobfinder.shared.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
+import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
+import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -31,29 +28,20 @@ public class VacancyEntity {
 
     @NotNull private Long employerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id")
     @NotNull
-    @Valid
-    private LocationEntity location;
+    private Long locationId;
 
     @NotNull private BigDecimal salary;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            schema = "jobfinder",
-            name = "vacancy_skills",
-            joinColumns = @JoinColumn(name = "vacancy_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<@NotNull @Valid SkillEntity> skills;
+    @ElementCollection
+    @CollectionTable(schema = "jobfinder", name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @Column(name = "skill_id")
+    private List<@NotNull @Valid Long> skillIds;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            schema = "jobfinder",
-            name = "language_vacancy",
-            joinColumns = @JoinColumn(name = "vacancy_id"),
-            inverseJoinColumns = @JoinColumn(name = "language_id"))
-    private List<@NotNull @Valid LanguageEntity> languages;
+    @ElementCollection
+    @CollectionTable(schema = "jobfinder", name = "language_vacancy", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @Column(name = "language_id")
+    private List<@NotNull @Valid Long> languageIds;
 
     @NotNull
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)

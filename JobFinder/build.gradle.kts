@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.qdrant:client:1.17.0")
     implementation("com.google.protobuf:protobuf-java:4.28.2")
     implementation("com.google.guava:guava:33.0.0-jre")

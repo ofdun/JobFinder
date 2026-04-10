@@ -1,6 +1,5 @@
 package com.ofdun.jobfinder.features.employer.data.entity;
 
-import com.ofdun.jobfinder.shared.location.entity.LocationEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -36,8 +35,6 @@ public class EmployerEntity {
     @Email(message = "Email should be valid")
     private String email;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
     @NotNull
-    private LocationEntity location;
+    private Long locationId;
 }

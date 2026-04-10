@@ -4,17 +4,20 @@ import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class RelationalResumeUpdateHandler extends ResumeHandler {
-    RelationalResumeRepository resumeRepository;
+    private final RelationalResumeRepository resumeRepository;
 
     @Override
-    protected ResumeModel execute(ResumeModel resume) {
-        if (resumeRepository.getResumeById(resume.getId()) == null) {
+    protected Optional<ResumeModel> execute(ResumeModel resume) {
+        if (resumeRepository.getResumeById(resume.getId()).isEmpty()) {
             throw new ResumeNotFoundException(resume.getId());
         }
-        return resumeRepository.updateResume(resume);
+        return Optional.ofNullable(resumeRepository.updateResume(resume));
     }
 }

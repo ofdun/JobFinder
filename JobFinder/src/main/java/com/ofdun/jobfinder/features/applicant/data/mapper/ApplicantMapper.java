@@ -2,7 +2,6 @@ package com.ofdun.jobfinder.features.applicant.data.mapper;
 
 import com.ofdun.jobfinder.features.applicant.data.entity.ApplicantEntity;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
-import com.ofdun.jobfinder.shared.location.mapper.LocationMapper;
 
 public class ApplicantMapper {
     public static ApplicantEntity toEntity(ApplicantModel applicant) {
@@ -16,7 +15,7 @@ public class ApplicantMapper {
                 applicant.getPasswordHash(),
                 applicant.getAddress(),
                 applicant.getPhoneNumber(),
-                LocationMapper.toEntity(applicant.getLocation()));
+                applicant.getLocationId());
     }
 
     public static ApplicantModel toModel(ApplicantEntity entity) {
@@ -30,6 +29,6 @@ public class ApplicantMapper {
                 entity.getPasswordHash(),
                 entity.getAddress(),
                 entity.getPhoneNumber(),
-                LocationMapper.toModel(entity.getLocation()));
+                entity.getLocationId());
     }
 }
