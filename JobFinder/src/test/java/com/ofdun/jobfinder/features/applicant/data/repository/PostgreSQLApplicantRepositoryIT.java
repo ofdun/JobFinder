@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
-import com.ofdun.jobfinder.shared.location.model.LocationModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,26 +57,26 @@ class PostgreSQLApplicantRepositoryIT {
 
         assertNotNull(id, "id должен быть не null после сохранения");
 
-        ApplicantModel fromDb = applicantRepository.getApplicantById(id);
-        assertNotNull(fromDb, "найденный по id кандидат не должен быть null");
-        assertEquals("newuser@example.com", fromDb.getEmail());
+        var fromDbOpt = applicantRepository.getApplicantById(id);
+        assertTrue(fromDbOpt.isPresent(), "найденный по id кандидат не должен быть null");
+        assertEquals("newuser@example.com", fromDbOpt.get().getEmail());
     }
 
     @Test
     void getApplicantByEmail_whenExists_thenReturnApplicant() {
         String email = "bob@example.com";
 
-        ApplicantModel fromDb = applicantRepository.getApplicantByEmail(email);
-
-        assertNotNull(fromDb, "предзагруженный кандидат с email должен существовать");
-        assertEquals(email, fromDb.getEmail());
+        var fromDbOpt = applicantRepository.getApplicantByEmail(email);
+        assertTrue(fromDbOpt.isPresent(), "предзагруженный кандидат с email должен существовать");
+        assertEquals(email, fromDbOpt.get().getEmail());
     }
 
     @Test
     void updateApplicant_whenApplicantExists_thenFieldsUpdated() {
         long id = 2;
-        ApplicantModel saved = applicantRepository.getApplicantById(id);
-        assertNotNull(saved, "предзагруженный кандидат должен существовать перед обновлением");
+        var savedOpt = applicantRepository.getApplicantById(id);
+        assertTrue(savedOpt.isPresent(), "предзагруженный кандидат должен существовать перед обновлением");
+        ApplicantModel saved = savedOpt.get();
 
         ApplicantModel updated =
                 new ApplicantModel(
@@ -87,42 +86,43 @@ class PostgreSQLApplicantRepositoryIT {
                         saved.getPasswordHash(),
                         saved.getAddress(),
                         saved.getPhoneNumber(),
-                        saved.getLocation());
+                        saved.getLocationId());
 
         ApplicantModel result = applicantRepository.updateApplicant(updated);
 
         assertNotNull(result);
         assertEquals("UpdatedName", result.getName());
 
-        ApplicantModel fromDb = applicantRepository.getApplicantById(id);
-        assertEquals("UpdatedName", fromDb.getName());
+        var fromDbOpt = applicantRepository.getApplicantById(id);
+        assertTrue(fromDbOpt.isPresent());
+        assertEquals("UpdatedName", fromDbOpt.get().getName());
     }
 
     @Test
     void deleteApplicant_whenApplicantExists_thenReturnTrueAndNotFound() {
         long id = 3;
-        ApplicantModel existing = applicantRepository.getApplicantById(id);
-        assertNotNull(existing, "предзагруженный кандидат должен существовать перед удалением");
+        var existingOpt = applicantRepository.getApplicantById(id);
+        assertTrue(existingOpt.isPresent(), "предзагруженный кандидат должен существовать перед удалением");
 
         Boolean deleted = applicantRepository.deleteApplicant(id);
 
         assertTrue(deleted);
-        ApplicantModel fromDb = applicantRepository.getApplicantById(id);
-        assertNull(fromDb);
+        var fromDbOpt = applicantRepository.getApplicantById(id);
+        assertFalse(fromDbOpt.isPresent());
     }
 
     @Test
     void getApplicantById_whenMissing_thenNullReturned() {
         long missingId = 9999L;
-        ApplicantModel fromDb = applicantRepository.getApplicantById(missingId);
-        assertNull(fromDb, "должно вернуться null для несуществующего id");
+        var fromDbOpt = applicantRepository.getApplicantById(missingId);
+        assertFalse(fromDbOpt.isPresent(), "должно вернуться null для несуществующего id");
     }
 
     @Test
     void getApplicantByEmail_whenMissing_thenNullReturned() {
         String missingEmail = "noone@example.com";
-        ApplicantModel fromDb = applicantRepository.getApplicantByEmail(missingEmail);
-        assertNull(fromDb, "должно вернуться null для несуществующего email");
+        var fromDbOpt = applicantRepository.getApplicantByEmail(missingEmail);
+        assertFalse(fromDbOpt.isPresent(), "должно вернуться null для несуществующего email");
     }
 
     @Test
@@ -143,6 +143,6 @@ class PostgreSQLApplicantRepositoryIT {
                 "passHash",
                 "Address",
                 "+70000000000",
-                new LocationModel(1L, "Vila", "Andorra"));
+                1L);
     }
 }

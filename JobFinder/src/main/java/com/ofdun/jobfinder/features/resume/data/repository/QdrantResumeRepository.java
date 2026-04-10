@@ -3,11 +3,13 @@ package com.ofdun.jobfinder.features.resume.data.repository;
 import com.ofdun.jobfinder.features.clients.vector.VectorClient;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
-import com.ofdun.jobfinder.shared.matching.model.MatchResultModel;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.VectorsFactory;
 import io.qdrant.client.grpc.Points;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,7 @@ public class QdrantResumeRepository implements VectorResumeRepository {
     }
 
     @Override
-    public ResumeModel getResumeById(Long resumeId) {
-        var model = new ResumeModel();
-
-        List<Float> embedding;
+    public Optional<ResumeModel> getResumeById(Long resumeId) {
         try {
             var resp =
                     client.getClient()
@@ -36,14 +35,19 @@ public class QdrantResumeRepository implements VectorResumeRepository {
                                     true,
                                     null)
                             .get();
-            embedding = resp.getFirst().getVectors().getVector().getDense().getDataList();
+
+            if (resp == null || resp.isEmpty()) {
+                return Optional.empty();
+            }
+
+            var embedding = resp.getFirst().getVectors().getVector().getDense().getDataList();
+
+            var model = new ResumeModel(resumeId);
+            model.setEmbedding(embedding);
+            return Optional.of(model);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        model.setEmbedding(embedding);
-
-        return model;
     }
 
     @Override

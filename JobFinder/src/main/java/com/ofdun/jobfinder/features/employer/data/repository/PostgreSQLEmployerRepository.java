@@ -6,6 +6,8 @@ import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class PostgreSQLEmployerRepository implements EmployerRepository {
@@ -17,13 +19,13 @@ public class PostgreSQLEmployerRepository implements EmployerRepository {
     }
 
     @Override
-    public EmployerModel getEmployerById(Long id) {
-        return jpaRepository.findById(id).map(EmployerMapper::toModel).orElse(null);
+    public Optional<EmployerModel> getEmployerById(Long id) {
+        return jpaRepository.findById(id).map(EmployerMapper::toModel);
     }
 
     @Override
-    public EmployerModel getEmployerByEmail(String email) {
-        return jpaRepository.findByEmail(email).map(EmployerMapper::toModel).orElse(null);
+    public Optional<EmployerModel> getEmployerByEmail(String email) {
+        return jpaRepository.findByEmail(email).map(EmployerMapper::toModel);
     }
 
     @Override

@@ -4,10 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.shared.location.model.LocationModel;
-import com.ofdun.jobfinder.shared.vacancy.enums.EmploymentType;
-import com.ofdun.jobfinder.shared.vacancy.enums.JobFormat;
-import com.ofdun.jobfinder.shared.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
+import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
+import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,7 @@ class PostgreSQLVacancyRepositoryIT {
     void getVacancyById_whenExists_thenReturnVacancy() {
         long id = 1L;
 
-        VacancyModel fromDb = vacancyRepository.getVacancyById(id);
+        VacancyModel fromDb = vacancyRepository.getVacancyById(id).orElse(null);
 
         assertNotNull(fromDb);
         assertEquals(id, fromDb.getId());
@@ -66,7 +65,7 @@ class PostgreSQLVacancyRepositoryIT {
                 new VacancyModel(
                         null,
                         1L,
-                        new LocationModel(1L, "City", "Country"),
+                        1L,
                         new BigDecimal("2000"),
                         null,
                         null,
@@ -82,7 +81,7 @@ class PostgreSQLVacancyRepositoryIT {
 
         assertNotNull(id);
 
-        VacancyModel fromDb = vacancyRepository.getVacancyById(id);
+        VacancyModel fromDb = vacancyRepository.getVacancyById(id).orElse(null);
         assertNotNull(fromDb);
         assertEquals(new BigDecimal("2000"), fromDb.getSalary());
     }
@@ -90,17 +89,17 @@ class PostgreSQLVacancyRepositoryIT {
     @Test
     void updateVacancy_whenExists_thenFieldsUpdated() {
         long id = 1L;
-        VacancyModel existing = vacancyRepository.getVacancyById(id);
+        VacancyModel existing = vacancyRepository.getVacancyById(id).orElse(null);
         assertNotNull(existing);
 
         VacancyModel updated =
                 new VacancyModel(
                         existing.getId(),
                         existing.getEmployerId(),
-                        existing.getLocation(),
+                        existing.getLocationId(),
                         existing.getSalary(),
-                        existing.getSkills(),
-                        existing.getLanguages(),
+                        existing.getSkillIds(),
+                        existing.getLanguageIds(),
                         existing.getPaymentFrequency(),
                         existing.getExperience(),
                         existing.getJobFormat(),
@@ -114,27 +113,28 @@ class PostgreSQLVacancyRepositoryIT {
         assertNotNull(result);
         assertEquals("Updated description", result.getDescription());
 
-        VacancyModel fromDb = vacancyRepository.getVacancyById(id);
+        VacancyModel fromDb = vacancyRepository.getVacancyById(id).orElse(null);
+        assertNotNull(fromDb);
         assertEquals("Updated description", fromDb.getDescription());
     }
 
     @Test
     void deleteVacancy_whenExists_thenReturnTrueAndNotFound() {
         long id = 1L;
-        VacancyModel existing = vacancyRepository.getVacancyById(id);
+        VacancyModel existing = vacancyRepository.getVacancyById(id).orElse(null);
         assertNotNull(existing);
 
         Boolean deleted = vacancyRepository.deleteVacancy(id);
 
         assertTrue(deleted);
-        VacancyModel fromDb = vacancyRepository.getVacancyById(id);
+        VacancyModel fromDb = vacancyRepository.getVacancyById(id).orElse(null);
         assertNull(fromDb);
     }
 
     @Test
     void getVacancyById_whenMissing_thenNullReturned() {
         long missingId = 9999L;
-        VacancyModel fromDb = vacancyRepository.getVacancyById(missingId);
+        VacancyModel fromDb = vacancyRepository.getVacancyById(missingId).orElse(null);
         assertNull(fromDb);
     }
 }

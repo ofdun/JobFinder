@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.employer.domain.service;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import com.ofdun.jobfinder.features.employer.domain.validator.EmployerValidator;
+import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,8 @@ public class BasicEmployerService implements EmployerService {
 
     @Override
     public EmployerModel getEmployerById(@NonNull Long id) {
-        return employerRepository.getEmployerById(id);
+        return employerRepository.getEmployerById(id)
+                .orElseThrow(() -> new EmployerNotFoundException(id));
     }
 
     @Override

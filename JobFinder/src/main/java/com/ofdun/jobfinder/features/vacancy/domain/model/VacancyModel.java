@@ -1,12 +1,8 @@
 package com.ofdun.jobfinder.features.vacancy.domain.model;
 
-import com.ofdun.jobfinder.shared.language.model.LanguageModel;
-import com.ofdun.jobfinder.shared.location.model.LocationModel;
-import com.ofdun.jobfinder.shared.skill.model.SkillModel;
-import com.ofdun.jobfinder.shared.vacancy.enums.EmploymentType;
-import com.ofdun.jobfinder.shared.vacancy.enums.JobFormat;
-import com.ofdun.jobfinder.shared.vacancy.enums.PaymentFrequency;
-import jakarta.validation.Valid;
+import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
+import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
+import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -24,13 +20,13 @@ public class VacancyModel {
 
     @NotNull private Long employerId;
 
-    @NotNull @Valid private LocationModel location;
+    @NotNull private Long locationId;
 
     @NotNull private BigDecimal salary;
 
-    private List<@NotNull @Valid SkillModel> skills;
+    private List<@NotNull Long> skillIds;
 
-    private List<@NotNull @Valid LanguageModel> languages;
+    private List<@NotNull Long> languageIds;
 
     @NotNull private PaymentFrequency paymentFrequency;
 

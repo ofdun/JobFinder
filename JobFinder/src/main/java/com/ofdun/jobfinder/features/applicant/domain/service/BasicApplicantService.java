@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.applicant.domain.service;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
+import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,8 @@ public class BasicApplicantService implements ApplicantService {
 
     @Override
     public ApplicantModel getApplicantById(@NonNull Long id) {
-        return applicantRepository.getApplicantById(id);
+        return applicantRepository.getApplicantById(id)
+                .orElseThrow(() -> new ApplicantNotFoundException(id));
     }
 
     @Override

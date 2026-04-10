@@ -1,0 +1,946 @@
+openapi: 3.0.3
+info:
+  title: JobFinder API
+  description: API для платформы поиска работы с поддержкой векторного AI-мэтчинга резюме и вакансий.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Локальный сервер разработки
+
+tags:
+  - name: Auth
+    description: Авторизация и аутентификация пользователей
+  - name: Applicants
+    description: Управление профилями соискателей
+  - name: Employers
+    description: Управление профилями работодателей
+  - name: Vacancies
+    description: Управление вакансиями
+  - name: Resumes
+    description: Управление резюме соискателей
+  - name: Applications
+    description: Отклики на вакансии
+  - name: Matching
+    description: AI-мэтчинг кандидатов
+
+paths:
+  /auth/applicant/login:
+    post:
+      tags: [Auth]
+      summary: Вход соискателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+
+  /auth/employer/login:
+    post:
+      tags: [Auth]
+      summary: Вход работодателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+
+  /auth/applicant/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновление токенов соискателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Новая пара токенов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+
+  /auth/employer/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновление токенов работодателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Новая пара токенов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+
+  /applicants:
+    post:
+      tags: [Applicants]
+      summary: Регистрация нового соискателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicantRequest'
+      responses:
+        '201':
+          description: Соискатель создан
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: ID созданного соискателя
+
+  /applicants/{id}:
+    get:
+      tags: [Applicants]
+      summary: Получить профиль соискателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Профиль соискателя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Applicant'
+    put:
+      tags: [Applicants]
+      summary: Обновить профиль соискателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicantRequest'
+      responses:
+        '200':
+          description: Профиль обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Applicant'
+    delete:
+      tags: [Applicants]
+      summary: Удалить профиль соискателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Профиль успешно удален
+
+  /employers:
+    post:
+      tags: [Employers]
+      summary: Регистрация нового работодателя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployerRequest'
+      responses:
+        '201':
+          description: Работодатель создан
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  /employers/{id}:
+    get:
+      tags: [Employers]
+      summary: Получить профиль работодателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Профиль работодателя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employer'
+    put:
+      tags: [Employers]
+      summary: Обновить профиль работодателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployerRequest'
+      responses:
+        '200':
+          description: Профиль обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employer'
+    delete:
+      tags: [Employers]
+      summary: Удалить профиль работодателя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Профиль успешно удален
+
+  /vacancies:
+    post:
+      tags: [Vacancies]
+      summary: Создать вакансию
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyRequest'
+      responses:
+        '201':
+          description: Вакансия создана
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  /vacancies/{id}:
+    get:
+      tags: [Vacancies]
+      summary: Получить вакансию по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные вакансии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacancy'
+    put:
+      tags: [Vacancies]
+      summary: Обновить вакансию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyRequest'
+      responses:
+        '200':
+          description: Вакансия обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacancy'
+    delete:
+      tags: [Vacancies]
+      summary: Удалить вакансию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Вакансия удалена
+
+  /resumes:
+    post:
+      tags: [Resumes]
+      summary: Создать резюме
+      description: Также асинхронно/синхронно генерирует векторные эмбеддинги (AI) и сохраняет в Qdrant.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeCreateRequest'
+      responses:
+        '201':
+          description: Резюме создано
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  /resumes/{id}:
+    get:
+      tags: [Resumes]
+      summary: Получить резюме
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные резюме
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+    put:
+      tags: [Resumes]
+      summary: Обновить резюме
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+      responses:
+        '200':
+          description: Резюме обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+    delete:
+      tags: [Resumes]
+      summary: Удалить резюме
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Резюме удалено
+
+  /applications:
+    post:
+      tags: [Applications]
+      summary: Оставить отклик на вакансию
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+      responses:
+        '201':
+          description: Отклик создан
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  /applications/{id}:
+    get:
+      tags: [Applications]
+      summary: Получить статус отклика
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные отклика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+    put:
+      tags: [Applications]
+      summary: Обновить статус отклика (например, INVITATION или REJECTION)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+      responses:
+        '200':
+          description: Отклик обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+    delete:
+      tags: [Applications]
+      summary: Отозвать/удалить отклик
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Отклик удален
+
+  /matching/vacancies/{vacancyId}/candidates:
+    get:
+      tags: [Matching]
+      summary: Поиск подходящих кандидатов для вакансии (поиск по векторам)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vacancyId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: maxAmount
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Максимальное количество кандидатов
+      responses:
+        '200':
+          description: Список наиболее подходящих резюме с их скором
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchResult'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+        city:
+          type: string
+        country:
+          type: string
+
+    Skill:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Language:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        proficiencyLevel:
+          type: string
+          enum: [A1, A2, B1, B2, C1, C2]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Education:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID записи об образовании (не передаётся при создании внутри POST /resumes)
+        resumeId:
+          type: integer
+          description: ID резюме (не передаётся при создании внутри POST /resumes, проставляется сервером)
+        educationDegree:
+          type: string
+          enum: [BACHELOR, MASTER, SPECIALIST, PHD]
+        institutionName:
+          type: string
+        faculty:
+          type: string
+        department:
+          type: string
+        yearOfGraduation:
+          type: string
+          format: date
+
+    EducationCreate:
+      type: object
+      description: Образование для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются)
+      properties:
+        educationDegree:
+          type: string
+          enum: [BACHELOR, MASTER, SPECIALIST, PHD]
+        institutionName:
+          type: string
+        faculty:
+          type: string
+        department:
+          type: string
+        yearOfGraduation:
+          type: string
+          format: date
+
+    JobExperience:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID записи опыта работы (не передаётся при создании внутри POST /resumes)
+        resumeId:
+          type: integer
+          description: ID резюме (не передаётся при создании внутри POST /resumes, проставляется сервером)
+        position:
+          type: string
+        companyName:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    JobExperienceCreate:
+      type: object
+      description: Опыт работы для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются)
+      properties:
+        position:
+          type: string
+        companyName:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    Applicant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+          description: Пароль для создания/обновления. Хэшируется на сервере.
+        address:
+          type: string
+        phoneNumber:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+
+    Employer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        description:
+          type: string
+        address:
+          type: string
+        websiteLink:
+          type: string
+          format: uri
+        location:
+          $ref: '#/components/schemas/Location'
+
+    Vacancy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        employerId:
+          type: integer
+        location:
+          $ref: '#/components/schemas/Location'
+        salary:
+          type: number
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Language'
+        paymentFrequency:
+          type: string
+          enum: [HOURLY, WEEKLY, MONTHLY, PROJECT]
+        experience:
+          type: string
+        jobFormat:
+          type: string
+          enum: [REMOTE, OFFICE, HYBRID]
+        employmentType:
+          type: string
+          enum: [FULL_TIME, PART_TIME, FREELANCE]
+        description:
+          type: string
+        publicationDate:
+          type: string
+          format: date-time
+          readOnly: true
+        address:
+          type: string
+
+    Resume:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        applicantId:
+          type: integer
+        category:
+          $ref: '#/components/schemas/Category'
+        description:
+          type: string
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+        jobExperiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobExperience'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Language'
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+
+    Application:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        vacancyId:
+          type: integer
+        resumeId:
+          type: integer
+        applicationDate:
+          type: string
+          format: date-time
+          readOnly: true
+        applicationStatus:
+          type: string
+          enum: [NEW, INVITATION, REJECTION]
+
+    MatchResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID резюме
+        score:
+          type: number
+          format: float
+          description: Метрика похожести (Cosine distance)
+
+    ApplicantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        address:
+          type: string
+        phoneNumber:
+          type: string
+        locationId:
+          type: integer
+
+    EmployerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        description:
+          type: string
+        address:
+          type: string
+        websiteLink:
+          type: string
+          format: uri
+        locationId:
+          type: integer
+
+    VacancyRequest:
+      type: object
+      properties:
+        employerId:
+          type: integer
+        locationId:
+          type: integer
+        salary:
+          type: number
+        skillIds:
+          type: array
+          items:
+            type: integer
+        languageIds:
+          type: array
+          items:
+            type: integer
+        paymentFrequency:
+          type: string
+          enum: [HOURLY, WEEKLY, MONTHLY, PROJECT]
+        experience:
+          type: string
+        jobFormat:
+          type: string
+          enum: [REMOTE, OFFICE, HYBRID]
+        employmentType:
+          type: string
+          enum: [FULL_TIME, PART_TIME, FREELANCE]
+        description:
+          type: string
+        address:
+          type: string
+
+    ResumeRequest:
+      type: object
+      properties:
+        applicantId:
+          type: integer
+        categoryId:
+          type: integer
+        description:
+          type: string
+        skillIds:
+          type: array
+          items:
+            type: integer
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationCreate'
+        jobExperiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobExperienceCreate'
+        languageIds:
+          type: array
+          items:
+            type: integer
+
+    ResumeCreateRequest:
+      type: object
+      description: |
+        Запрос на создание резюме. В отличие от ResumeRequest (используемого для обновления),
+        позволяет передать образование и опыт работы целиком, чтобы сервер создал их в рамках одного запроса.
+      properties:
+        applicantId:
+          type: integer
+        categoryId:
+          type: integer
+        description:
+          type: string
+        skillIds:
+          type: array
+          items:
+            type: integer
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationCreate'
+        jobExperiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobExperienceCreate'
+        languageIds:
+          type: array
+          items:
+            type: integer
+
+    ApplicationRequest:
+      type: object
+      properties:
+        vacancyId:
+          type: integer
+        resumeId:
+          type: integer
+        applicationStatus:
+          type: string
+          enum: [NEW, INVITATION, REJECTION]

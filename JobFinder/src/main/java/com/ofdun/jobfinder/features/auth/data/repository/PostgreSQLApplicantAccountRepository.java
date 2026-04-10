@@ -7,14 +7,16 @@ import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepos
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class PostgreSQLApplicantAccountRepository implements ApplicantAccountRepository {
     private final ApplicantRepository applicantRepository;
 
     @Override
-    public ApplicantAccountModel findByEmail(String email) {
-        var applicant = applicantRepository.getApplicantByEmail(email);
-        return applicant == null ? null : ApplicantAccountMapper.toModel(applicant);
+    public Optional<ApplicantAccountModel> findByEmail(String email) {
+        return applicantRepository.getApplicantByEmail(email)
+                .map(ApplicantAccountMapper::toModel);
     }
 }

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import com.ofdun.jobfinder.features.employer.domain.validator.EmployerValidator;
+import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +54,7 @@ class BasicEmployerServiceTest {
     void getEmployerById_whenExists_thenEmployerReturned() {
         Long id = 1L;
         EmployerModel expectedEmployer = mock(EmployerModel.class);
-        when(employerRepository.getEmployerById(id)).thenReturn(expectedEmployer);
+        when(employerRepository.getEmployerById(id)).thenReturn(Optional.of(expectedEmployer));
 
         EmployerModel actualEmployer = employerService.getEmployerById(id);
 
@@ -62,13 +64,12 @@ class BasicEmployerServiceTest {
     }
 
     @Test
-    void getEmployerById_whenMissing_thenNullReturned() {
+    void getEmployerById_whenMissing_thenThrowsNotFound() {
         Long id = 404L;
-        when(employerRepository.getEmployerById(id)).thenReturn(null);
+        when(employerRepository.getEmployerById(id)).thenReturn(Optional.empty());
 
-        EmployerModel actualEmployer = employerService.getEmployerById(id);
+        assertThrows(EmployerNotFoundException.class, () -> employerService.getEmployerById(id));
 
-        assertNull(actualEmployer);
         verify(employerRepository).getEmployerById(id);
         verifyNoMoreInteractions(employerRepository);
     }

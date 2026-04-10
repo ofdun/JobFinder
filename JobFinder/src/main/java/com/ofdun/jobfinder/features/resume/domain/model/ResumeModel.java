@@ -1,10 +1,7 @@
 package com.ofdun.jobfinder.features.resume.domain.model;
 
-import com.ofdun.jobfinder.shared.category.model.CategoryModel;
-import com.ofdun.jobfinder.shared.education.model.EducationModel;
-import com.ofdun.jobfinder.shared.experience.model.JobExperienceModel;
-import com.ofdun.jobfinder.shared.language.model.LanguageModel;
-import com.ofdun.jobfinder.shared.skill.model.SkillModel;
+import com.ofdun.jobfinder.features.education.domain.model.EducationModel;
+import com.ofdun.jobfinder.features.experience.domain.model.JobExperienceModel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
@@ -26,21 +23,21 @@ public class ResumeModel {
     public ResumeModel(
             Long id,
             Long applicantId,
-            CategoryModel category,
+            Long categoryId,
             String description,
-            List<SkillModel> skills,
+            List<Long> skillIds,
             List<EducationModel> educations,
             List<JobExperienceModel> jobExperiences,
-            List<LanguageModel> languages,
+            List<Long> languageIds,
             Date publishedDate) {
         this.id = id;
         this.applicantId = applicantId;
-        this.category = category;
+        this.categoryId = categoryId;
         this.description = description;
-        this.skills = skills;
+        this.skillIds = skillIds;
         this.educations = educations;
         this.jobExperiences = jobExperiences;
-        this.languages = languages;
+        this.languageIds = languageIds;
         this.date = publishedDate;
     }
 
@@ -48,14 +45,14 @@ public class ResumeModel {
 
     @NotNull private Long applicantId;
 
-    @NotNull @Valid private CategoryModel category;
+    @NotNull private Long categoryId;
 
     private String description;
 
-    private List<@NotNull @Valid SkillModel> skills;
+    private List<@NotNull @Valid Long> skillIds;
     private List<@NotNull @Valid EducationModel> educations;
     private List<@NotNull @Valid JobExperienceModel> jobExperiences;
-    private List<@NotNull @Valid LanguageModel> languages;
+    private List<@NotNull @Valid Long> languageIds;
 
     @NotNull private Date date;
 

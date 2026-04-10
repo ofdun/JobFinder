@@ -1,6 +1,5 @@
 package com.ofdun.jobfinder.features.applicant.data.entity;
 
-import com.ofdun.jobfinder.shared.location.entity.LocationEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -38,8 +37,6 @@ public class ApplicantEntity {
 
     @NotNull private String phoneNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
     @NotNull
-    private LocationEntity location;
+    private Long locationId;
 }

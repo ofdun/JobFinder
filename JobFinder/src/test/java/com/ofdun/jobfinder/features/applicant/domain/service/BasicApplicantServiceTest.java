@@ -6,6 +6,9 @@ import static org.mockito.Mockito.*;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
+import java.util.Optional;
+
+import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +55,7 @@ class BasicApplicantServiceTest {
     void getApplicantById_whenExists_thenApplicantReturned() {
         Long id = 1L;
         ApplicantModel expectedApplicant = mock(ApplicantModel.class);
-        when(applicantRepository.getApplicantById(id)).thenReturn(expectedApplicant);
+        when(applicantRepository.getApplicantById(id)).thenReturn(Optional.of(expectedApplicant));
 
         ApplicantModel actualApplicant = applicantService.getApplicantById(id);
 
@@ -62,13 +65,12 @@ class BasicApplicantServiceTest {
     }
 
     @Test
-    void getApplicantById_whenMissing_thenNullReturned() {
+    void getApplicantById_whenMissing_thenThrowsNotFound() {
         Long id = 404L;
-        when(applicantRepository.getApplicantById(id)).thenReturn(null);
+        when(applicantRepository.getApplicantById(id)).thenReturn(Optional.empty());
 
-        ApplicantModel actualApplicant = applicantService.getApplicantById(id);
+        assertThrows(ApplicantNotFoundException.class, () -> applicantService.getApplicantById(id));
 
-        assertNull(actualApplicant);
         verify(applicantRepository).getApplicantById(id);
         verifyNoMoreInteractions(applicantRepository);
     }

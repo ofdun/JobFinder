@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.ofdun.jobfinder.features.clients.ai.AiClient;
+import com.ofdun.jobfinder.features.matching.domain.service.BasicMatchingService;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.shared.matching.model.MatchResultModel;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,8 +33,7 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = 0;
 
-        List<MatchResultModel> result =
-                matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
@@ -43,24 +44,27 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = -1;
 
-        List<MatchResultModel> result =
-                matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
     }
 
     @Test
-    void findSuitableCandidates_whenVacancyRepositoryReturnsNull_thenThrowsException() {
+    void findSuitableCandidates_whenVacancyRepositoryReturnsEmpty_thenReturnEmptyList() {
         Long vacancyId = 1L;
         Integer maxAmount = 5;
-        when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(null);
+        when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(Optional.empty());
+        when(aiClient.getEmbedding("Optional.empty")).thenReturn(List.of());
+        when(vectorResumeRepository.getMostSimilarResumes(List.of(), maxAmount)).thenReturn(List.of());
 
-        assertThrows(
-                NullPointerException.class,
-                () -> matchingService.findSuitableCandidates(vacancyId, maxAmount));
+        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+
+        assertTrue(result.isEmpty());
         verify(vacancyRepository).getVacancyById(vacancyId);
-        verifyNoInteractions(aiClient, vectorResumeRepository);
+        verify(aiClient).getEmbedding("Optional.empty");
+        verify(vectorResumeRepository).getMostSimilarResumes(List.of(), maxAmount);
+        verifyNoMoreInteractions(vacancyRepository, aiClient, vectorResumeRepository);
     }
 
     @Test
@@ -71,9 +75,9 @@ class BasicMatchingServiceTest {
         List<Float> mockEmbedding = List.of(0.1f, 0.2f, 0.3f);
         List<MatchResultModel> expectedResults = List.of(mock(MatchResultModel.class));
 
-        when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(mockVacancy);
+        when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(Optional.of(mockVacancy));
         when(mockVacancy.toString()).thenReturn("vacancyString");
-        when(aiClient.getEmbedding("vacancyString")).thenReturn(mockEmbedding);
+        when(aiClient.getEmbedding("Optional[vacancyString]")).thenReturn(mockEmbedding);
         when(vectorResumeRepository.getMostSimilarResumes(mockEmbedding, maxAmount))
                 .thenReturn(expectedResults);
 
@@ -82,7 +86,7 @@ class BasicMatchingServiceTest {
 
         assertEquals(expectedResults, actualResults);
         verify(vacancyRepository).getVacancyById(vacancyId);
-        verify(aiClient).getEmbedding("vacancyString");
+        verify(aiClient).getEmbedding("Optional[vacancyString]");
         verify(vectorResumeRepository).getMostSimilarResumes(mockEmbedding, maxAmount);
         verifyNoMoreInteractions(vacancyRepository, aiClient, vectorResumeRepository);
     }

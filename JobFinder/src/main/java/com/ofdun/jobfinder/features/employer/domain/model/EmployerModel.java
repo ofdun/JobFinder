@@ -1,7 +1,5 @@
 package com.ofdun.jobfinder.features.employer.domain.model;
 
-import com.ofdun.jobfinder.shared.location.model.LocationModel;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,5 +31,5 @@ public class EmployerModel {
     @Email(message = "Email should be valid")
     private String email;
 
-    @NotNull @Valid private LocationModel location;
+    @NotNull private Long locationId;
 }

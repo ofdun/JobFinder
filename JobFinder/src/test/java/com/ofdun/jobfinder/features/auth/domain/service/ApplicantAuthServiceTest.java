@@ -10,8 +10,8 @@ import com.ofdun.jobfinder.features.auth.domain.model.ApplicantAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
-import com.ofdun.jobfinder.shared.auth.enums.AccountType;
-import com.ofdun.jobfinder.shared.encrypt.EncryptionService;
+import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +45,7 @@ class ApplicantAuthServiceTest {
         ApplicantAccountModel applicant = mock(ApplicantAccountModel.class);
         when(applicant.getPasswordHash()).thenReturn(hashedPassword);
         when(applicant.getId()).thenReturn(applicantId);
-        when(applicantAccountRepository.findByEmail(email)).thenReturn(applicant);
+        when(applicantAccountRepository.findByEmail(email)).thenReturn(java.util.Optional.of(applicant));
         when(encryptionService.encrypt(password)).thenReturn(hashedPassword);
         when(jwtProvider.generateAccessToken(AccountType.APPLICANT, applicantId))
                 .thenReturn(accessToken);
@@ -65,7 +65,7 @@ class ApplicantAuthServiceTest {
     void login_whenApplicantNotFound_thenThrowsException() {
         String email = "test@test.com";
         String password = "password";
-        when(applicantAccountRepository.findByEmail(email)).thenReturn(null);
+        when(applicantAccountRepository.findByEmail(email)).thenReturn(java.util.Optional.empty());
 
         RuntimeException exception =
                 assertThrows(
@@ -82,7 +82,7 @@ class ApplicantAuthServiceTest {
         String password = "password";
         ApplicantAccountModel applicant = mock(ApplicantAccountModel.class);
         when(applicant.getPasswordHash()).thenReturn("storedHash");
-        when(applicantAccountRepository.findByEmail(email)).thenReturn(applicant);
+        when(applicantAccountRepository.findByEmail(email)).thenReturn(java.util.Optional.of(applicant));
         when(encryptionService.encrypt(password)).thenReturn("differentHash");
 
         RuntimeException exception =

@@ -2,19 +2,19 @@ package com.ofdun.jobfinder.features.resume.domain.chain.save;
 
 import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
-import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class VectorResumeSaveHandler extends ResumeHandler {
-
-    VectorResumeRepository resumeRepository;
+    private final VectorResumeRepository resumeRepository;
 
     @Override
-    protected ResumeModel execute(ResumeModel resume) {
-        var id = resumeRepository.createResume(resume);
-        resume.setId(id);
-        return resume;
+    protected Optional<ResumeModel> execute(ResumeModel resume) {
+        resumeRepository.createResume(resume);
+        return Optional.of(resume);
     }
 }

@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.vacancy.domain.service;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.validator.VacancyValidator;
+import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,8 @@ public class BasicVacancyService implements VacancyService {
 
     @Override
     public VacancyModel getVacancyById(@NonNull Long id) {
-        return vacancyRepository.getVacancyById(id);
+        return vacancyRepository.getVacancyById(id)
+                .orElseThrow(() -> new VacancyNotFoundException(id));
     }
 
     @Override
