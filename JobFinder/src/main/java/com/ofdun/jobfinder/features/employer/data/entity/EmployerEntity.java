@@ -35,6 +35,5 @@ public class EmployerEntity {
     @Email(message = "Email should be valid")
     private String email;
 
-    @NotNull
-    private Long locationId;
+    @NotNull private Long locationId;
 }

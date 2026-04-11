@@ -17,8 +17,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtProvider jwtProvider)
             throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
+        return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
@@ -30,7 +29,8 @@ public class SecurityConfiguration {
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/v1/employers")
                                         .permitAll()
-                                        // swagger: GET /vacancies/{id}, GET /resumes/{id} — публичные
+                                        // swagger: GET /vacancies/{id}, GET /resumes/{id} —
+                                        // публичные
                                         .requestMatchers(
                                                 HttpMethod.GET,
                                                 "/api/v1/vacancies/*",

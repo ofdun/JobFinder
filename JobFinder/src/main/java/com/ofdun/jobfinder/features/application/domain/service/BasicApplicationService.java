@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BasicApplicationService implements  ApplicationService {
+public class BasicApplicationService implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ApplicationValidator applicationValidator;
 
@@ -23,7 +23,8 @@ public class BasicApplicationService implements  ApplicationService {
 
     @Override
     public ApplicationModel getApplication(@NonNull Long id) {
-        return applicationRepository.getApplicationById(id)
+        return applicationRepository
+                .getApplicationById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 

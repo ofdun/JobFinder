@@ -1,7 +1,6 @@
 package com.ofdun.jobfinder.features.language.domain.repository;
 
 import com.ofdun.jobfinder.features.language.domain.model.LanguageModel;
-
 import java.util.Optional;
 
 public interface LanguageRepository {

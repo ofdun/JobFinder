@@ -37,6 +37,5 @@ public class ApplicantEntity {
 
     @NotNull private String phoneNumber;
 
-    @NotNull
-    private Long locationId;
+    @NotNull private Long locationId;
 }

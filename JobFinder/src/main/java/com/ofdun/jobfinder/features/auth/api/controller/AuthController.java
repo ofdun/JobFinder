@@ -43,4 +43,3 @@ public class AuthController {
         return new TokenPairResponse(pair.accessToken(), pair.refreshToken());
     }
 }
-

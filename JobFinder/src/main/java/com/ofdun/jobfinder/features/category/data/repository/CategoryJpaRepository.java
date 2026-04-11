@@ -4,5 +4,5 @@ import com.ofdun.jobfinder.features.category.data.entity.CategoryEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CategoryJpaRepository extends JpaRepository<@NonNull CategoryEntity, @NonNull Long> {
-}
+public interface CategoryJpaRepository
+        extends JpaRepository<@NonNull CategoryEntity, @NonNull Long> {}

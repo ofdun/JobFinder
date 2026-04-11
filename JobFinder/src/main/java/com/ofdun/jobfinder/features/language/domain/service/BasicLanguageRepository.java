@@ -13,7 +13,8 @@ public class BasicLanguageRepository implements LanguageService {
 
     @Override
     public LanguageModel getLanguageById(Long id) {
-        return languageRepository.getLanguageById(id)
+        return languageRepository
+                .getLanguageById(id)
                 .orElseThrow(() -> new LanguageNotFoundException(id));
     }
 }

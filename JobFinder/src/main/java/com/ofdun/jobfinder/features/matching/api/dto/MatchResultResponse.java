@@ -11,4 +11,3 @@ public class MatchResultResponse {
     private Long id;
     private Float score;
 }
-

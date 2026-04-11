@@ -10,7 +10,8 @@ public class CategoryApiMapper {
         }
         return new CategoryDto(model.getId(), model.getName());
     }
-     public static CategoryModel toModel(CategoryDto dto) {
+
+    public static CategoryModel toModel(CategoryDto dto) {
         if (dto == null) {
             return null;
         }

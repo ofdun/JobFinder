@@ -68,4 +68,3 @@ class PostgreSQLSkillRepositoryIT {
         assertThrows(RuntimeException.class, () -> skillRepository.getSkillById(null));
     }
 }
-

@@ -8,12 +8,13 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class BasicCategoryService implements CategoryService{
+public class BasicCategoryService implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
     public CategoryModel getCategoryById(Long id) {
-        return categoryRepository.getCategoryById(id)
+        return categoryRepository
+                .getCategoryById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 }

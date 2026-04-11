@@ -18,4 +18,3 @@ public class EducationDto {
     private String department;
     private Year yearOfGraduation;
 }
-

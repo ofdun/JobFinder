@@ -69,4 +69,3 @@ class PostgreSQLLocationRepositoryIT {
         assertThrows(RuntimeException.class, () -> locationRepository.getLocationById(null));
     }
 }
-

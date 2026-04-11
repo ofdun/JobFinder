@@ -28,18 +28,23 @@ public class VacancyEntity {
 
     @NotNull private Long employerId;
 
-    @NotNull
-    private Long locationId;
+    @NotNull private Long locationId;
 
     @NotNull private BigDecimal salary;
 
     @ElementCollection
-    @CollectionTable(schema = "jobfinder", name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @CollectionTable(
+            schema = "jobfinder",
+            name = "vacancy_skills",
+            joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
     private List<@NotNull @Valid Long> skillIds;
 
     @ElementCollection
-    @CollectionTable(schema = "jobfinder", name = "language_vacancy", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @CollectionTable(
+            schema = "jobfinder",
+            name = "language_vacancy",
+            joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "language_id")
     private List<@NotNull @Valid Long> languageIds;
 

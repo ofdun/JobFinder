@@ -69,7 +69,8 @@ class PostgreSQLEmployerRepositoryIT {
 
     @Test
     void getEmployerByEmail_whenExists_thenReturnModel() {
-        Optional<EmployerModel> employerOpt = employerRepository.getEmployerByEmail("employer@example.com");
+        Optional<EmployerModel> employerOpt =
+                employerRepository.getEmployerByEmail("employer@example.com");
         assertTrue(employerOpt.isPresent());
         EmployerModel employer = employerOpt.orElseThrow();
         assertEquals(1L, employer.getId());

@@ -2,13 +2,18 @@ package com.ofdun.jobfinder.features.auth.data.jwt.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.redis.test.autoconfigure.DataRedisTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -16,12 +21,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.time.Duration;
 
 @ActiveProfiles("test")
 @DataRedisTest
@@ -31,8 +30,7 @@ class RedisTokenRepositoryIT {
 
     @Container
     static final GenericContainer<?> redis =
-            new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
-                    .withExposedPorts(6379);
+            new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
 
     @DynamicPropertySource
     static void registerRedis(DynamicPropertyRegistry registry) {
@@ -56,11 +54,9 @@ class RedisTokenRepositoryIT {
         }
     }
 
-    @Autowired
-    private RedisTokenRepository tokenRepository;
+    @Autowired private RedisTokenRepository tokenRepository;
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    @Autowired private StringRedisTemplate redisTemplate;
 
     @BeforeEach
     void cleanup() {

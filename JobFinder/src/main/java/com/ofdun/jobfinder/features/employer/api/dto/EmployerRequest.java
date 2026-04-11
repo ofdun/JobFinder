@@ -35,4 +35,3 @@ public class EmployerRequest {
     @NotNull(message = "Location is required")
     private Long locationId;
 }
-

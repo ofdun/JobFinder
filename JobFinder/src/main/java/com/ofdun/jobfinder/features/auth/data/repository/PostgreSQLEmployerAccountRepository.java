@@ -14,7 +14,8 @@ public class PostgreSQLEmployerAccountRepository implements EmployerAccountRepos
 
     @Override
     public EmployerAccountModel findByEmail(String email) {
-        return employerRepository.getEmployerByEmail(email)
+        return employerRepository
+                .getEmployerByEmail(email)
                 .map(EmployerAccountMapper::toModel)
                 .orElse(null);
     }

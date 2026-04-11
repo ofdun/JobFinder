@@ -6,6 +6,6 @@ public class ApplicantNotFoundException extends RuntimeException {
     }
 
     public ApplicantNotFoundException(String email) {
-         super("Applicant with email " + email + " not found");
+        super("Applicant with email " + email + " not found");
     }
 }
