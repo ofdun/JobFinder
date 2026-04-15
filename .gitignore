@@ -1,5 +1,5 @@
-.DS_Store
-*.bkp
 .idea
-cities500.txt
-countryInfo.txt
+.venv
+**bkp**
+.DS_Store
+*cities500.txt
