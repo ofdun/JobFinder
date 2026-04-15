@@ -93,19 +93,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(LanguageNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleLanguageNotFound(LanguageNotFoundException ex) {
         return createErrorResponse("Language not found", HttpStatus.NOT_FOUND.value(), ex);
     }
 
     @ExceptionHandler(SkillNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleSkillNotFound(SkillNotFoundException ex) {
         return createErrorResponse("Skill not found", HttpStatus.NOT_FOUND.value(), ex);
     }
 
     @ExceptionHandler(CategoryNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleCategoryNotFound(CategoryNotFoundException ex) {
         return createErrorResponse("Category not found", HttpStatus.NOT_FOUND.value(), ex);
     }
