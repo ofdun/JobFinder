@@ -37,6 +37,7 @@ dependencies {
     implementation("com.google.guava:guava:33.0.0-jre")
     implementation("org.hibernate.orm:hibernate-core:7.3.0.Final")
     implementation("org.hibernate.validator:hibernate-validator:9.1.0.Final")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
