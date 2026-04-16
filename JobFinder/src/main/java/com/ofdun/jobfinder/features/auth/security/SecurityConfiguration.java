@@ -1,5 +1,6 @@
 package com.ofdun.jobfinder.features.auth.security;
 
+import com.ofdun.jobfinder.common.logging.UserActionLoggingFilter;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +16,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtProvider jwtProvider)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtProvider jwtProvider,
+            UserActionLoggingFilter userActionLoggingFilter) {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -24,13 +27,10 @@ public class SecurityConfiguration {
                         auth ->
                                 auth.requestMatchers("/api/v1/auth/**")
                                         .permitAll()
-                                        // swagger: регистрация публичная
                                         .requestMatchers(HttpMethod.POST, "/api/v1/applicants")
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/v1/employers")
                                         .permitAll()
-                                        // swagger: GET /vacancies/{id}, GET /resumes/{id} —
-                                        // публичные
                                         .requestMatchers(
                                                 HttpMethod.GET,
                                                 "/api/v1/vacancies/*",
@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(userActionLoggingFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 }

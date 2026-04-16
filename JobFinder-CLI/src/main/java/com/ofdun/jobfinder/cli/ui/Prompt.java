@@ -8,8 +8,13 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public final class Prompt {
+    private static final Logger log = LoggerFactory.getLogger(Prompt.class);
+
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public void println(String s) {
@@ -26,11 +31,37 @@ public final class Prompt {
                 print(label);
                 String line = in.readLine();
                 if (line == null) return "";
-                return line.trim();
+                String normalized = line.trim();
+                MDC.put("service", "JobFinder-CLI");
+                MDC.put("event.action", "cli.input");
+                MDC.put("prompt.label", sanitize(label));
+                MDC.put("input.value", sanitizeInput(label, normalized));
+                log.info("CLI input received");
+                MDC.remove("service");
+                MDC.remove("event.action");
+                MDC.remove("prompt.label");
+                MDC.remove("input.value");
+                return normalized;
             } catch (IOException e) {
                 println("Ошибка ввода: " + e.getMessage());
             }
         }
+    }
+
+    private String sanitizeInput(String label, String input) {
+        String normalizedLabel = label == null ? "" : label.toLowerCase();
+        if (normalizedLabel.contains("password") || normalizedLabel.contains("token")) {
+            return "[REDACTED]";
+        }
+        return sanitize(input);
+    }
+
+    private String sanitize(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        String compact = value.replaceAll("\\s+", " ").trim();
+        return compact.length() > 120 ? compact.substring(0, 120) + "..." : compact;
     }
 
     public String readNonBlank(String label) {
