@@ -43,4 +43,3 @@ public class VacancyResponse {
 
     private String address;
 }
-

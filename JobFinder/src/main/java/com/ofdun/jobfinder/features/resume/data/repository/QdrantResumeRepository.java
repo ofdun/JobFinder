@@ -1,15 +1,14 @@
 package com.ofdun.jobfinder.features.resume.data.repository;
 
 import com.ofdun.jobfinder.features.clients.vector.VectorClient;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
-import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.VectorsFactory;
 import io.qdrant.client.grpc.Points;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

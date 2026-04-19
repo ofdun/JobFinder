@@ -23,7 +23,8 @@ public class BasicEmployerService implements EmployerService {
 
     @Override
     public EmployerModel getEmployerById(@NonNull Long id) {
-        return employerRepository.getEmployerById(id)
+        return employerRepository
+                .getEmployerById(id)
                 .orElseThrow(() -> new EmployerNotFoundException(id));
     }
 
@@ -39,4 +40,3 @@ public class BasicEmployerService implements EmployerService {
         return employerRepository.deleteEmployer(id);
     }
 }
-

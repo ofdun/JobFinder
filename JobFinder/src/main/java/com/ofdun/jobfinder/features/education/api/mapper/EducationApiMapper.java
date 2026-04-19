@@ -14,8 +14,7 @@ public class EducationApiMapper {
                 model.getInstitutionName(),
                 model.getFaculty(),
                 model.getDepartment(),
-                model.getYearOfGraduation()
-        );
+                model.getYearOfGraduation());
     }
 
     public static EducationModel toEducationModel(EducationCreateDto dto) {
@@ -27,7 +26,6 @@ public class EducationApiMapper {
                 dto.getInstitutionName(),
                 dto.getFaculty(),
                 dto.getDepartment(),
-                dto.getYearOfGraduation()
-        );
+                dto.getYearOfGraduation());
     }
 }

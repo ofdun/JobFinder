@@ -75,7 +75,9 @@ class PostgreSQLApplicantRepositoryIT {
     void updateApplicant_whenApplicantExists_thenFieldsUpdated() {
         long id = 2;
         var savedOpt = applicantRepository.getApplicantById(id);
-        assertTrue(savedOpt.isPresent(), "предзагруженный кандидат должен существовать перед обновлением");
+        assertTrue(
+                savedOpt.isPresent(),
+                "предзагруженный кандидат должен существовать перед обновлением");
         ApplicantModel saved = savedOpt.get();
 
         ApplicantModel updated =
@@ -102,7 +104,9 @@ class PostgreSQLApplicantRepositoryIT {
     void deleteApplicant_whenApplicantExists_thenReturnTrueAndNotFound() {
         long id = 3;
         var existingOpt = applicantRepository.getApplicantById(id);
-        assertTrue(existingOpt.isPresent(), "предзагруженный кандидат должен существовать перед удалением");
+        assertTrue(
+                existingOpt.isPresent(),
+                "предзагруженный кандидат должен существовать перед удалением");
 
         Boolean deleted = applicantRepository.deleteApplicant(id);
 
@@ -136,13 +140,6 @@ class PostgreSQLApplicantRepositoryIT {
     }
 
     private ApplicantModel buildApplicantModel(String email) {
-        return new ApplicantModel(
-                null,
-                "First",
-                email,
-                "passHash",
-                "Address",
-                "+70000000000",
-                1L);
+        return new ApplicantModel(null, "First", email, "passHash", "Address", "+70000000000", 1L);
     }
 }

@@ -25,4 +25,3 @@ public class ResumeResponse {
     private List<LanguageDto> languages;
     private Date date;
 }
-

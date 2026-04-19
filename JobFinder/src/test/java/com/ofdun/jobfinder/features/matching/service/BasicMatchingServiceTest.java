@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.ofdun.jobfinder.features.clients.ai.AiClient;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.matching.domain.service.BasicMatchingService;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,8 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = 0;
 
-        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
@@ -44,7 +45,8 @@ class BasicMatchingServiceTest {
         Long vacancyId = 1L;
         Integer maxAmount = -1;
 
-        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(vacancyRepository, vectorResumeRepository, aiClient);
@@ -56,9 +58,11 @@ class BasicMatchingServiceTest {
         Integer maxAmount = 5;
         when(vacancyRepository.getVacancyById(vacancyId)).thenReturn(Optional.empty());
         when(aiClient.getEmbedding("Optional.empty")).thenReturn(List.of());
-        when(vectorResumeRepository.getMostSimilarResumes(List.of(), maxAmount)).thenReturn(List.of());
+        when(vectorResumeRepository.getMostSimilarResumes(List.of(), maxAmount))
+                .thenReturn(List.of());
 
-        List<MatchResultModel> result = matchingService.findSuitableCandidates(vacancyId, maxAmount);
+        List<MatchResultModel> result =
+                matchingService.findSuitableCandidates(vacancyId, maxAmount);
 
         assertTrue(result.isEmpty());
         verify(vacancyRepository).getVacancyById(vacancyId);

@@ -9,10 +9,8 @@ import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyRequest;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyResponse;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
-
 import java.util.Date;
 import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,8 +33,11 @@ public class VacancyApiMapper {
                 request.getAddress());
     }
 
-    public VacancyResponse toResponse(VacancyModel model, LocationModel location,
-                                      List<SkillModel> skills, List<LanguageModel> languages) {
+    public VacancyResponse toResponse(
+            VacancyModel model,
+            LocationModel location,
+            List<SkillModel> skills,
+            List<LanguageModel> languages) {
         if (model == null) return null;
         return new VacancyResponse(
                 model.getId(),
@@ -44,7 +45,9 @@ public class VacancyApiMapper {
                 LocationApiMapper.toDto(location),
                 model.getSalary(),
                 skills == null ? null : skills.stream().map(SkillApiMapper::toDto).toList(),
-                languages == null ? null : languages.stream().map(LanguageApiMapper::toDto).toList(),
+                languages == null
+                        ? null
+                        : languages.stream().map(LanguageApiMapper::toDto).toList(),
                 model.getPaymentFrequency(),
                 model.getExperience(),
                 model.getJobFormat(),
@@ -54,4 +57,3 @@ public class VacancyApiMapper {
                 model.getAddress());
     }
 }
-

@@ -1,15 +1,15 @@
 package com.ofdun.jobfinder.features.vacancy.api.dto;
 
-import lombok.NoArgsConstructor;
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import java.util.List;
-import java.math.BigDecimal;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotBlank;
-import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
-import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
+import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
+import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor

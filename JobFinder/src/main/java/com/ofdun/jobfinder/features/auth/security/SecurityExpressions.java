@@ -43,7 +43,11 @@ public class SecurityExpressions {
 
         return vacancyRepository
                 .getVacancyById(vacancyId)
-                .map(v -> v.getEmployerId() != null && p != null && v.getEmployerId().equals(p.id()))
+                .map(
+                        v ->
+                                v.getEmployerId() != null
+                                        && p != null
+                                        && v.getEmployerId().equals(p.id()))
                 .orElse(false);
     }
 
@@ -56,7 +60,11 @@ public class SecurityExpressions {
 
         return resumeRepository
                 .getResumeById(resumeId)
-                .map(r -> r.getApplicantId() != null && p != null && r.getApplicantId().equals(p.id()))
+                .map(
+                        r ->
+                                r.getApplicantId() != null
+                                        && p != null
+                                        && r.getApplicantId().equals(p.id()))
                 .orElse(false);
     }
 
@@ -71,21 +79,29 @@ public class SecurityExpressions {
 
         return applicationRepository
                 .getApplicationById(applicationId)
-                .map(app -> {
-                    if (p.accountType() == AccountType.APPLICANT) {
-                        return resumeRepository
-                                .getResumeById(app.getResumeId())
-                                .map(r -> r.getApplicantId() != null && r.getApplicantId().equals(p.id()))
-                                .orElse(false);
-                    }
-                    if (p.accountType() == AccountType.EMPLOYER) {
-                        return vacancyRepository
-                                .getVacancyById(app.getVacancyId())
-                                .map(v -> v.getEmployerId() != null && v.getEmployerId().equals(p.id()))
-                                .orElse(false);
-                    }
-                    return false;
-                })
+                .map(
+                        app -> {
+                            if (p.accountType() == AccountType.APPLICANT) {
+                                return resumeRepository
+                                        .getResumeById(app.getResumeId())
+                                        .map(
+                                                r ->
+                                                        r.getApplicantId() != null
+                                                                && r.getApplicantId()
+                                                                        .equals(p.id()))
+                                        .orElse(false);
+                            }
+                            if (p.accountType() == AccountType.EMPLOYER) {
+                                return vacancyRepository
+                                        .getVacancyById(app.getVacancyId())
+                                        .map(
+                                                v ->
+                                                        v.getEmployerId() != null
+                                                                && v.getEmployerId().equals(p.id()))
+                                        .orElse(false);
+                            }
+                            return false;
+                        })
                 .orElse(false);
     }
 

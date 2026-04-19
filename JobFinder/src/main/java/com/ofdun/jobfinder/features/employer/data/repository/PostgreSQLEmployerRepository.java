@@ -3,10 +3,9 @@ package com.ofdun.jobfinder.features.employer.data.repository;
 import com.ofdun.jobfinder.features.employer.data.mapper.EmployerMapper;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

@@ -1,9 +1,8 @@
 package com.ofdun.jobfinder.features.resume.api.dto;
 
-import java.util.List;
-
 import com.ofdun.jobfinder.features.education.api.dto.EducationCreateDto;
 import com.ofdun.jobfinder.features.experience.api.dto.JobExperienceCreateDto;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +19,3 @@ public class ResumeUpdateRequest {
     private List<JobExperienceCreateDto> jobExperiences;
     private List<Long> languageIds;
 }
-

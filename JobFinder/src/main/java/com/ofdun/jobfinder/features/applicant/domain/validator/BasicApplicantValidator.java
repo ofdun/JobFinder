@@ -1,11 +1,11 @@
-package com.ofdun.jobfinder.features.applicant.domain.validator;// java
+package com.ofdun.jobfinder.features.applicant.domain.validator; // java
 
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantAlreadyExistsException;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
-import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

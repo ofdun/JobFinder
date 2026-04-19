@@ -1,5 +1,7 @@
 package com.ofdun.jobfinder.features.resume.domain.service;
 
+import com.ofdun.jobfinder.common.domain.model.OffsetPagination;
+import com.ofdun.jobfinder.common.domain.model.PageResult;
 import com.ofdun.jobfinder.features.resume.domain.chain.EmbeddingResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.get.RelationalResumeGetHandler;
@@ -9,15 +11,15 @@ import com.ofdun.jobfinder.features.resume.domain.chain.save.VectorResumeSaveHan
 import com.ofdun.jobfinder.features.resume.domain.chain.update.RelationalResumeUpdateHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.update.VectorResumeUpdateHandler;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
+import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.resume.exception.FailedToCreateResumeException;
 import jakarta.validation.Valid;
+import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -59,16 +61,18 @@ public class BasicResumeService implements ResumeService {
 
     @Override
     public Long createResume(@NonNull @Valid ResumeModel resumeModel) {
-        return saveChain.handle(resumeModel)
-                .orElseThrow(() -> new FailedToCreateResumeException(resumeModel.getApplicantId()))
+        var result = saveChain.handle(resumeModel);
+        return result.orElseThrow(
+                        () -> new FailedToCreateResumeException(resumeModel.getApplicantId()))
                 .getId();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<ResumeModel> getResumeById(@NonNull Long resumeId) {
-        var startingResume = new ResumeModel(resumeId);
-        return getChain.handle(startingResume);
+        var model = new ResumeModel();
+        model.setId(resumeId);
+        return getChain.handle(model);
     }
 
     @Override
@@ -91,5 +95,18 @@ public class BasicResumeService implements ResumeService {
         }
 
         return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResult<ResumeModel> searchResumes(
+            ResumeSearchFilter filter, OffsetPagination pagination) {
+        OffsetPagination p = pagination == null ? OffsetPagination.builder().build() : pagination;
+
+        int safeLimit = Math.min(100, Math.max(1, p.getLimit()));
+        int safeOffset = Math.max(0, p.getOffset());
+
+        return relationalResumeRepository.searchResumes(
+                filter, safeLimit, safeOffset, p.getSortBy(), p.isSortDesc());
     }
 }

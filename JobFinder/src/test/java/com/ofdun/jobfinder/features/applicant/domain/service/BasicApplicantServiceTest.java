@@ -6,9 +6,8 @@ import static org.mockito.Mockito.*;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
-import java.util.Optional;
-
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

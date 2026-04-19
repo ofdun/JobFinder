@@ -22,8 +22,10 @@ public class ApplicationController {
 
     @PostMapping
     @PreAuthorize("@sec.isApplicant(authentication)")
-    public ResponseEntity<@NonNull Long> createApplication(@Valid @RequestBody ApplicationRequest request) {
-        return ResponseEntity.ok(applicationService.saveApplication(mapper.toModel(request)));
+    public ResponseEntity<@NonNull Long> createApplication(
+            @Valid @RequestBody ApplicationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(applicationService.saveApplication(mapper.toModel(request)));
     }
 
     @GetMapping("/{id}")

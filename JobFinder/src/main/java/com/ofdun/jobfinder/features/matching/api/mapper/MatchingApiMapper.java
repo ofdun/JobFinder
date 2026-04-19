@@ -2,10 +2,9 @@ package com.ofdun.jobfinder.features.matching.api.mapper;
 
 import com.ofdun.jobfinder.features.matching.api.dto.MatchResultResponse;
 import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MatchingApiMapper {
@@ -21,9 +20,6 @@ public class MatchingApiMapper {
         if (models == null) {
             return null;
         }
-        return models.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return models.stream().map(this::toResponse).collect(Collectors.toList());
     }
 }
-

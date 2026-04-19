@@ -13,7 +13,8 @@ public class BasicLocationService implements LocationService {
 
     @Override
     public LocationModel getLocationById(Long id) {
-        return locationRepository.getLocationById(id)
+        return locationRepository
+                .getLocationById(id)
                 .orElseThrow(() -> new LocationNotFoundException(id));
     }
 }

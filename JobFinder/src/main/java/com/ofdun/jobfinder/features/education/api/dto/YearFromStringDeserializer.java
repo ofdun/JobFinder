@@ -51,8 +51,8 @@ public class YearFromStringDeserializer extends JsonDeserializer<Year> {
         }
 
         // Let Jackson build a proper error message
-        return (Year) ctxt.handleWeirdStringValue(Year.class, value,
-                "Expected 'YYYY' or ISO date 'YYYY-MM-DD'");
+        return (Year)
+                ctxt.handleWeirdStringValue(
+                        Year.class, value, "Expected 'YYYY' or ISO date 'YYYY-MM-DD'");
     }
 }
-

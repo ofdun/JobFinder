@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.application.domain.validator;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.exception.ApplicationAlreadyExistsException;
+import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ public class BasicApplicationValidator implements ApplicationValidator {
 
     private void validateExists(Long id) {
         if (applicationRepository.getApplicationById(id).isEmpty()) {
-            throw new ApplicationAlreadyExistsException(id);
+            throw new ApplicationNotFoundException(id);
         }
     }
 

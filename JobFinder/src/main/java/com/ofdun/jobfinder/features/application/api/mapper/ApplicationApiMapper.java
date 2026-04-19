@@ -3,9 +3,8 @@ package com.ofdun.jobfinder.features.application.api.mapper;
 import com.ofdun.jobfinder.features.application.api.dto.ApplicationRequest;
 import com.ofdun.jobfinder.features.application.api.dto.ApplicationResponse;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
-import org.springframework.stereotype.Component;
-
 import java.util.Date;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationApiMapper {
@@ -20,8 +19,7 @@ public class ApplicationApiMapper {
                 request.getVacancyId(),
                 request.getResumeId(),
                 new Date(),
-                request.getApplicationStatus()
-        );
+                request.getApplicationStatus());
     }
 
     public ApplicationResponse toResponse(ApplicationModel model) {

@@ -13,8 +13,7 @@ public class BasicVacancyValidator implements VacancyValidator {
     private final VacancyRepository vacancyRepository;
 
     @Override
-    public void validateVacancyForCreate(VacancyModel vacancy) {
-    }
+    public void validateVacancyForCreate(VacancyModel vacancy) {}
 
     @Override
     public void validateVacancyForUpdate(VacancyModel vacancy) {

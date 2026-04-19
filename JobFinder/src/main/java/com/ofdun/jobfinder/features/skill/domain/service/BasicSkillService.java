@@ -13,7 +13,6 @@ public class BasicSkillService implements SkillService {
 
     @Override
     public SkillModel getSkillById(Long id) {
-        return skillRepository.getSkillById(id)
-                .orElseThrow(() -> new SkillNotFoundException(id));
+        return skillRepository.getSkillById(id).orElseThrow(() -> new SkillNotFoundException(id));
     }
 }

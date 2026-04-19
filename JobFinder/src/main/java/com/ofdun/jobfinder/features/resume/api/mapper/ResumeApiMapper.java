@@ -6,9 +6,9 @@ import com.ofdun.jobfinder.features.education.api.mapper.EducationApiMapper;
 import com.ofdun.jobfinder.features.experience.api.mapper.JobExperienceApiMapper;
 import com.ofdun.jobfinder.features.language.api.mapper.LanguageApiMapper;
 import com.ofdun.jobfinder.features.language.domain.model.LanguageModel;
-import com.ofdun.jobfinder.features.resume.api.dto.ResumeUpdateRequest;
 import com.ofdun.jobfinder.features.resume.api.dto.ResumeRequest;
 import com.ofdun.jobfinder.features.resume.api.dto.ResumeResponse;
+import com.ofdun.jobfinder.features.resume.api.dto.ResumeUpdateRequest;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.skill.api.mapper.SkillApiMapper;
 import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
@@ -29,10 +29,14 @@ public class ResumeApiMapper {
                 request.getSkillIds(),
                 request.getEducations() == null
                         ? null
-                        : request.getEducations().stream().map(EducationApiMapper::toEducationModel).toList(),
+                        : request.getEducations().stream()
+                                .map(EducationApiMapper::toEducationModel)
+                                .toList(),
                 request.getJobExperiences() == null
                         ? null
-                        : request.getJobExperiences().stream().map(JobExperienceApiMapper::toJobExperienceModel).toList(),
+                        : request.getJobExperiences().stream()
+                                .map(JobExperienceApiMapper::toJobExperienceModel)
+                                .toList(),
                 request.getLanguageIds(),
                 null);
     }
@@ -49,13 +53,16 @@ public class ResumeApiMapper {
                 request.getSkillIds(),
                 request.getEducations() == null
                         ? null
-                        : request.getEducations().stream().map(EducationApiMapper::toEducationModel).toList(),
+                        : request.getEducations().stream()
+                                .map(EducationApiMapper::toEducationModel)
+                                .toList(),
                 request.getJobExperiences() == null
                         ? null
-                        : request.getJobExperiences().stream().map(JobExperienceApiMapper::toJobExperienceModel).toList(),
+                        : request.getJobExperiences().stream()
+                                .map(JobExperienceApiMapper::toJobExperienceModel)
+                                .toList(),
                 request.getLanguageIds(),
-                null
-        );
+                null);
     }
 
     public ResumeResponse toResponse(
@@ -72,10 +79,19 @@ public class ResumeApiMapper {
                 CategoryApiMapper.toDto(category),
                 resume.getDescription(),
                 skills == null ? null : skills.stream().map(SkillApiMapper::toDto).toList(),
-                resume.getEducations() == null ? null : resume.getEducations().stream().map(EducationApiMapper::toEducationDto).toList(),
-                resume.getJobExperiences() == null ? null : resume.getJobExperiences().stream().map(JobExperienceApiMapper::toJobExperienceDto).toList(),
-                languages == null ? null : languages.stream().map(LanguageApiMapper::toDto).toList(),
-                resume.getDate()
-        );
+                resume.getEducations() == null
+                        ? null
+                        : resume.getEducations().stream()
+                                .map(EducationApiMapper::toEducationDto)
+                                .toList(),
+                resume.getJobExperiences() == null
+                        ? null
+                        : resume.getJobExperiences().stream()
+                                .map(JobExperienceApiMapper::toJobExperienceDto)
+                                .toList(),
+                languages == null
+                        ? null
+                        : languages.stream().map(LanguageApiMapper::toDto).toList(),
+                resume.getDate());
     }
 }

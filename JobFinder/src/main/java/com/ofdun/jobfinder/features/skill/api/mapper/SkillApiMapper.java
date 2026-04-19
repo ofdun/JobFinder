@@ -10,6 +10,7 @@ public class SkillApiMapper {
         }
         return new SkillDto(model.getId(), model.getName());
     }
+
     public static SkillModel toModel(SkillDto dto) {
         if (dto == null) {
             return null;

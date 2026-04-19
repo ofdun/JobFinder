@@ -1,9 +1,9 @@
 package com.ofdun.jobfinder.features.matching.domain.service;
 
 import com.ofdun.jobfinder.features.clients.ai.AiClient;
+import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import java.util.Collections;
 import java.util.List;
 import lombok.NonNull;
