@@ -19,6 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    public static final String ATTR_ACTOR_ID = "actor.id";
+    public static final String ATTR_ACTOR_ROLE = "actor.role";
+
     private final JwtProvider jwtProvider;
 
     @Override
@@ -57,8 +60,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            request.setAttribute(ATTR_ACTOR_ID, userId);
+            request.setAttribute(ATTR_ACTOR_ROLE, accountType.name().toLowerCase());
         } catch (Exception ignored) {
             SecurityContextHolder.clearContext();
+            request.removeAttribute(ATTR_ACTOR_ID);
+            request.removeAttribute(ATTR_ACTOR_ROLE);
         }
 
         filterChain.doFilter(request, response);
