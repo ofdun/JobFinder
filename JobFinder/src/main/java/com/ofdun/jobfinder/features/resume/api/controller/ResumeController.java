@@ -38,7 +38,9 @@ public class ResumeController {
     private final ResumeApiMapper mapper;
 
     @GetMapping("/search")
-    @PreAuthorize("@sec.isEmployer(authentication)")
+    @PreAuthorize(
+            "@sec.isEmployer(authentication) || (#applicantId != null &&"
+                + " @sec.isApplicant(authentication) && @sec.isSelf(authentication, #applicantId))")
     public ResponseEntity<PageResponse<ResumeResponse>> searchResumes(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long applicantId,

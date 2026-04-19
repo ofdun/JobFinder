@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ofdun.jobfinder.cli.auth.Session;
 import com.ofdun.jobfinder.cli.dto.auth.RefreshRequest;
 import com.ofdun.jobfinder.cli.dto.auth.TokenPair;
+import com.ofdun.jobfinder.cli.logging.StructuredCliLogger;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
@@ -17,13 +18,16 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ApiClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static final Logger log = LoggerFactory.getLogger(ApiClient.class);
 
     private final OkHttpClient http =
             new OkHttpClient.Builder().callTimeout(Duration.ofSeconds(30)).build();
-    ;
+
     private final ObjectMapper mapper = Json.mapper();
 
     @Setter @Getter private Session session;
@@ -105,6 +109,9 @@ public final class ApiClient {
     }
 
     private <T> T execute(Request request, Class<T> responseType, boolean authRequired) {
+        long startedAt = System.nanoTime();
+        String path = request.url().encodedPath();
+
         try (Response resp = http.newCall(request).execute()) {
             if (resp.code() == 401 && authRequired) {
                 if (tryRefresh()) {
@@ -113,13 +120,55 @@ public final class ApiClient {
                                     .header("Authorization", "Bearer " + session.getAccessToken())
                                     .build();
                     try (Response resp2 = http.newCall(retry).execute()) {
-                        return handleResponse(resp2, responseType);
+                        return handleResponseWithLogging(
+                                request, path, responseType, resp2, startedAt);
                     }
                 }
             }
-            return handleResponse(resp, responseType);
+            return handleResponseWithLogging(request, path, responseType, resp, startedAt);
         } catch (IOException e) {
+            StructuredCliLogger.logHttpCall(
+                    log,
+                    session,
+                    request.method(),
+                    path,
+                    null,
+                    null,
+                    (System.nanoTime() - startedAt) / 1_000_000,
+                    "failure",
+                    e);
             throw new ApiException("Ошибка сети: " + e.getMessage());
+        }
+    }
+
+    private <T> T handleResponseWithLogging(
+            Request request, String path, Class<T> responseType, Response response, long startedAt)
+            throws IOException {
+        try {
+            T result = handleResponse(response, responseType);
+            StructuredCliLogger.logHttpCall(
+                    log,
+                    session,
+                    request.method(),
+                    path,
+                    response.header("X-Request-Id"),
+                    response.code(),
+                    (System.nanoTime() - startedAt) / 1_000_000,
+                    response.code() < 400 ? "success" : "failure",
+                    null);
+            return result;
+        } catch (ApiException ex) {
+            StructuredCliLogger.logHttpCall(
+                    log,
+                    session,
+                    request.method(),
+                    path,
+                    response.header("X-Request-Id"),
+                    response.code(),
+                    (System.nanoTime() - startedAt) / 1_000_000,
+                    "failure",
+                    ex);
+            throw ex;
         }
     }
 

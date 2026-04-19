@@ -3,9 +3,8 @@ package com.ofdun.jobfinder.cli.ui;
 import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.dto.applications.*;
 import com.ofdun.jobfinder.cli.http.ApiException;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public final class ApplicationsMenu {

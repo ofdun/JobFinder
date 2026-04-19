@@ -3,10 +3,9 @@ package com.ofdun.jobfinder.cli.ui;
 import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.dto.matching.MatchResult;
 import com.ofdun.jobfinder.cli.http.ApiException;
-import lombok.RequiredArgsConstructor;
-
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public final class MatchingMenu {
