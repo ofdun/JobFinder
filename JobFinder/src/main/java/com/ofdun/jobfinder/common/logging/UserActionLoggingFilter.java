@@ -84,5 +84,3 @@ public class UserActionLoggingFilter extends OncePerRequestFilter {
         log.info("User action finished");
     }
 }
-
-

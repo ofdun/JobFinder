@@ -43,7 +43,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LocationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleLocationNotFound(LocationNotFoundException ex) {
-        return createErrorResponse("Location not found", HttpStatus.NOT_FOUND, "LOCATION_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Location not found", HttpStatus.NOT_FOUND, "LOCATION_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(AiEmptyRespondException.class)
@@ -59,7 +60,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SessionIsOverException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiErrorResponse handleSessionIsOver(SessionIsOverException ex) {
-        return createErrorResponse("Session is over", HttpStatus.UNAUTHORIZED, "SESSION_IS_OVER", ex);
+        return createErrorResponse(
+                "Session is over", HttpStatus.UNAUTHORIZED, "SESSION_IS_OVER", ex);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
@@ -72,13 +74,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidPasswordException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiErrorResponse handleInvalidPassword(InvalidPasswordException ex) {
-        return createErrorResponse("Invalid password", HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex);
+        return createErrorResponse(
+                "Invalid password", HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex);
     }
 
     @ExceptionHandler(VacancyNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleVacancyNotFound(VacancyNotFoundException ex) {
-        return createErrorResponse("Vacancy not found", HttpStatus.NOT_FOUND, "VACANCY_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Vacancy not found", HttpStatus.NOT_FOUND, "VACANCY_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(VacancyAlreadyExistsException.class)
@@ -91,7 +95,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmployerNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleEmployerNotFound(EmployerNotFoundException ex) {
-        return createErrorResponse("Employer not found", HttpStatus.NOT_FOUND, "EMPLOYER_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Employer not found", HttpStatus.NOT_FOUND, "EMPLOYER_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(EmployerAlreadyExistsException.class)
@@ -104,7 +109,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LanguageNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleLanguageNotFound(LanguageNotFoundException ex) {
-        return createErrorResponse("Language not found", HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Language not found", HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(SkillNotFoundException.class)
@@ -116,13 +122,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CategoryNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleCategoryNotFound(CategoryNotFoundException ex) {
-        return createErrorResponse("Category not found", HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Category not found", HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(ApplicantNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleApplicantNotFound(ApplicantNotFoundException ex) {
-        return createErrorResponse("Applicant not found", HttpStatus.NOT_FOUND, "APPLICANT_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Applicant not found", HttpStatus.NOT_FOUND, "APPLICANT_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(ApplicationNotFoundException.class)
@@ -152,19 +160,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResumeNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleResumeNotFound(ResumeNotFoundException ex) {
-        return createErrorResponse("Resume not found", HttpStatus.NOT_FOUND, "RESUME_NOT_FOUND", ex);
+        return createErrorResponse(
+                "Resume not found", HttpStatus.NOT_FOUND, "RESUME_NOT_FOUND", ex);
     }
 
     @ExceptionHandler(FailedToCreateResumeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiErrorResponse handleFailedToCreateResume(FailedToCreateResumeException ex) {
-        return createErrorResponse("Failed to create resume", HttpStatus.INTERNAL_SERVER_ERROR, "RESUME_CREATE_FAILED", ex);
+        return createErrorResponse(
+                "Failed to create resume",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "RESUME_CREATE_FAILED",
+                ex);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleIllegalArgument(IllegalArgumentException ex) {
-        return createErrorResponse("Invalid request parameters", HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", ex);
+        return createErrorResponse(
+                "Invalid request parameters", HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", ex);
     }
 
     @ExceptionHandler(RedisConnectionFailureException.class)
@@ -200,7 +214,8 @@ public class GlobalExceptionHandler {
                 stackTrace);
     }
 
-    private void logBusinessException(String message, HttpStatus status, String errorCode, Exception ex) {
+    private void logBusinessException(
+            String message, HttpStatus status, String errorCode, Exception ex) {
         MDC.put("error.code", errorCode);
         MDC.put("error.type", ex.getClass().getSimpleName());
         MDC.put("http.status", String.valueOf(status.value()));

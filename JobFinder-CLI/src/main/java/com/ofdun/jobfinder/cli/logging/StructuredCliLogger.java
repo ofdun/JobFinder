@@ -8,7 +8,8 @@ import org.slf4j.MDC;
 public final class StructuredCliLogger {
     private StructuredCliLogger() {}
 
-    public static void logUserAction(Logger logger, Session session, String action, Consumer<Logger> body) {
+    public static void logUserAction(
+            Logger logger, Session session, String action, Consumer<Logger> body) {
         putSessionContext(session);
         MDC.put("service", "JobFinder-CLI");
         MDC.put("event.action", action);
@@ -83,5 +84,3 @@ public final class StructuredCliLogger {
         MDC.remove("actor.id");
     }
 }
-
-
