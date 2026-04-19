@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.auth.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -46,7 +47,9 @@ class EmployerAuthServiceTest {
         when(employer.getPasswordHash()).thenReturn(hashedPassword);
         when(employer.getId()).thenReturn(employerId);
         when(employerAccountRepository.findByEmail(email)).thenReturn(employer);
-        when(encryptionService.encrypt(password)).thenReturn(hashedPassword);
+
+        when(encryptionService.matches(password, hashedPassword)).thenReturn(true);
+
         when(jwtProvider.generateAccessToken(AccountType.EMPLOYER, employerId))
                 .thenReturn(accessToken);
         when(jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employerId))
@@ -71,7 +74,7 @@ class EmployerAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> employerAuthService.login(email, password));
 
-        assertEquals("Applicant not found", exception.getMessage());
+        assertEquals("Applicant with email " + email + " not found", exception.getMessage());
         verify(employerAccountRepository).findByEmail(email);
         verifyNoInteractions(encryptionService, tokenRepository, jwtProvider);
     }
@@ -83,15 +86,16 @@ class EmployerAuthServiceTest {
         EmployerAccountModel employer = mock(EmployerAccountModel.class);
         when(employer.getPasswordHash()).thenReturn("storedHash");
         when(employerAccountRepository.findByEmail(email)).thenReturn(employer);
-        when(encryptionService.encrypt(password)).thenReturn("differentHash");
+
+        when(encryptionService.matches(password, "storedHash")).thenReturn(false);
 
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class, () -> employerAuthService.login(email, password));
 
-        assertEquals("Invalid password", exception.getMessage());
+        assertEquals("Password is invalid", exception.getMessage());
         verify(employerAccountRepository).findByEmail(email);
-        verify(encryptionService).encrypt(password);
+        verify(encryptionService).matches(password, "storedHash");
         verifyNoInteractions(tokenRepository, jwtProvider);
     }
 
@@ -124,7 +128,7 @@ class EmployerAuthServiceTest {
         RuntimeException exception =
                 assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
 
-        assertEquals("Refresh token invalid", exception.getMessage());
+        assertEquals("Refresh token is invalid", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.EMPLOYER);
         verifyNoInteractions(tokenRepository);
     }
@@ -138,7 +142,7 @@ class EmployerAuthServiceTest {
         RuntimeException exception =
                 assertThrows(RuntimeException.class, () -> employerAuthService.refreshToken(token));
 
-        assertEquals("Session is over or invalid", exception.getMessage());
+        assertEquals("Session is over", exception.getMessage());
         verify(jwtProvider).validateToken(token, AccountType.EMPLOYER);
         verify(tokenRepository).getUserIdByToken(token);
         verify(tokenRepository, never()).deleteToken(anyString());

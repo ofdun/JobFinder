@@ -9,6 +9,7 @@ import com.ofdun.jobfinder.features.location.domain.service.LocationService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +23,16 @@ public class EmployerController {
     private final EmployerApiMapper mapper;
 
     @PostMapping
-    public ResponseEntity<@NonNull Long> createEmployer(@Valid @RequestBody EmployerRequest request) {
-        return ResponseEntity.ok(employerService.createEmployer(mapper.toModel(request)));
+    public ResponseEntity<@NonNull Long> createEmployer(
+            @Valid @RequestBody EmployerRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(employerService.createEmployer(mapper.toModel(request)));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@sec.isApplicant(authentication) || (@sec.isEmployer(authentication) && @sec.isSelf(authentication, #id))")
+    @PreAuthorize(
+            "@sec.isApplicant(authentication) || (@sec.isEmployer(authentication) &&"
+                    + " @sec.isSelf(authentication, #id))")
     public ResponseEntity<@NonNull EmployerResponse> getEmployer(@PathVariable Long id) {
         var employer = employerService.getEmployerById(id);
         var location = locationService.getLocationById(employer.getLocationId());

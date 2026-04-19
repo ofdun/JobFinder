@@ -3,13 +3,12 @@ package com.ofdun.jobfinder.features.matching.api.controller;
 import com.ofdun.jobfinder.features.matching.api.dto.MatchResultResponse;
 import com.ofdun.jobfinder.features.matching.api.mapper.MatchingApiMapper;
 import com.ofdun.jobfinder.features.matching.domain.service.MatchingService;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/matching")

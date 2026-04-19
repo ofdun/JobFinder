@@ -10,6 +10,7 @@ public class LanguageApiMapper {
         }
         return new LanguageDto(model.getId(), model.getName(), model.getProficiencyLevel());
     }
+
     public static LanguageModel toModel(LanguageDto dto) {
         if (dto == null) {
             return null;

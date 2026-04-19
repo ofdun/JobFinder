@@ -17,4 +17,3 @@ public class LocationDto {
     @NotBlank(message = "Country is required")
     private String country;
 }
-

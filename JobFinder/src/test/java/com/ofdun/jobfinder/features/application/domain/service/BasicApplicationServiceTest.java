@@ -54,7 +54,8 @@ class BasicApplicationServiceTest {
     void getApplication_whenExists_thenApplicationReturned() {
         Long id = 1L;
         ApplicationModel expectedApplication = mock(ApplicationModel.class);
-        when(applicationRepository.getApplicationById(id)).thenReturn(Optional.of(expectedApplication));
+        when(applicationRepository.getApplicationById(id))
+                .thenReturn(Optional.of(expectedApplication));
 
         ApplicationModel actualApplication = applicationService.getApplication(id);
 
@@ -68,7 +69,8 @@ class BasicApplicationServiceTest {
         Long id = 99L;
         when(applicationRepository.getApplicationById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ApplicationNotFoundException.class, () -> applicationService.getApplication(id));
+        assertThrows(
+                ApplicationNotFoundException.class, () -> applicationService.getApplication(id));
 
         verify(applicationRepository).getApplicationById(id);
         verifyNoMoreInteractions(applicationRepository);

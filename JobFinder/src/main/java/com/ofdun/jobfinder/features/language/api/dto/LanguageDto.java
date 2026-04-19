@@ -16,7 +16,5 @@ public class LanguageDto {
     @NotBlank(message = "Language name cannot be blank")
     private String name;
 
-    @NotNull
-    private LanguageProficiencyLevel proficiencyLevel;
+    @NotNull private LanguageProficiencyLevel proficiencyLevel;
 }
-

@@ -3,8 +3,6 @@ package com.ofdun.jobfinder.features.resume.data.mapper;
 import com.ofdun.jobfinder.features.resume.data.entity.ResumeEntity;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 
-import java.util.Date;
-
 public class ResumeMapper {
     public static ResumeModel toModel(ResumeEntity resumeEntity) {
         if (resumeEntity == null) {
@@ -33,6 +31,6 @@ public class ResumeMapper {
                 resumeModel.getDescription(),
                 resumeModel.getSkillIds(),
                 resumeModel.getLanguageIds(),
-                new Date());
+                null);
     }
 }

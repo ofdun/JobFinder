@@ -338,7 +338,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResumeCreateRequest'
+              $ref: '#/components/schemas/ResumeRequest'
       responses:
         '201':
           description: Резюме создано
@@ -380,7 +380,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResumeRequest'
+              $ref: '#/components/schemas/ResumeUpdateRequest'
       responses:
         '200':
           description: Резюме обновлено
@@ -509,6 +509,218 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MatchResult'
+  /vacancies/search:
+    get:
+      tags: [Vacancies]
+      summary: Поиск вакансий по фильтрам с пагинацией
+      description: Параметры limit/offset/sortBy/sortDesc соответствуют модели OffsetPaginationParams.
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Подстрока для поиска по описанию вакансии
+        - name: employerId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: locationId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: salaryMin
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: salaryMax
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: paymentFrequency
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/PaymentFrequency'
+        - name: employmentType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/EmploymentType'
+        - name: workFormat
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/JobFormat'
+        - name: publicationDateFrom
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: publicationDateTo
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: skillIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          description: Фильтр по навыкам (AND). Вакансия должна содержать ВСЕ переданные skillIds.
+        - name: languageIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          description: Фильтр по языкам (AND). Вакансия должна содержать ВСЕ переданные languageIds.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+          description: Количество элементов на странице
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Смещение от начала выборки
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Поле сортировки (например publicationDate)
+        - name: sortDesc
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Сортировка по убыванию
+      responses:
+        '200':
+          description: Страница вакансий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyPageResponse'
+
+  /resumes/search:
+    get:
+      tags: [Resumes]
+      summary: Поиск резюме по фильтрам с пагинацией
+      description: Параметры limit/offset/sortBy/sortDesc соответствуют модели OffsetPaginationParams.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Подстрока для поиска по описанию резюме
+        - name: applicantId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: creationDateFrom
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: creationDateTo
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: skillIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          description: Фильтр по навыкам (AND). Резюме должно содержать ВСЕ переданные skillIds.
+        - name: languageIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          description: Фильтр по языкам (AND). Резюме должно содержать ВСЕ переданные languageIds.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sortDesc
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Страница резюме
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumePageResponse'
 
 components:
   securitySchemes:
@@ -905,11 +1117,9 @@ components:
           items:
             type: integer
 
-    ResumeCreateRequest:
+    ResumeUpdateRequest:
       type: object
-      description: |
-        Запрос на создание резюме. В отличие от ResumeRequest (используемого для обновления),
-        позволяет передать образование и опыт работы целиком, чтобы сервер создал их в рамках одного запроса.
+      description: Запрос на обновление резюме. Поля опциональны.
       properties:
         applicantId:
           type: integer
@@ -944,3 +1154,61 @@ components:
         applicationStatus:
           type: string
           enum: [NEW, INVITATION, REJECTION]
+
+    VacancyPageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vacancy'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    ResumePageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resume'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    OffsetPaginationParams:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          default: 20
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+
+    PaymentFrequency:
+      type: string
+      enum: [HOURLY, WEEKLY, MONTHLY, PROJECT]
+
+    EmploymentType:
+      type: string
+      enum: [FULL_TIME, PART_TIME, FREELANCE]
+
+    JobFormat:
+      type: string
+      enum: [REMOTE, OFFICE, HYBRID]

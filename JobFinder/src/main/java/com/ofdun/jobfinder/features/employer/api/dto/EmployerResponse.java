@@ -17,4 +17,3 @@ public class EmployerResponse {
     private String websiteLink;
     private LocationDto location;
 }
-

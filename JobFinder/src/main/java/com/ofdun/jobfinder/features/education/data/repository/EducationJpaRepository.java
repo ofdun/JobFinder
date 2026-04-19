@@ -11,4 +11,3 @@ public interface EducationJpaRepository extends JpaRepository<EducationEntity, L
 
     void deleteAllByResumeId(Long resumeId);
 }
-

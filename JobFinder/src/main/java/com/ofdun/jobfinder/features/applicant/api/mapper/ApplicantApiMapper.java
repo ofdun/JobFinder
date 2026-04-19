@@ -3,9 +3,9 @@ package com.ofdun.jobfinder.features.applicant.api.mapper;
 import com.ofdun.jobfinder.features.applicant.api.dto.ApplicantRequest;
 import com.ofdun.jobfinder.features.applicant.api.dto.ApplicantResponse;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
+import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import com.ofdun.jobfinder.features.location.api.mapper.LocationApiMapper;
 import com.ofdun.jobfinder.features.location.domain.model.LocationModel;
-import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +23,7 @@ public class ApplicantApiMapper {
                 encryptionService.encrypt(request.getPassword()),
                 request.getAddress(),
                 request.getPhoneNumber(),
-                request.getLocationId()
-        );
+                request.getLocationId());
     }
 
     public ApplicantResponse toResponse(ApplicantModel model, LocationModel location) {
@@ -35,8 +34,6 @@ public class ApplicantApiMapper {
                 model.getEmail(),
                 model.getAddress(),
                 model.getPhoneNumber(),
-                LocationApiMapper.toDto(location)
-        );
+                LocationApiMapper.toDto(location));
     }
 }
-

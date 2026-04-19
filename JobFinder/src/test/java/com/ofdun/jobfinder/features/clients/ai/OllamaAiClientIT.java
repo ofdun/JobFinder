@@ -20,18 +20,20 @@ class OllamaAiClientIT {
 
     private static final String PREBUILT_IMAGE = "ollama-mxbai-embed-large:latest";
 
-    @Container
-    static final GenericContainer<?> ollama;
+    @Container static final GenericContainer<?> ollama;
 
     static {
-        ollama = new GenericContainer<>(DockerImageName.parse(PREBUILT_IMAGE))
-                .withExposedPorts(11434)
-                .waitingFor(Wait.forListeningPort());
+        ollama =
+                new GenericContainer<>(DockerImageName.parse(PREBUILT_IMAGE))
+                        .withExposedPorts(11434)
+                        .waitingFor(Wait.forListeningPort());
     }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("app.ollama.url", () -> "http://" + ollama.getHost() + ":" + ollama.getMappedPort(11434));
+        registry.add(
+                "app.ollama.url",
+                () -> "http://" + ollama.getHost() + ":" + ollama.getMappedPort(11434));
     }
 
     @Test

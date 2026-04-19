@@ -6,12 +6,9 @@ import lombok.Data;
 
 @Data
 public class ApplicationRequest {
-    @NotNull
-    private Long vacancyId;
+    @NotNull private Long vacancyId;
 
-    @NotNull
-    private Long resumeId;
+    @NotNull private Long resumeId;
 
-    @NotNull
-    private ApplicationStatus applicationStatus;
+    @NotNull private ApplicationStatus applicationStatus;
 }

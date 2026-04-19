@@ -61,11 +61,12 @@ class QdrantResumeRepositoryIT {
         String baseUrl = String.format("http://%s:%d/collections/%s", host, port, collectionName);
 
         try {
-            HttpRequest deleteReq = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl))
-                    .timeout(Duration.ofSeconds(5))
-                    .DELETE()
-                    .build();
+            HttpRequest deleteReq =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(baseUrl))
+                            .timeout(Duration.ofSeconds(5))
+                            .DELETE()
+                            .build();
 
             HttpResponse<String> deleteResp =
                     httpClient.send(deleteReq, HttpResponse.BodyHandlers.ofString());
@@ -74,21 +75,25 @@ class QdrantResumeRepositoryIT {
                 throw new RuntimeException("Failed to delete collection: " + deleteResp.body());
             }
 
-            String body = String.format("""
-                {
-                  "vectors": {
-                    "size": %d,
-                    "distance": "Cosine"
-                  }
-                }
-                """, embeddingDimension);
+            String body =
+                    String.format(
+                            """
+                            {
+                              "vectors": {
+                                "size": %d,
+                                "distance": "Cosine"
+                              }
+                            }
+                            """,
+                            embeddingDimension);
 
-            HttpRequest createReq = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl))
-                    .timeout(Duration.ofSeconds(5))
-                    .PUT(HttpRequest.BodyPublishers.ofString(body))
-                    .header("Content-Type", "application/json")
-                    .build();
+            HttpRequest createReq =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(baseUrl))
+                            .timeout(Duration.ofSeconds(5))
+                            .PUT(HttpRequest.BodyPublishers.ofString(body))
+                            .header("Content-Type", "application/json")
+                            .build();
 
             HttpResponse<String> createResp =
                     httpClient.send(createReq, HttpResponse.BodyHandlers.ofString());
@@ -101,7 +106,6 @@ class QdrantResumeRepositoryIT {
             throw new RuntimeException("Failed to reset Qdrant collection", e);
         }
     }
-
 
     @Test
     void getMostSimilarResumes_whenTwoVectors_thenReturnClosest() {

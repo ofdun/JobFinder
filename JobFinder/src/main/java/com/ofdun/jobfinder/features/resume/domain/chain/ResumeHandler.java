@@ -1,7 +1,6 @@
 package com.ofdun.jobfinder.features.resume.domain.chain;
 
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
-
 import java.util.Optional;
 
 public abstract class ResumeHandler {

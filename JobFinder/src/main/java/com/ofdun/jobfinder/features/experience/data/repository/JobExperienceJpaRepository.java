@@ -11,4 +11,3 @@ public interface JobExperienceJpaRepository extends JpaRepository<JobExperienceE
 
     void deleteAllByResumeId(Long resumeId);
 }
-

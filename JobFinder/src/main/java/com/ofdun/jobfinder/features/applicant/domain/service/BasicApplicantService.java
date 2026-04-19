@@ -23,7 +23,8 @@ public class BasicApplicantService implements ApplicantService {
 
     @Override
     public ApplicantModel getApplicantById(@NonNull Long id) {
-        return applicantRepository.getApplicantById(id)
+        return applicantRepository
+                .getApplicantById(id)
                 .orElseThrow(() -> new ApplicantNotFoundException(id));
     }
 

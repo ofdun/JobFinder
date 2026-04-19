@@ -3,7 +3,6 @@ package com.ofdun.jobfinder.features.auth.data.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.applicant.data.repository.PostgreSQLApplicantRepository;
-import com.ofdun.jobfinder.features.auth.domain.model.ApplicantAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +56,7 @@ class PostgreSQLApplicantAccountRepositoryIT {
 
     @Test
     void findByEmail_whenMissing_thenReturnNull() {
-        var account =
-                applicantAccountRepository.findByEmail("missing@example.com");
+        var account = applicantAccountRepository.findByEmail("missing@example.com");
         assertTrue(account.isEmpty());
     }
 }

@@ -14,8 +14,7 @@ public class JobExperienceApiMapper {
                 dto.getCompanyName(),
                 dto.getDescription(),
                 dto.getStartDate(),
-                dto.getEndDate()
-        );
+                dto.getEndDate());
     }
 
     public static JobExperienceDto toJobExperienceDto(JobExperienceModel model) {
@@ -27,7 +26,6 @@ public class JobExperienceApiMapper {
                 model.getCompanyName(),
                 model.getDescription(),
                 model.getStartDate(),
-                model.getEndDate()
-        );
+                model.getEndDate());
     }
 }

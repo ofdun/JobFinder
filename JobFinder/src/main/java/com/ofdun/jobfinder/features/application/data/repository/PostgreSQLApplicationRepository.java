@@ -3,9 +3,8 @@ package com.ofdun.jobfinder.features.application.data.repository;
 import com.ofdun.jobfinder.features.application.data.mapper.ApplicationMapper;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
-import org.springframework.stereotype.Component;
-
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PostgreSQLApplicationRepository implements ApplicationRepository {
@@ -17,16 +16,12 @@ public class PostgreSQLApplicationRepository implements ApplicationRepository {
 
     @Override
     public Long createApplication(ApplicationModel application) {
-        return applicationJpaRepository
-                .save(ApplicationMapper.toEntity(application))
-                .getId();
+        return applicationJpaRepository.save(ApplicationMapper.toEntity(application)).getId();
     }
 
     @Override
     public Optional<ApplicationModel> getApplicationById(Long id) {
-        return applicationJpaRepository
-                .findById(id)
-                .map(ApplicationMapper::toModel);
+        return applicationJpaRepository.findById(id).map(ApplicationMapper::toModel);
     }
 
     @Override
@@ -37,11 +32,13 @@ public class PostgreSQLApplicationRepository implements ApplicationRepository {
 
     @Override
     public Boolean deleteApplication(Long id) {
-        return applicationJpaRepository.findById(id)
-                .map(entity -> {
-                    applicationJpaRepository.delete(entity);
-                    return true;
-                })
+        return applicationJpaRepository
+                .findById(id)
+                .map(
+                        entity -> {
+                            applicationJpaRepository.delete(entity);
+                            return true;
+                        })
                 .orElse(false);
     }
 }

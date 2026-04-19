@@ -1,9 +1,9 @@
 package com.ofdun.jobfinder.features.employer.domain.validator;
 
-import com.ofdun.jobfinder.features.employer.exception.EmployerAlreadyExistsException;
-import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import com.ofdun.jobfinder.features.employer.exception.EmployerAlreadyExistsException;
+import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

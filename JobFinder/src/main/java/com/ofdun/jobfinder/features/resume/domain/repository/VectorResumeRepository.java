@@ -1,7 +1,7 @@
 package com.ofdun.jobfinder.features.resume.domain.repository;
 
-import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
+import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import java.util.List;
 import java.util.Optional;
 

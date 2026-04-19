@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.auth.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -45,8 +46,11 @@ class ApplicantAuthServiceTest {
         ApplicantAccountModel applicant = mock(ApplicantAccountModel.class);
         when(applicant.getPasswordHash()).thenReturn(hashedPassword);
         when(applicant.getId()).thenReturn(applicantId);
-        when(applicantAccountRepository.findByEmail(email)).thenReturn(java.util.Optional.of(applicant));
-        when(encryptionService.encrypt(password)).thenReturn(hashedPassword);
+        when(applicantAccountRepository.findByEmail(email))
+                .thenReturn(java.util.Optional.of(applicant));
+
+        when(encryptionService.matches(password, hashedPassword)).thenReturn(true);
+
         when(jwtProvider.generateAccessToken(AccountType.APPLICANT, applicantId))
                 .thenReturn(accessToken);
         when(jwtProvider.generateRefreshToken(AccountType.APPLICANT, applicantId))
@@ -82,8 +86,10 @@ class ApplicantAuthServiceTest {
         String password = "password";
         ApplicantAccountModel applicant = mock(ApplicantAccountModel.class);
         when(applicant.getPasswordHash()).thenReturn("storedHash");
-        when(applicantAccountRepository.findByEmail(email)).thenReturn(java.util.Optional.of(applicant));
-        when(encryptionService.encrypt(password)).thenReturn("differentHash");
+        when(applicantAccountRepository.findByEmail(email))
+                .thenReturn(java.util.Optional.of(applicant));
+
+        when(encryptionService.matches(password, "storedHash")).thenReturn(false);
 
         RuntimeException exception =
                 assertThrows(
@@ -91,7 +97,7 @@ class ApplicantAuthServiceTest {
 
         assertEquals("Password is invalid", exception.getMessage());
         verify(applicantAccountRepository).findByEmail(email);
-        verify(encryptionService).encrypt(password);
+        verify(encryptionService).matches(password, "storedHash");
         verifyNoInteractions(tokenRepository, jwtProvider);
     }
 

@@ -16,4 +16,3 @@ public class ApplicantResponse {
     private String phoneNumber;
     private LocationDto location;
 }
-

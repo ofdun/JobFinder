@@ -1,11 +1,10 @@
 package com.ofdun.jobfinder.features.auth.data.jwt.repository;
 
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
