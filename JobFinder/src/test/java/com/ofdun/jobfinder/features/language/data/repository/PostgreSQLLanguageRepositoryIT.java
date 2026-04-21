@@ -69,4 +69,12 @@ class PostgreSQLLanguageRepositoryIT {
     void getLanguageById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> languageRepository.getLanguageById(null));
     }
+
+    @Test
+    void getAllLanguages_whenCalled_thenReturnsNonEmptyList() {
+        var languages = languageRepository.getAllLanguages();
+
+        assertFalse(languages.isEmpty());
+        assertNotNull(languages.getFirst().getName());
+    }
 }

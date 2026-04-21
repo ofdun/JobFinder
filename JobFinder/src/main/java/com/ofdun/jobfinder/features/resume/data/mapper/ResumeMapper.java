@@ -31,6 +31,6 @@ public class ResumeMapper {
                 resumeModel.getDescription(),
                 resumeModel.getSkillIds(),
                 resumeModel.getLanguageIds(),
-                null);
+                resumeModel.getDate());
     }
 }

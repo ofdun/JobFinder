@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.applicant.api.controller;
 
 import com.ofdun.jobfinder.features.applicant.api.dto.ApplicantRequest;
 import com.ofdun.jobfinder.features.applicant.api.dto.ApplicantResponse;
+import com.ofdun.jobfinder.features.applicant.api.dto.ApplicantUpdateRequest;
 import com.ofdun.jobfinder.features.applicant.api.mapper.ApplicantApiMapper;
 import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.service.ApplicantService;
@@ -42,8 +43,9 @@ public class ApplicantController {
     @PutMapping("/{id}")
     @PreAuthorize("@sec.isApplicant(authentication) && @sec.isSelf(authentication, #id)")
     public ResponseEntity<@NonNull ApplicantResponse> updateApplicant(
-            @PathVariable Long id, @Valid @RequestBody ApplicantRequest request) {
-        ApplicantModel model = mapper.toModel(request);
+            @PathVariable Long id, @Valid @RequestBody ApplicantUpdateRequest request) {
+        ApplicantModel existingApplicant = applicantService.getApplicantById(id);
+        ApplicantModel model = mapper.toModel(request, existingApplicant.getPasswordHash());
         model.setId(id);
         var location = locationService.getLocationById(model.getLocationId());
         var dto = applicantService.updateApplicant(model);

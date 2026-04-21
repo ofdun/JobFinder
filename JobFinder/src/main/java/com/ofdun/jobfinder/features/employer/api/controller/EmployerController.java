@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.employer.api.controller;
 
 import com.ofdun.jobfinder.features.employer.api.dto.EmployerRequest;
 import com.ofdun.jobfinder.features.employer.api.dto.EmployerResponse;
+import com.ofdun.jobfinder.features.employer.api.dto.EmployerUpdateRequest;
 import com.ofdun.jobfinder.features.employer.api.mapper.EmployerApiMapper;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.service.EmployerService;
@@ -42,8 +43,9 @@ public class EmployerController {
     @PutMapping("/{id}")
     @PreAuthorize("@sec.isEmployer(authentication) && @sec.isSelf(authentication, #id)")
     public ResponseEntity<@NonNull EmployerResponse> updateEmployer(
-            @PathVariable Long id, @Valid @RequestBody EmployerRequest request) {
-        EmployerModel model = mapper.toModel(request);
+            @PathVariable Long id, @Valid @RequestBody EmployerUpdateRequest request) {
+        EmployerModel existingEmployer = employerService.getEmployerById(id);
+        EmployerModel model = mapper.toModel(request, existingEmployer.getPasswordHash());
         model.setId(id);
         var location = locationService.getLocationById(model.getLocationId());
         var employer = employerService.updateEmployer(model);

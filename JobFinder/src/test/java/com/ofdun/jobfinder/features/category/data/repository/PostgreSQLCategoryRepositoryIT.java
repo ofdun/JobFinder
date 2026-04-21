@@ -67,4 +67,12 @@ class PostgreSQLCategoryRepositoryIT {
     void getCategoryById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> categoryRepository.getCategoryById(null));
     }
+
+    @Test
+    void getAllCategories_whenCalled_thenReturnsNonEmptyList() {
+        var categories = categoryRepository.getAllCategories();
+
+        assertFalse(categories.isEmpty());
+        assertNotNull(categories.getFirst().getName());
+    }
 }

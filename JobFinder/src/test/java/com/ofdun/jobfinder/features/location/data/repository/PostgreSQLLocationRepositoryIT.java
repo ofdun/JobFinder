@@ -68,4 +68,17 @@ class PostgreSQLLocationRepositoryIT {
     void getLocationById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> locationRepository.getLocationById(null));
     }
+
+    @Test
+    void searchLocations_whenQueryProvided_thenReturnsResults() {
+        var result = locationRepository.searchLocations("And", 10);
+
+        assertFalse(result.isEmpty());
+        assertTrue(
+                result.stream()
+                        .anyMatch(
+                                location ->
+                                        location.getCity().contains("And")
+                                                || location.getCountry().contains("And")));
+    }
 }

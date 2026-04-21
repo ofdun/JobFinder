@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
-import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
+import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
@@ -25,22 +25,22 @@ public class EmployerAuthService implements AuthService {
 
     @Override
     public TokenPair login(@NonNull String email, @NonNull String password) {
-        var applicant = employerAccountRepository.findByEmail(email);
-        if (applicant == null) {
-            throw new ApplicantNotFoundException(email);
+        var employer = employerAccountRepository.findByEmail(email);
+        if (employer == null) {
+            throw new EmployerNotFoundException(email);
         }
 
-        if (!encryptionService.matches(password, applicant.getPasswordHash())) {
+        if (!encryptionService.matches(password, employer.getPasswordHash())) {
             throw new InvalidPasswordException();
         }
 
-        var accessToken = jwtProvider.generateAccessToken(AccountType.EMPLOYER, applicant.getId());
+        var accessToken = jwtProvider.generateAccessToken(AccountType.EMPLOYER, employer.getId());
         var refreshToken =
-                jwtProvider.generateRefreshToken(AccountType.EMPLOYER, applicant.getId());
+                jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employer.getId());
 
         tokenRepository.saveToken(
                 refreshToken,
-                applicant.getId(),
+                employer.getId(),
                 Duration.ofMillis(jwtProvider.getRefreshTokenExpiration()));
 
         return new TokenPair(accessToken, refreshToken);

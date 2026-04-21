@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.DS_Store
+*.tsbuildinfo
+
+# TypeScript output from accidental local compilations
+*.js
+*.d.ts
+
+# Keep source TypeScript declaration files under src if needed
+!src/**/*.d.ts
+
