@@ -16,7 +16,6 @@ CREATE TYPE jobfinder.work_format AS ENUM (
 CREATE TYPE jobfinder.employment_type AS ENUM (
   'FULL_TIME',
   'PART_TIME',
-  'INTERNSHIP',
   'FREELANCE'
 );
 

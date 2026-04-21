@@ -15,9 +15,38 @@ public class RelationalResumeUpdateHandler extends ResumeHandler {
 
     @Override
     protected Optional<ResumeModel> execute(ResumeModel resume) {
-        if (resumeRepository.getResumeById(resume.getId()).isEmpty()) {
+        var existingOpt = resumeRepository.getResumeById(resume.getId());
+        if (existingOpt.isEmpty()) {
             throw new ResumeNotFoundException(resume.getId());
         }
+
+        var existing = existingOpt.get();
+
+        if (resume.getApplicantId() == null) {
+            resume.setApplicantId(existing.getApplicantId());
+        }
+        if (resume.getCategoryId() == null) {
+            resume.setCategoryId(existing.getCategoryId());
+        }
+        if (resume.getDescription() == null) {
+            resume.setDescription(existing.getDescription());
+        }
+        if (resume.getSkillIds() == null) {
+            resume.setSkillIds(existing.getSkillIds());
+        }
+        if (resume.getLanguageIds() == null) {
+            resume.setLanguageIds(existing.getLanguageIds());
+        }
+        if (resume.getEducations() == null) {
+            resume.setEducations(existing.getEducations());
+        }
+        if (resume.getJobExperiences() == null) {
+            resume.setJobExperiences(existing.getJobExperiences());
+        }
+        if (resume.getDate() == null) {
+            resume.setDate(existing.getDate());
+        }
+
         return Optional.ofNullable(resumeRepository.updateResume(resume));
     }
 }
