@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.application.data.repository;
 import com.ofdun.jobfinder.features.application.data.mapper.ApplicationMapper;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,13 @@ public class PostgreSQLApplicationRepository implements ApplicationRepository {
     @Override
     public Optional<ApplicationModel> getApplicationById(Long id) {
         return applicationJpaRepository.findById(id).map(ApplicationMapper::toModel);
+    }
+
+    @Override
+    public List<ApplicationModel> getApplicationsByVacancyId(Long vacancyId) {
+        return applicationJpaRepository.findByVacancyIdOrderByDateDesc(vacancyId).stream()
+                .map(ApplicationMapper::toModel)
+                .toList();
     }
 
     @Override

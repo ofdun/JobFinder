@@ -67,4 +67,12 @@ class PostgreSQLSkillRepositoryIT {
     void getSkillById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> skillRepository.getSkillById(null));
     }
+
+    @Test
+    void getAllSkills_whenCalled_thenReturnsNonEmptyList() {
+        var skills = skillRepository.getAllSkills();
+
+        assertFalse(skills.isEmpty());
+        assertNotNull(skills.getFirst().getName());
+    }
 }

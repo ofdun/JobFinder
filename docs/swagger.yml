@@ -23,6 +23,14 @@ tags:
     description: Отклики на вакансии
   - name: Matching
     description: AI-мэтчинг кандидатов
+  - name: Categories
+    description: Справочник категорий
+  - name: Skills
+    description: Справочник навыков
+  - name: Languages
+    description: Справочник языков
+  - name: Locations
+    description: Справочник локаций
 
 paths:
   /auth/applicant/login:
@@ -97,6 +105,94 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenPair'
 
+  /categories:
+    get:
+      tags: [Categories]
+      summary: Получить список всех категорий
+      responses:
+        '200':
+          description: Список категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+  /skills:
+    get:
+      tags: [Skills]
+      summary: Получить список всех навыков
+      responses:
+        '200':
+          description: Список навыков
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
+
+  /languages:
+    get:
+      tags: [Languages]
+      summary: Получить список всех языков
+      responses:
+        '200':
+          description: Список языков
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'
+
+  /locations/{id}:
+    get:
+      tags: [Locations]
+      summary: Получить локацию по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Локация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+
+  /locations/search:
+    get:
+      tags: [Locations]
+      summary: Поиск локаций по городу или стране
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Найденные локации
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+
   /applicants:
     post:
       tags: [Applicants]
@@ -151,7 +247,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApplicantRequest'
+              $ref: '#/components/schemas/ApplicantUpdateRequest'
       responses:
         '200':
           description: Профиль обновлен
@@ -227,7 +323,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmployerRequest'
+              $ref: '#/components/schemas/EmployerUpdateRequest'
       responses:
         '200':
           description: Профиль обновлен
@@ -480,6 +576,86 @@ paths:
       responses:
         '204':
           description: Отклик удален
+
+  /vacancies/{vacancyId}/applications:
+    get:
+      tags: [Applications]
+      summary: Получить все отклики на вакансию работодателя
+      description: Доступно только работодателю-владельцу вакансии.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vacancyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список откликов по вакансии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+        '403':
+          description: Нет доступа к вакансии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Вакансия не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /applications/{id}/status:
+    patch:
+      tags: [Applications]
+      summary: Изменить статус отклика
+      description: Доступно работодателю-владельцу вакансии, на которую оставлен отклик.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStatusUpdateRequest'
+      responses:
+        '200':
+          description: Статус отклика обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: Невалидный статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Нет доступа к отклику
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Отклик не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
 
   /matching/vacancies/{vacancyId}/candidates:
     get:
@@ -1037,6 +1213,25 @@ components:
         locationId:
           type: integer
 
+    ApplicantUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+          description: Необязательный новый пароль; если не передан, текущий пароль сохраняется
+        address:
+          type: string
+        phoneNumber:
+          type: string
+        locationId:
+          type: integer
+
     EmployerRequest:
       type: object
       properties:
@@ -1048,6 +1243,28 @@ components:
         password:
           type: string
           writeOnly: true
+        description:
+          type: string
+        address:
+          type: string
+        websiteLink:
+          type: string
+          format: uri
+        locationId:
+          type: integer
+
+    EmployerUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+          description: Необязательный новый пароль; если не передан, текущий пароль сохраняется
         description:
           type: string
         address:
@@ -1151,6 +1368,14 @@ components:
           type: integer
         resumeId:
           type: integer
+        applicationStatus:
+          type: string
+          enum: [NEW, INVITATION, REJECTION]
+
+    ApplicationStatusUpdateRequest:
+      type: object
+      required: [applicationStatus]
+      properties:
         applicationStatus:
           type: string
           enum: [NEW, INVITATION, REJECTION]

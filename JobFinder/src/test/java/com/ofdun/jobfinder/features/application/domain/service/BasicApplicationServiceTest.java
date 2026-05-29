@@ -7,6 +7,7 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.domain.validator.ApplicationValidator;
 import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,6 +75,27 @@ class BasicApplicationServiceTest {
 
         verify(applicationRepository).getApplicationById(id);
         verifyNoMoreInteractions(applicationRepository);
+    }
+
+    @Test
+    void getApplicationsByVacancyId_whenValidVacancyId_thenApplicationsReturned() {
+        Long vacancyId = 10L;
+        List<ApplicationModel> expected = List.of(mock(ApplicationModel.class), mock(ApplicationModel.class));
+        when(applicationRepository.getApplicationsByVacancyId(vacancyId)).thenReturn(expected);
+
+        List<ApplicationModel> actual = applicationService.getApplicationsByVacancyId(vacancyId);
+
+        assertSame(expected, actual);
+        verify(applicationRepository).getApplicationsByVacancyId(vacancyId);
+    }
+
+    @Test
+    void getApplicationsByVacancyId_whenInvalidVacancyId_thenThrowsIllegalArgumentException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> applicationService.getApplicationsByVacancyId(0L));
+
+        verifyNoInteractions(applicationRepository);
     }
 
     @Test

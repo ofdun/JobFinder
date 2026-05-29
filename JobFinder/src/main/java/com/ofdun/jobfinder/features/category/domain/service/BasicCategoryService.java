@@ -2,8 +2,10 @@ package com.ofdun.jobfinder.features.category.domain.service;
 
 import com.ofdun.jobfinder.features.category.domain.model.CategoryModel;
 import com.ofdun.jobfinder.features.category.domain.repository.CategoryRepository;
+import java.util.List;
 import com.ofdun.jobfinder.features.category.exception.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -16,5 +18,11 @@ public class BasicCategoryService implements CategoryService {
         return categoryRepository
                 .getCategoryById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
+    }
+
+    @Override
+    @Cacheable(cacheNames = "categories")
+    public List<CategoryModel> getAllCategories() {
+        return categoryRepository.getAllCategories();
     }
 }

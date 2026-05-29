@@ -18,6 +18,7 @@ import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
 import com.ofdun.jobfinder.features.skill.exception.SkillNotFoundException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyAlreadyExistsException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import org.slf4j.MDC;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -179,6 +181,20 @@ public class GlobalExceptionHandler {
     public ApiErrorResponse handleIllegalArgument(IllegalArgumentException ex) {
         return createErrorResponse(
                 "Invalid request parameters", HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", ex);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        return createErrorResponse(
+                "Validation failed", HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", ex);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handleConstraintViolation(ConstraintViolationException ex) {
+        return createErrorResponse(
+                "Validation failed", HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", ex);
     }
 
     @ExceptionHandler(RedisConnectionFailureException.class)

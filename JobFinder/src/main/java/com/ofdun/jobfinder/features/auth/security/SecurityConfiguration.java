@@ -40,6 +40,14 @@ public class SecurityConfiguration {
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/v1/employers")
                                         .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/v1/categories")
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/v1/skills")
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/v1/languages")
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/v1/locations/**")
+                                        .permitAll()
                                         .requestMatchers(
                                                 HttpMethod.GET,
                                                 "/api/v1/vacancies/*",
@@ -58,7 +66,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type", "Accept", "Origin"));
         configuration.setAllowCredentials(true);
