@@ -16,6 +16,5 @@ public class EducationCreateDto {
     private String faculty;
     private String department;
 
-    @JsonDeserialize(using = YearFromStringDeserializer.class)
-    private Year yearOfGraduation;
+    private Integer yearOfGraduation;
 }

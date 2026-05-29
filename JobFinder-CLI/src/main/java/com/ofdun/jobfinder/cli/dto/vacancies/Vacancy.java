@@ -19,4 +19,5 @@ public record Vacancy(
         EmploymentType employmentType,
         String description,
         OffsetDateTime publicationDate,
-        String address) {}
+        String address,
+        VacancyStatus status) {}

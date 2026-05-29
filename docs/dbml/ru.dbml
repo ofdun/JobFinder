@@ -39,6 +39,11 @@ Enum EmploymentType {
   freelance  [note: 'Фриланс']
 }
 
+Enum VacancyStatus {
+  inactive [note: 'Неактивная']
+  active [note: 'Активная']
+}
+
 Enum ApplicationStatus {
   new         [note: 'Новый']
   invitation  [note: 'Приглашение']
@@ -73,6 +78,13 @@ Table Vacancy {
   Дата_публикации datetime
   Тип_занятости EmploymentType
   Адрес varchar
+  Статус VacancyStatus
+}
+
+Table DraftVacancy {
+  Идентификатор int [pk, increment]
+  Вакансия_ID int
+  Таймстемп_версии datetime
 }
 
 Table Application {
@@ -156,6 +168,8 @@ Ref: Vacancy.Идентификатор < Application.Вакансия_ID
 Ref: Vacancy.Локация_ID - Location.Идентификатор
 Ref: Vacancy.Идентификатор < VacancySkills.Вакансия_ID
 Ref: Skill.Идентификатор < VacancySkills.Навык_ID
+
+Ref: Vacancy.Идентификатор < DraftVacancy.Вакансия_ID
 
 Ref: Applicant.Идентификатор < Resume.Соискатель_ID
 Ref: Category.Идентификатор < Resume.Категория_ID

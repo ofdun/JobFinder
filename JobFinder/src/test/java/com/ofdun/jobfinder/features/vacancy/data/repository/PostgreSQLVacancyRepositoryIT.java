@@ -2,12 +2,16 @@ package com.ofdun.jobfinder.features.vacancy.data.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ofdun.jobfinder.features.vacancy.data.postgres.repository.PostgreSQLVacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import java.math.BigDecimal;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -20,7 +24,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import(PostgreSQLVacancyRepository.class)
 @Testcontainers
@@ -75,7 +80,8 @@ class PostgreSQLVacancyRepositoryIT {
                         EmploymentType.FULL_TIME,
                         "New vacancy",
                         new java.util.Date(),
-                        "Address");
+                        "Address",
+                        VacancyStatus.ACTIVE);
 
         Long id = vacancyRepository.createVacancy(model);
 
@@ -106,7 +112,8 @@ class PostgreSQLVacancyRepositoryIT {
                         existing.getEmploymentType(),
                         "Updated description",
                         existing.getPublicationDate(),
-                        existing.getAddress());
+                        existing.getAddress(),
+                        existing.getStatus());
 
         VacancyModel result = vacancyRepository.updateVacancy(updated);
 

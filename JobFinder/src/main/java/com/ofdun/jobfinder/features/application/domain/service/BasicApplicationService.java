@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.domain.validator.ApplicationValidator;
 import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
+import java.util.List;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,15 @@ public class BasicApplicationService implements ApplicationService {
         return applicationRepository
                 .getApplicationById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
+    }
+
+    @Override
+    public List<ApplicationModel> getApplicationsByVacancyId(@NonNull Long vacancyId) {
+        if (vacancyId <= 0) {
+            throw new IllegalArgumentException("Vacancy id must be a positive number");
+        }
+
+        return applicationRepository.getApplicationsByVacancyId(vacancyId);
     }
 
     @Override

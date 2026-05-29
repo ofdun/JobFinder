@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.resume.data.spec;
 
-import com.ofdun.jobfinder.features.resume.data.entity.ResumeEntity;
+import com.ofdun.jobfinder.features.resume.data.postgres.entity.ResumeEntity;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;

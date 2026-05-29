@@ -1,0 +1,43 @@
+@startuml
+
+skinparam defaultFontSize 24
+skinparam usecaseFontSize 24
+skinparam actorFontSize 24
+
+actor "Работодатель" as User
+
+participant "Frontend" as SPA
+
+participant "Backend" as Backend #WhiteSmoke
+
+database "Qdrant" as VDB
+database "PostgreSQL" as DB
+
+User -> SPA: Найти кандидатов
+activate SPA
+
+SPA -> Backend: Запрос на поиск совпадений
+activate Backend
+
+Backend -> DB: Запрос текста вакансии
+activate DB
+DB --> Backend: Текст вакансии
+deactivate DB
+
+Backend -> VDB: Поиск ближайших соседей
+activate VDB
+VDB --> Backend: Список ID и весов
+deactivate VDB
+
+Backend -> DB: Запрос данных профилей
+activate DB
+DB --> Backend: Данные соискателей
+deactivate DB
+
+Backend --> SPA: Список подходящих профилей
+deactivate Backend
+
+SPA --> User: Отображение рекомендованных кандидатов
+deactivate SPA
+
+@enduml

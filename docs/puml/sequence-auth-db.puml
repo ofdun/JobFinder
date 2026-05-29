@@ -1,0 +1,40 @@
+@startuml
+
+skinparam defaultFontSize 24
+skinparam usecaseFontSize 24
+skinparam actorFontSize 24
+
+actor "Пользователь" as User
+
+participant "Frontend" as SPA
+
+participant "Backend" as Backend #WhiteSmoke
+
+database "PostgreSQL" as DB
+database "Redis" as RedisDB
+
+User -> SPA: Ввод email и пароля
+activate SPA
+
+SPA -> Backend: Запрос на авторизацию
+activate Backend
+
+Backend -> DB: Поиск пользователя по email
+activate DB
+DB --> Backend: Данные пользователя
+deactivate DB
+
+Backend -> Backend: Проверка пароля\nГенерация JWT токена
+
+Backend -> RedisDB: Сохранение токена
+activate RedisDB
+RedisDB --> Backend: Подтверждение
+deactivate RedisDB
+
+Backend --> SPA: Успешная авторизация
+deactivate Backend
+
+SPA --> User: Успешный вход
+deactivate SPA
+
+@enduml

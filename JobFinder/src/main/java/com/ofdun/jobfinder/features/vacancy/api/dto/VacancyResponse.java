@@ -6,6 +6,7 @@ import com.ofdun.jobfinder.features.skill.api.dto.SkillDto;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -42,4 +43,6 @@ public class VacancyResponse {
     private Date publicationDate;
 
     private String address;
+
+    private VacancyStatus status;
 }

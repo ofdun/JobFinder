@@ -74,7 +74,7 @@ class EmployerAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> employerAuthService.login(email, password));
 
-        assertEquals("Applicant with email " + email + " not found", exception.getMessage());
+        assertEquals("Employer with email " + email + " not found", exception.getMessage());
         verify(employerAccountRepository).findByEmail(email);
         verifyNoInteractions(encryptionService, tokenRepository, jwtProvider);
     }

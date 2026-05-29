@@ -2,15 +2,18 @@ package com.ofdun.jobfinder.features.employer.data.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ofdun.jobfinder.features.employer.data.postgres.repository.PostgreSQLEmployerRepository;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -19,7 +22,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import(PostgreSQLEmployerRepository.class)
 @Testcontainers

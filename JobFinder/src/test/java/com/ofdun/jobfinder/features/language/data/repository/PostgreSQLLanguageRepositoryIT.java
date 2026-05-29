@@ -2,8 +2,10 @@ package com.ofdun.jobfinder.features.language.data.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ofdun.jobfinder.features.language.data.postgres.repository.PostgreSQLLanguageRepository;
 import com.ofdun.jobfinder.features.language.domain.repository.LanguageRepository;
 import com.ofdun.jobfinder.features.language.enums.LanguageProficiencyLevel;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -16,7 +18,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import(PostgreSQLLanguageRepository.class)
 @Testcontainers
@@ -68,5 +71,13 @@ class PostgreSQLLanguageRepositoryIT {
     @Test
     void getLanguageById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> languageRepository.getLanguageById(null));
+    }
+
+    @Test
+    void getAllLanguages_whenCalled_thenReturnsNonEmptyList() {
+        var languages = languageRepository.getAllLanguages();
+
+        assertFalse(languages.isEmpty());
+        assertNotNull(languages.getFirst().getName());
     }
 }

@@ -2,11 +2,14 @@ package com.ofdun.jobfinder.features.application.data.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ofdun.jobfinder.features.application.data.postgres.repository.PostgreSQLApplicationRepository;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.enums.ApplicationStatus;
 import java.util.Date;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -19,7 +22,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import(PostgreSQLApplicationRepository.class)
 @Testcontainers
@@ -46,6 +50,7 @@ class PostgreSQLApplicationRepositoryIT {
     }
 
     @Autowired private ApplicationRepository applicationRepository;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void cleanup() {}
@@ -119,8 +124,46 @@ class PostgreSQLApplicationRepositoryIT {
         assertTrue(applicationRepository.getApplicationById(missingId).isEmpty());
     }
 
+    @Test
+    void getApplicationsByVacancyId_whenVacancyHasApplications_thenReturnOnlyVacancyApplications() {
+        Long secondVacancyId = createVacancyForTests();
+
+        applicationRepository.createApplication(
+                buildApplicationModel(null, 1L, 1L, new Date(), ApplicationStatus.NEW));
+        applicationRepository.createApplication(
+                buildApplicationModel(null, 1L, 2L, new Date(), ApplicationStatus.INVITATION));
+        applicationRepository.createApplication(
+                buildApplicationModel(null, secondVacancyId, 1L, new Date(), ApplicationStatus.REJECTION));
+
+        var items = applicationRepository.getApplicationsByVacancyId(1L);
+
+        assertFalse(items.isEmpty());
+        assertTrue(items.stream().allMatch(item -> item.getVacancyId().equals(1L)));
+    }
+
     private ApplicationModel buildApplicationModel(
             Long id, Long vacancyId, Long resumeId, Date date, ApplicationStatus status) {
         return new ApplicationModel(id, vacancyId, resumeId, date, status);
+    }
+
+    private Long createVacancyForTests() {
+        return jdbcTemplate.queryForObject(
+                """
+                INSERT INTO jobfinder.vacancies (
+                    employer_id,
+                    location_id,
+                    salary,
+                    payment_frequency,
+                    work_experience,
+                    work_format,
+                    description,
+                    publication_date,
+                    employment_type,
+                    address
+                )
+                VALUES (1, 2, 150000, 'MONTHLY', '2 years', 'HYBRID', 'IT vacancy for tests', now(), 'FULL_TIME', 'Test address')
+                RETURNING id
+                """,
+                Long.class);
     }
 }

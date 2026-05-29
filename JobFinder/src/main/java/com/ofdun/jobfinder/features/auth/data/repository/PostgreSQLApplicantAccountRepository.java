@@ -6,10 +6,12 @@ import com.ofdun.jobfinder.features.auth.domain.model.ApplicantAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.persistence.type", havingValue = "postgres")
 public class PostgreSQLApplicantAccountRepository implements ApplicantAccountRepository {
     private final ApplicantRepository applicantRepository;
 

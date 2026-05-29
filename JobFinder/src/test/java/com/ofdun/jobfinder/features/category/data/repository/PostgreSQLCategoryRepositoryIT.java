@@ -2,7 +2,9 @@ package com.ofdun.jobfinder.features.category.data.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ofdun.jobfinder.features.category.data.postgres.repository.PostgreSQLCategoryRepository;
 import com.ofdun.jobfinder.features.category.domain.repository.CategoryRepository;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -15,7 +17,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import(PostgreSQLCategoryRepository.class)
 @Testcontainers
@@ -66,5 +69,13 @@ class PostgreSQLCategoryRepositoryIT {
     @Test
     void getCategoryById_whenNullId_thenThrowsException() {
         assertThrows(RuntimeException.class, () -> categoryRepository.getCategoryById(null));
+    }
+
+    @Test
+    void getAllCategories_whenCalled_thenReturnsNonEmptyList() {
+        var categories = categoryRepository.getAllCategories();
+
+        assertFalse(categories.isEmpty());
+        assertNotNull(categories.getFirst().getName());
     }
 }

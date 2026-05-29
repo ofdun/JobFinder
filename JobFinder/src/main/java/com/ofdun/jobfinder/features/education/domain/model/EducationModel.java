@@ -24,5 +24,5 @@ public class EducationModel {
 
     @NotBlank private String department; // кафедра
 
-    @NotNull private Year yearOfGraduation;
+    @NotNull private Integer yearOfGraduation;
 }

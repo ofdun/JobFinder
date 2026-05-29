@@ -10,13 +10,17 @@ import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
 import com.ofdun.jobfinder.features.skill.domain.service.SkillService;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyRequest;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyResponse;
+import com.ofdun.jobfinder.features.vacancy.api.dto.DraftVacancyResponse;
+import com.ofdun.jobfinder.features.vacancy.api.mapper.DraftVacancyApiMapper;
 import com.ofdun.jobfinder.features.vacancy.api.mapper.VacancyApiMapper;
+import com.ofdun.jobfinder.features.vacancy.domain.service.DraftVacancyService;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import com.ofdun.jobfinder.features.vacancy.domain.service.VacancyService;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,6 +43,8 @@ public class VacancyController {
     private final LocationService locationService;
     private final SkillService skillService;
     private final VacancyApiMapper mapper;
+    private final DraftVacancyService draftVacancyService;
+    private final DraftVacancyApiMapper draftVacancyApiMapper;
 
     @PostMapping
     @PreAuthorize(
@@ -66,13 +72,45 @@ public class VacancyController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
-    public ResponseEntity<@NonNull Void> deleteVacancy(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteVacancy(@PathVariable Long id) {
         vacancyService.deleteVacancy(id);
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}/drafts")
+    @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
+    public ResponseEntity<List<DraftVacancyResponse>> getVacancyDrafts(@PathVariable Long id) {
+        var drafts = draftVacancyService.getDrafts(id).stream()
+                .map(draftVacancyApiMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(drafts);
+    }
+
+    @PostMapping("/{id}/drafts")
+    @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
+    public ResponseEntity<DraftVacancyResponse> createVacancyDraft(@PathVariable Long id) {
+        var draft = draftVacancyService.createDraft(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(draftVacancyApiMapper.toResponse(draft));
+    }
+
+    @PostMapping("/{id}/drafts/{draftId}/apply")
+    @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
+    public ResponseEntity<@NonNull VacancyResponse> applyVacancyDraft(
+            @PathVariable Long id, @PathVariable Long draftId) {
+        var updated = draftVacancyService.applyDraft(id, draftId);
+        return ResponseEntity.ok(mapToResponse(updated));
+    }
+
+    @DeleteMapping("/{id}/drafts/{draftId}")
+    @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
+    public ResponseEntity<Void> deleteVacancyDraft(
+            @PathVariable Long id, @PathVariable Long draftId) {
+        draftVacancyService.deleteDraft(id, draftId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<VacancyResponse>> searchVacancies(
+    public ResponseEntity<@NonNull PageResponse<@NonNull VacancyResponse>> searchVacancies(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long employerId,
             @RequestParam(required = false) Long locationId,
@@ -87,6 +125,7 @@ public class VacancyController {
                     Date publicationDateTo,
             @RequestParam(required = false) List<Long> skillIds,
             @RequestParam(required = false) List<Long> languageIds,
+            @RequestParam(required = false) VacancyStatus status,
             @Valid @ModelAttribute OffsetPaginationParams pagination) {
 
         var filter =
@@ -102,7 +141,8 @@ public class VacancyController {
                         publicationDateFrom,
                         publicationDateTo,
                         skillIds,
-                        languageIds);
+                        languageIds,
+                        status);
 
         var p =
                 OffsetPagination.builder()

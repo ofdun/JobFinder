@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.vacancy.domain.model;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -26,4 +27,5 @@ public class VacancySearchFilter {
     private Date publicationDateTo;
     private List<Long> skillIds;
     private List<Long> languageIds;
+    private VacancyStatus status;
 }
