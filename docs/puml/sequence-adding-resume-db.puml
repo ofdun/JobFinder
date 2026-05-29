@@ -1,0 +1,39 @@
+@startuml
+
+skinparam defaultFontSize 24
+skinparam usecaseFontSize 24
+skinparam actorFontSize 24
+
+actor "Соискатель" as User
+
+participant "Frontend" as SPA
+
+participant "Backend" as Backend #WhiteSmoke
+
+database "PostgreSQL" as DB
+
+database "Qdrant" as VDB
+
+User -> SPA: Сохранить резюме
+activate SPA
+
+SPA -> Backend: Запрос на создание резюме
+activate Backend
+
+Backend -> DB: Сохранить данные резюме
+activate DB
+DB --> Backend: Идентификатор резюме
+deactivate DB
+
+Backend -> VDB: Сохранить вектор с привязкой к ID
+activate VDB
+VDB --> Backend: Подтверждение
+deactivate VDB
+
+Backend --> SPA: Успешный ответ
+deactivate Backend
+
+SPA --> User: Уведомление об успехе
+deactivate SPA
+
+@enduml

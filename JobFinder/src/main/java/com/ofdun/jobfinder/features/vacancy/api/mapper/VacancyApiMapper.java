@@ -9,6 +9,7 @@ import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyRequest;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyResponse;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,8 @@ public class VacancyApiMapper {
                 request.getEmploymentType(),
                 request.getDescription(),
                 new Date(),
-                request.getAddress());
+                request.getAddress(),
+                request.getStatus() == null ? VacancyStatus.ACTIVE : request.getStatus());
     }
 
     public VacancyResponse toResponse(
@@ -54,6 +56,7 @@ public class VacancyApiMapper {
                 model.getEmploymentType(),
                 model.getDescription(),
                 model.getPublicationDate(),
-                model.getAddress());
+                model.getAddress(),
+                model.getStatus());
     }
 }

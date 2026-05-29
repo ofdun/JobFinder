@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.auth.domain.model.EmployerAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
-import com.ofdun.jobfinder.features.employer.data.repository.PostgreSQLEmployerRepository;
+import com.ofdun.jobfinder.features.employer.data.postgres.repository.PostgreSQLEmployerRepository;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -17,7 +18,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@ActiveProfiles("test")
+@Tag("postgres")
+@ActiveProfiles("test-postgres")
 @DataJpaTest
 @Import({PostgreSQLEmployerAccountRepository.class, PostgreSQLEmployerRepository.class})
 @Testcontainers

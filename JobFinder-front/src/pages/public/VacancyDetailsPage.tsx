@@ -2,7 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError } from '../../shared/api/httpClient';
 import { getVacancyById } from '../../shared/api/vacancyApi';
-import { formatDate, formatEmploymentType, formatJobFormat, formatSalary, toHumanTitle } from '../../shared/lib/format';
+import {
+  formatDate,
+  formatEmploymentType,
+  formatJobFormat,
+  formatSalary,
+  formatVacancyStatus,
+  toHumanTitle,
+} from '../../shared/lib/format';
 import { getSession } from '../../shared/session/sessionStore';
 import { QueryStateBlock } from '../../shared/ui/QueryStateBlock';
 
@@ -43,6 +50,7 @@ export function VacancyDetailsPage() {
         <p>{query.data.description}</p>
         <p>Формат: {formatJobFormat(query.data.jobFormat)}</p>
         <p>Тип занятости: {formatEmploymentType(query.data.employmentType)}</p>
+        <p>Статус: {formatVacancyStatus(query.data.status)}</p>
         <p>Опыт: {query.data.experience}</p>
         <p>Адрес: {query.data.address}</p>
         <p>Зарплата: {formatSalary(query.data)}</p>

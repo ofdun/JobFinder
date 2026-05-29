@@ -27,6 +27,11 @@ const jobFormatLabels: Record<Vacancy['jobFormat'], string> = {
   HYBRID: 'Гибрид',
 };
 
+const vacancyStatusLabels: Record<Vacancy['status'], string> = {
+  ACTIVE: 'Активная',
+  INACTIVE: 'Неактивная',
+};
+
 const applicationStatusLabels: Record<ApplicationStatus, string> = {
   NEW: 'Новый',
   INVITATION: 'Приглашение',
@@ -41,6 +46,17 @@ const languageProficiencyLabels: Record<string, string> = {
   C1: 'C1 (Продвинутый)',
   C2: 'C2 (В совершенстве)',
 };
+
+const educationDegreeLabels: Record<string, string> = {
+    BACHELOR: 'Бакалавр',
+    MASTER: 'Магистр',
+    SPECIALIST: 'Специалист',
+    PHD: 'Доктор наук (PhD)',
+};
+
+export function formatEducationDegree(degree: string): string {
+    return educationDegreeLabels[degree] ?? degree;
+}
 
 const moneyFormatter = new Intl.NumberFormat('ru-RU');
 
@@ -58,6 +74,10 @@ export function formatEmploymentType(value: Vacancy['employmentType'] | string):
 
 export function formatJobFormat(value: Vacancy['jobFormat'] | string): string {
   return jobFormatLabels[value as Vacancy['jobFormat']] ?? value;
+}
+
+export function formatVacancyStatus(value: Vacancy['status'] | string): string {
+  return vacancyStatusLabels[value as Vacancy['status']] ?? value;
 }
 
 export function formatApplicationStatus(value: ApplicationStatus): string {
@@ -87,3 +107,9 @@ export function formatDate(dateIso: string): string {
   }).format(new Date(dateIso));
 }
 
+export function formatDateTimeSeconds(dateIso: string): string {
+  return new Intl.DateTimeFormat('ru-RU', {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+  }).format(new Date(dateIso));
+}

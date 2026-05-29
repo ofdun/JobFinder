@@ -1,6 +1,10 @@
 @startuml
 left to right direction
 
+skinparam defaultFontSize 24
+skinparam usecaseFontSize 24
+skinparam actorFontSize 24
+
 actor "Гость" as Guest
 actor "Соискатель" as Seeker
 actor "Работодатель" as Employer
@@ -18,7 +22,7 @@ rectangle "Система поиска работы" {
   usecase "Управление резюме" as ManageResume
   usecase "Откликнуться на вакансию" as Apply
   usecase "Просмотр своих откликов и их статусов" as ViewMyApplications
-  
+
   usecase "Создать новое резюме" as AddResume
 
   usecase "Управление профилем компании" as ManageCompany
@@ -36,7 +40,6 @@ rectangle "Система поиска работы" {
   Seeker --> ViewMyApplications
 
   ManageResume ..> AddResume : extend
-
   Apply ...> SearchVacancies : extend
 
   Employer --> ManageCompany

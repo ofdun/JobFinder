@@ -153,3 +153,4 @@ CREATE TABLE jobfinder.language_vacancy (
   language_id bigint,
   vacancy_id bigint
 );
+

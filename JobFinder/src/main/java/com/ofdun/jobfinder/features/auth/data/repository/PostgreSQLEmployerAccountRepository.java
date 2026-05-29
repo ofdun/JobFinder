@@ -5,10 +5,12 @@ import com.ofdun.jobfinder.features.auth.domain.model.EmployerAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.persistence.type", havingValue = "postgres")
 public class PostgreSQLEmployerAccountRepository implements EmployerAccountRepository {
     private final EmployerRepository employerRepository;
 

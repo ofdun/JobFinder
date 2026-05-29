@@ -32,6 +32,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: jobfinder
+    volumes:
+      - mongodb_data:/data/db
+
   redis:
     image: redis:8.6
     container_name: jobfinder-redis
@@ -45,12 +58,15 @@ services:
     working_dir: /workspace/JobFinder
     environment:
       GRADLE_USER_HOME: /home/gradle/.gradle
-    command: sh -c "chmod +x ./gradlew && ./gradlew bootRun --no-daemon --args='--spring.profiles.active=docker'"
+    command: sh -c "chmod +x ./gradlew && ./gradlew bootRun --no-daemon"
+    env_file:
+      - ./JobFinder/.env
     depends_on:
       - postgres
       - redis
       - qdrant
       - ollama
+      - mongodb
     ports:
       - "8080:8080"
     volumes:
@@ -74,6 +90,7 @@ services:
       - frontend_node_modules:/workspace/JobFinder-front/node_modules
 
 volumes:
+  mongodb_data:
   ollama_data:
   qdrant_data:
   postgres_data:

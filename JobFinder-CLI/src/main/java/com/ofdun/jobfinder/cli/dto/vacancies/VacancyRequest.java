@@ -13,4 +13,5 @@ public record VacancyRequest(
         JobFormat jobFormat,
         EmploymentType employmentType,
         String description,
-        String address) {}
+        String address,
+        VacancyStatus status) {}

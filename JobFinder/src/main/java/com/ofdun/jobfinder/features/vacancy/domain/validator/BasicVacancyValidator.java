@@ -18,7 +18,7 @@ public class BasicVacancyValidator implements VacancyValidator {
     @Override
     public void validateVacancyForUpdate(VacancyModel vacancy) {
         validateId(vacancy.getId());
-        validateVacancyDoesNotExist(vacancy.getId());
+        validateVacancyExists(vacancy.getId());
     }
 
     @Override

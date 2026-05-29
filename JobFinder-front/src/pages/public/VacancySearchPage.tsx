@@ -10,9 +10,16 @@ import {
   formatLanguageProficiency,
   formatPaymentFrequency,
   formatSalary,
+  formatVacancyStatus,
 } from '../../shared/lib/format';
 import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
-import { EmploymentType, JobFormat, PaymentFrequency } from '../../shared/types/vacancy';
+import {
+  EmploymentType,
+  JobFormat,
+  PaymentFrequency,
+  VacancySearchParams,
+  VacancyStatus,
+} from '../../shared/types/vacancy';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
 import { MultiSelectChips } from '../../shared/ui/MultiSelectChips';
 import { QueryStateBlock } from '../../shared/ui/QueryStateBlock';
@@ -21,6 +28,7 @@ const PAGE_SIZE = 10;
 const paymentFrequencies: PaymentFrequency[] = ['HOURLY', 'WEEKLY', 'MONTHLY', 'PROJECT'];
 const employmentTypes: EmploymentType[] = ['FULL_TIME', 'PART_TIME', 'FREELANCE'];
 const jobFormats: JobFormat[] = ['REMOTE', 'OFFICE', 'HYBRID'];
+const vacancyStatuses: VacancyStatus[] = ['ACTIVE', 'INACTIVE'];
 
 function parsePage(value: string | null): number {
   const parsed = Number(value);
@@ -89,6 +97,14 @@ function parseWorkFormat(value: string): JobFormat | undefined {
   return undefined;
 }
 
+function parseVacancyStatus(value: string): VacancyStatus | undefined {
+  if (value === 'ACTIVE' || value === 'INACTIVE') {
+    return value;
+  }
+
+  return undefined;
+}
+
 function buildCardTitle(description: string): string {
   const normalized = description.trim();
   if (!normalized) {
@@ -115,6 +131,7 @@ export function VacancySearchPage() {
   const paymentFrequency = searchParams.get('paymentFrequency') ?? '';
   const employmentType = searchParams.get('employmentType') ?? '';
   const workFormat = searchParams.get('workFormat') ?? '';
+  const status = searchParams.get('status') ?? '';
   const sortBy = searchParams.get('sortBy') ?? '';
   const sortDesc = searchParams.get('sortDesc') === 'true';
   const page = parsePage(searchParams.get('page'));
@@ -147,12 +164,13 @@ export function VacancySearchPage() {
       paymentFrequency,
       employmentType,
       workFormat,
+      status,
       sortBy,
       sortDesc,
       page,
     ],
-    queryFn: () =>
-      searchVacancies({
+    queryFn: () => {
+      const params = {
         q: debouncedQ || undefined,
         salaryMin: parseOptionalNumber(salaryMin),
         salaryMax: parseOptionalNumber(salaryMax),
@@ -164,11 +182,15 @@ export function VacancySearchPage() {
         paymentFrequency: parsePaymentFrequency(paymentFrequency),
         employmentType: parseEmploymentType(employmentType),
         workFormat: parseWorkFormat(workFormat),
+        status: parseVacancyStatus(status),
         sortBy: sortBy || undefined,
         sortDesc,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
-      }),
+      } as VacancySearchParams;
+
+      return searchVacancies(params);
+    },
   });
 
   const skillsQuery = useQuery({
@@ -214,6 +236,7 @@ export function VacancySearchPage() {
                 <h3>{buildCardTitle(vacancy.description)}</h3>
                 <p>Формат: {formatJobFormat(vacancy.jobFormat)}</p>
                 <p>Занятость: {formatEmploymentType(vacancy.employmentType)}</p>
+                <p>Статус: {formatVacancyStatus(vacancy.status)}</p>
                 <p>Зарплата: {formatSalary(vacancy)}</p>
                 <p>Опубликовано: {formatDate(vacancy.publicationDate)}</p>
                 <Link to={`/vacancies/${vacancy.id}`}>Подробнее</Link>
@@ -329,6 +352,17 @@ export function VacancySearchPage() {
               {jobFormats.map((option) => (
                 <option key={option} value={option}>
                   {formatJobFormat(option)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Статус
+            <select value={status} onChange={(event) => setQueryState('status', event.target.value)}>
+              <option value="">Любой</option>
+              {vacancyStatuses.map((option) => (
+                <option key={option} value={option}>
+                  {formatVacancyStatus(option)}
                 </option>
               ))}
             </select>

@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.vacancy.api.dto;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
 import com.ofdun.jobfinder.features.vacancy.enums.PaymentFrequency;
+import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -36,4 +37,6 @@ public class VacancyRequest {
     @NotNull private Long locationId;
 
     @NotNull private Long employerId;
+
+    private VacancyStatus status;
 }
