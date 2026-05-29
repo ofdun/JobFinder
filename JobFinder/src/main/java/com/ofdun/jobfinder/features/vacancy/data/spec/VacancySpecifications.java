@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.vacancy.data.spec;
 
-import com.ofdun.jobfinder.features.vacancy.data.entity.VacancyEntity;
+import com.ofdun.jobfinder.features.vacancy.data.postgres.entity.VacancyEntity;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -33,6 +33,9 @@ public final class VacancySpecifications {
             }
             if (filter.getWorkFormat() != null) {
                 predicates.add(cb.equal(root.get("workFormat"), filter.getWorkFormat()));
+            }
+            if (filter.getStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), filter.getStatus()));
             }
 
             if (filter.getSalaryMin() != null) {

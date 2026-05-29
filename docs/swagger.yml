@@ -988,8 +988,7 @@ components:
         department:
           type: string
         yearOfGraduation:
-          type: string
-          format: date
+          type: integer
 
     EducationCreate:
       type: object
@@ -1005,8 +1004,7 @@ components:
         department:
           type: string
         yearOfGraduation:
-          type: string
-          format: date
+          type: integer
 
     JobExperience:
       type: object

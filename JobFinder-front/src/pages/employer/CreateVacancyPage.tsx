@@ -9,15 +9,17 @@ import {
   formatJobFormat,
   formatLanguageProficiency,
   formatPaymentFrequency,
+  formatVacancyStatus,
 } from '../../shared/lib/format';
 import { getCurrentUserId } from '../../shared/session/sessionStore';
-import { EmploymentType, JobFormat, PaymentFrequency } from '../../shared/types/vacancy';
+import { EmploymentType, JobFormat, PaymentFrequency, VacancyStatus } from '../../shared/types/vacancy';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
 import { MultiSelectChips } from '../../shared/ui/MultiSelectChips';
 
 const paymentFrequencies: PaymentFrequency[] = ['HOURLY', 'WEEKLY', 'MONTHLY', 'PROJECT'];
 const employmentTypes: EmploymentType[] = ['FULL_TIME', 'PART_TIME', 'FREELANCE'];
 const jobFormats: JobFormat[] = ['REMOTE', 'OFFICE', 'HYBRID'];
+const vacancyStatuses: VacancyStatus[] = ['ACTIVE', 'INACTIVE'];
 
 export function CreateVacancyPage() {
   const navigate = useNavigate();
@@ -33,6 +35,7 @@ export function CreateVacancyPage() {
   const [employmentType, setEmploymentType] = useState<EmploymentType>('FULL_TIME');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
+  const [status, setStatus] = useState<VacancyStatus>('ACTIVE');
 
   const skillsQuery = useQuery({
     queryKey: ['skills'],
@@ -60,6 +63,7 @@ export function CreateVacancyPage() {
         employmentType,
         description,
         address,
+        status,
       }),
     onSuccess: () => navigate('/me/vacancies'),
   });
@@ -125,6 +129,15 @@ export function CreateVacancyPage() {
           <select value={employmentType} onChange={(event) => setEmploymentType(event.target.value as EmploymentType)}>
             {employmentTypes.map((option) => (
               <option key={option} value={option}>{formatEmploymentType(option)}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Статус
+          <select value={status} onChange={(event) => setStatus(event.target.value as VacancyStatus)}>
+            {vacancyStatuses.map((option) => (
+              <option key={option} value={option}>{formatVacancyStatus(option)}</option>
             ))}
           </select>
         </label>

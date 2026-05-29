@@ -16,5 +16,5 @@ public class EducationDto {
     private String institutionName;
     private String faculty;
     private String department;
-    private Year yearOfGraduation;
+    private Integer yearOfGraduation;
 }

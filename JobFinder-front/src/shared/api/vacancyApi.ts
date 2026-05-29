@@ -1,4 +1,10 @@
-import { Vacancy, VacancyPageResponse, VacancyRequest, VacancySearchParams } from '../types/vacancy';
+import {
+  DraftVacancy,
+  Vacancy,
+  VacancyPageResponse,
+  VacancyRequest,
+  VacancySearchParams,
+} from '../types/vacancy';
 import { request } from './httpClient';
 
 function toSearchParams(params: VacancySearchParams): string {
@@ -38,6 +44,10 @@ function toSearchParams(params: VacancySearchParams): string {
 
   if (params.workFormat) {
     searchParams.set('workFormat', params.workFormat);
+  }
+
+  if (params.status) {
+    searchParams.set('status', params.status);
   }
 
   if (params.publicationDateFrom) {
@@ -105,3 +115,27 @@ export function deleteVacancyById(id: number): Promise<void> {
   });
 }
 
+export function getVacancyDrafts(vacancyId: number): Promise<DraftVacancy[]> {
+  return request<DraftVacancy[]>(`/vacancies/${vacancyId}/drafts`, { auth: true });
+}
+
+export function createVacancyDraft(vacancyId: number): Promise<DraftVacancy> {
+  return request<DraftVacancy>(`/vacancies/${vacancyId}/drafts`, {
+    method: 'POST',
+    auth: true,
+  });
+}
+
+export function applyVacancyDraft(vacancyId: number, draftId: number): Promise<Vacancy> {
+  return request<Vacancy>(`/vacancies/${vacancyId}/drafts/${draftId}/apply`, {
+    method: 'POST',
+    auth: true,
+  });
+}
+
+export function deleteVacancyDraft(vacancyId: number, draftId: number): Promise<void> {
+  return request<void>(`/vacancies/${vacancyId}/drafts/${draftId}`, {
+    method: 'DELETE',
+    auth: true,
+  });
+}

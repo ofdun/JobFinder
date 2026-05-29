@@ -19,6 +19,9 @@ configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
+    create("mockitoAgent") {
+        isTransitive = false
+    }
 }
 
 repositories {
@@ -30,6 +33,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
@@ -43,6 +47,11 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    testImplementation("org.testcontainers:testcontainers-mongodb")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test:4.0.4")
 
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
@@ -61,11 +70,31 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.springframework.security:spring-security-test")
+    add("mockitoAgent", "org.mockito:mockito-core")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-javaagent:${configurations["mockitoAgent"].singleFile.absolutePath}")
+}
+
+tasks.register<Test>("testPostgres") {
+    useJUnitPlatform {
+        includeTags("postgres")
+    }
+    systemProperty("spring.profiles.active", "test-postgres")
+}
+
+tasks.register<Test>("testMongo") {
+    useJUnitPlatform {
+        includeTags("mongo")
+    }
+    systemProperty("spring.profiles.active", "test-mongo")
+}
+
+tasks.register("testAll") {
+    dependsOn("testPostgres", "testMongo")
 }
 
 spotless {

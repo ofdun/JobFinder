@@ -3,21 +3,32 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getLanguages } from '../../shared/api/languageApi';
 import { getSkills } from '../../shared/api/skillApi';
-import { deleteVacancyById, getVacancyById, updateVacancyById } from '../../shared/api/vacancyApi';
+import {
+  applyVacancyDraft,
+  createVacancyDraft,
+  deleteVacancyById,
+  deleteVacancyDraft,
+  getVacancyById,
+  getVacancyDrafts,
+  updateVacancyById,
+} from '../../shared/api/vacancyApi';
 import {
   formatEmploymentType,
   formatJobFormat,
   formatLanguageProficiency,
   formatPaymentFrequency,
+  formatVacancyStatus,
+  formatDateTimeSeconds,
   toHumanTitle,
 } from '../../shared/lib/format';
-import { EmploymentType, JobFormat, PaymentFrequency } from '../../shared/types/vacancy';
+import { EmploymentType, JobFormat, PaymentFrequency, VacancyStatus } from '../../shared/types/vacancy';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
 import { MultiSelectChips } from '../../shared/ui/MultiSelectChips';
 
 const paymentFrequencies: PaymentFrequency[] = ['HOURLY', 'WEEKLY', 'MONTHLY', 'PROJECT'];
 const employmentTypes: EmploymentType[] = ['FULL_TIME', 'PART_TIME', 'FREELANCE'];
 const jobFormats: JobFormat[] = ['REMOTE', 'OFFICE', 'HYBRID'];
+const vacancyStatuses: VacancyStatus[] = ['ACTIVE', 'INACTIVE'];
 
 function toIdArray(values: Array<{ id: number }> | undefined): number[] {
   if (!values || values.length === 0) {
@@ -50,6 +61,12 @@ export function EditVacancyPage() {
     staleTime: 1000 * 60 * 60,
   });
 
+  const draftsQuery = useQuery({
+    queryKey: ['vacancy-drafts', vacancyId],
+    queryFn: () => getVacancyDrafts(vacancyId),
+    enabled: Number.isFinite(vacancyId),
+  });
+
   const [employerId, setEmployerId] = useState(1);
   const [locationId, setLocationId] = useState<number | undefined>(1);
   const [salary, setSalary] = useState(0);
@@ -61,6 +78,7 @@ export function EditVacancyPage() {
   const [employmentType, setEmploymentType] = useState<EmploymentType>('FULL_TIME');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
+  const [status, setStatus] = useState<VacancyStatus>('ACTIVE');
 
   useEffect(() => {
     if (!query.data) {
@@ -78,6 +96,7 @@ export function EditVacancyPage() {
     setEmploymentType(query.data.employmentType ?? 'FULL_TIME');
     setDescription(query.data.description ?? '');
     setAddress(query.data.address ?? '');
+    setStatus(query.data.status ?? 'ACTIVE');
   }, [query.data]);
 
   const updateMutation = useMutation({
@@ -94,13 +113,32 @@ export function EditVacancyPage() {
         employmentType,
         description,
         address,
+        status,
       }),
     onSuccess: () => query.refetch(),
+  });
+
+  const draftMutation = useMutation({
+    mutationFn: () => createVacancyDraft(vacancyId),
+    onSuccess: () => draftsQuery.refetch(),
+  });
+
+  const applyDraftMutation = useMutation({
+    mutationFn: (draftId: number) => applyVacancyDraft(vacancyId, draftId),
+    onSuccess: () => {
+      query.refetch();
+      draftsQuery.refetch();
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteVacancyById(vacancyId),
     onSuccess: () => navigate('/me/vacancies'),
+  });
+
+  const deleteDraftMutation = useMutation({
+    mutationFn: (draftId: number) => deleteVacancyDraft(vacancyId, draftId),
+    onSuccess: () => draftsQuery.refetch(),
   });
 
   if (!Number.isFinite(vacancyId)) {
@@ -172,9 +210,54 @@ export function EditVacancyPage() {
           </select>
         </label>
 
+        <label>
+          Статус
+          <select value={status} onChange={(event) => setStatus(event.target.value as VacancyStatus)}>
+            {vacancyStatuses.map((option) => (
+              <option key={option} value={option}>{formatVacancyStatus(option)}</option>
+            ))}
+          </select>
+        </label>
+
         <label>Опыт<input value={experience} onChange={(event) => setExperience(event.target.value)} required /></label>
         <label>Описание<textarea rows={6} value={description} onChange={(event) => setDescription(event.target.value)} required /></label>
         <label>Адрес<input value={address} onChange={(event) => setAddress(event.target.value)} required /></label>
+
+        <section className="card">
+          <h2>Версии вакансии</h2>
+          {draftsQuery.isLoading ? <p>Загрузка версий...</p> : null}
+          {draftsQuery.isError ? <p className="error">Не удалось загрузить версии.</p> : null}
+          {draftsQuery.data && draftsQuery.data.length > 0 ? (
+            <ul>
+              {draftsQuery.data.map((draft) => (
+                <li key={draft.id}>
+                  <span>{formatDateTimeSeconds(draft.versionTimestamp)}</span>
+                  <button
+                    type="button"
+                    className="button-small"
+                    onClick={() => applyDraftMutation.mutate(draft.id)}
+                    disabled={applyDraftMutation.isPending}
+                  >
+                    {applyDraftMutation.isPending ? 'Загружаем...' : 'Загрузить версию'}
+                  </button>
+                  <button
+                    type="button"
+                    className="danger button-small"
+                    onClick={() => deleteDraftMutation.mutate(draft.id)}
+                    disabled={deleteDraftMutation.isPending}
+                  >
+                    {deleteDraftMutation.isPending ? 'Удаляем...' : 'Удалить версию'}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Версий пока нет.</p>
+          )}
+          <button type="button" onClick={() => draftMutation.mutate()} disabled={draftMutation.isPending}>
+            {draftMutation.isPending ? 'Сохраняем...' : 'Сохранить версию'}
+          </button>
+        </section>
 
         <div className="toolbar">
           <button type="submit" disabled={updateMutation.isPending || !locationId}>{updateMutation.isPending ? 'Сохраняем...' : 'Сохранить'}</button>

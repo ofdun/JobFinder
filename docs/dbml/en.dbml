@@ -38,6 +38,11 @@ enum employment_type {
   freelance  [note: 'Фриланс']
 }
 
+enum vacancy_status {
+  inactive [note: 'Неактивная']
+  active [note: 'Активная']
+}
+
 enum application_status {
   new         [note: 'Новый']
   invitation  [note: 'Приглашение']
@@ -72,6 +77,13 @@ table vacancy {
   publication_date datetime
   employment_type employment_type
   address varchar
+  status vacancy_status
+}
+
+table draft_vacancy {
+  id int [pk, increment]
+  vacancy_id int
+  version_timestamp datetime
 }
 
 table application {
@@ -158,6 +170,8 @@ ref: vacancy.id < application.vacancy_id
 ref: vacancy.location_id - location.id
 ref: vacancy.id < vacancy_skills.vacancy_id
 ref: skill.id < vacancy_skills.skill_id
+
+ref: vacancy.id < draft_vacancy.vacancy_id
 
 ref: applicant.id < resume.applicant_id
 ref: category.id < resume.category_id
