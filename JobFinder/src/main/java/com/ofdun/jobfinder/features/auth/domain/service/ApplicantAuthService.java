@@ -1,6 +1,6 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
-import com.ofdun.jobfinder.features.applicant.exception.ApplicantAlreadyExistsException;
+import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
@@ -28,7 +28,7 @@ public class ApplicantAuthService implements AuthService {
         var applicant =
                 applicantAccountRepository
                         .findByEmail(email)
-                        .orElseThrow(() -> new ApplicantAlreadyExistsException(email));
+                        .orElseThrow(() -> new ApplicantNotFoundException(email));
 
         if (!encryptionService.matches(password, applicant.getPasswordHash())) {
             throw new InvalidPasswordException();
