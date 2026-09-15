@@ -15,7 +15,41 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class BasicEmployerServiceTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void createEmployer_whenValidationFails_skipsStorage() {
+        var input = com.ofdun.jobfinder.support.TestDataMother.employer();
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(employerValidator)
+                .validateEmployerForCreate(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> employerService.createEmployer(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(employerRepository);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void deleteEmployer_whenValidationFails_skipsStorage() {
+        Long input = 0L;
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(employerValidator)
+                .validateEmployerForDelete(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> employerService.deleteEmployer(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(employerRepository);
+    }
 
     @Mock private EmployerRepository employerRepository;
 

@@ -11,7 +11,22 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+@org.junit.jupiter.api.Tag("equivalence")
 class RelationalResumeUpdateHandlerTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void handle_whenResumeMissing_throwsNotFound() {
+        var repository = mock(RelationalResumeRepository.class);
+        var handler = new RelationalResumeUpdateHandler(repository);
+        var model = com.ofdun.jobfinder.support.TestDataMother.resume();
+        when(repository.getResumeById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException.class,
+                () -> handler.handle(model));
+
+        verify(repository, never()).updateResume(any());
+    }
 
     @Test
     void execute_whenPartialUpdate_thenPreservesRequiredFieldsFromExistingResume() {
@@ -33,7 +48,8 @@ class RelationalResumeUpdateHandlerTest {
         update.setDescription("Updated description");
 
         when(repository.getResumeById(15L)).thenReturn(Optional.of(existing));
-        when(repository.updateResume(any(ResumeModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.updateResume(any(ResumeModel.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = handler.handle(update);
 
@@ -45,4 +61,3 @@ class RelationalResumeUpdateHandlerTest {
         assertEquals("Updated description", saved.getDescription());
     }
 }
-

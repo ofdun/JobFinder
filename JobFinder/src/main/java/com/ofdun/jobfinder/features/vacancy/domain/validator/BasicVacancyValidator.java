@@ -13,7 +13,9 @@ public class BasicVacancyValidator implements VacancyValidator {
     private final VacancyRepository vacancyRepository;
 
     @Override
-    public void validateVacancyForCreate(VacancyModel vacancy) {}
+    public void validateVacancyForCreate(VacancyModel vacancy) {
+        java.util.Objects.requireNonNull(vacancy, "Vacancy is required");
+    }
 
     @Override
     public void validateVacancyForUpdate(VacancyModel vacancy) {

@@ -50,6 +50,8 @@ public final class VacanciesMenu {
         EmploymentType et = p.readEnum("employmentType", EmploymentType.class, true);
         String description = p.readLine("description (можно пусто): ");
         String address = p.readLine("address (можно пусто): ");
+        VacancyStatus status =
+                p.readEnum("status (по умолчанию ACTIVE)", VacancyStatus.class, true);
 
         return new VacancyRequest(
                 employerId,
@@ -62,7 +64,8 @@ public final class VacanciesMenu {
                 jf,
                 et,
                 description.isBlank() ? null : description,
-                address.isBlank() ? null : address);
+                address.isBlank() ? null : address,
+                status);
     }
 
     private void create() {

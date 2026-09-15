@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class BasicMatchingServiceTest {
 
     @Mock private VacancyRepository vacancyRepository;
@@ -29,6 +30,7 @@ class BasicMatchingServiceTest {
     @InjectMocks private BasicMatchingService matchingService;
 
     @Test
+    @org.junit.jupiter.api.Tag("boundary")
     void findSuitableCandidates_whenMaxAmountIsZeroOrLess_thenEmptyListReturned() {
         Long vacancyId = 1L;
         Integer maxAmount = 0;
@@ -41,6 +43,7 @@ class BasicMatchingServiceTest {
     }
 
     @Test
+    @org.junit.jupiter.api.Tag("boundary")
     void findSuitableCandidates_whenMaxAmountIsNegative_thenEmptyListReturned() {
         Long vacancyId = 1L;
         Integer maxAmount = -1;

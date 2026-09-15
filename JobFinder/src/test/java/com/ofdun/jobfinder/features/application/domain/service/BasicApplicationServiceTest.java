@@ -16,7 +16,41 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class BasicApplicationServiceTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void saveApplication_whenValidationFails_skipsStorage() {
+        var input = com.ofdun.jobfinder.support.TestDataMother.application();
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(applicationValidator)
+                .validateApplicationForCreate(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> applicationService.saveApplication(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(applicationRepository);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void deleteApplication_whenValidationFails_skipsStorage() {
+        Long input = 0L;
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(applicationValidator)
+                .validateApplicationForDelete(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> applicationService.deleteApplication(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(applicationRepository);
+    }
 
     @Mock private ApplicationRepository applicationRepository;
 
@@ -80,7 +114,8 @@ class BasicApplicationServiceTest {
     @Test
     void getApplicationsByVacancyId_whenValidVacancyId_thenApplicationsReturned() {
         Long vacancyId = 10L;
-        List<ApplicationModel> expected = List.of(mock(ApplicationModel.class), mock(ApplicationModel.class));
+        List<ApplicationModel> expected =
+                List.of(mock(ApplicationModel.class), mock(ApplicationModel.class));
         when(applicationRepository.getApplicationsByVacancyId(vacancyId)).thenReturn(expected);
 
         List<ApplicationModel> actual = applicationService.getApplicationsByVacancyId(vacancyId);

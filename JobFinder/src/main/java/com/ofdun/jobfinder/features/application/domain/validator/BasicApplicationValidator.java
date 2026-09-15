@@ -2,7 +2,6 @@ package com.ofdun.jobfinder.features.application.domain.validator;
 
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
-import com.ofdun.jobfinder.features.application.exception.ApplicationAlreadyExistsException;
 import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,13 +28,7 @@ public class BasicApplicationValidator implements ApplicationValidator {
     @Override
     public void validateApplicationForDelete(Long applicationId) {
         validateId(applicationId);
-        validateNotExists(applicationId);
-    }
-
-    private void validateNotExists(Long id) {
-        if (applicationRepository.getApplicationById(id).isPresent()) {
-            throw new ApplicationAlreadyExistsException(id);
-        }
+        validateExists(applicationId);
     }
 
     private void validateExists(Long id) {

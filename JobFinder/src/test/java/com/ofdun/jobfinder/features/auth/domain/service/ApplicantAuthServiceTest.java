@@ -21,7 +21,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class ApplicantAuthServiceTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void logout_whenStorageFails_propagatesFailure() {
+        var failure = new IllegalStateException("storage unavailable");
+        doThrow(failure).when(tokenRepository).deleteToken("token");
+
+        var error =
+                assertThrows(
+                        IllegalStateException.class, () -> applicantAuthService.logout("token"));
+
+        assertSame(failure, error);
+    }
 
     @Mock private EncryptionService encryptionService;
 
@@ -75,7 +88,9 @@ class ApplicantAuthServiceTest {
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.login(email, password));
 
-        assertEquals("Applicant with string " + email + " already exists", exception.getMessage());
+        assertInstanceOf(
+                com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException.class,
+                exception);
         verify(applicantAccountRepository).findByEmail(email);
         verifyNoInteractions(encryptionService, tokenRepository, jwtProvider);
     }

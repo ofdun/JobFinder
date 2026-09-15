@@ -24,6 +24,7 @@ describe('format helpers', () => {
       description: 'desc',
       publicationDate: '2026-01-01T00:00:00Z',
       address: 'test',
+      status: 'ACTIVE',
     });
 
     expect(salary).toContain('150');
@@ -61,4 +62,3 @@ describe('format helpers', () => {
     expect(formatLanguageProficiency('UNKNOWN')).toBe('UNKNOWN');
   });
 });
-
