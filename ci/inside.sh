@@ -15,9 +15,10 @@ collect() {
         if ! tcpdump -nn -r "$root/JobFinder/build/traffic/http.pcap" > "$root/JobFinder/build/traffic/http.txt" 2>&1; then result=1; fi
         if ! grep -q '18080' "$root/JobFinder/build/traffic/http.txt"; then result=1; fi
     fi
-    if [ -d "$root/JobFinder/build/reports" ]; then cp -R "$root/JobFinder/build/reports" "$output/"; fi
-    if [ -d "$root/JobFinder/build/test-results" ]; then cp -R "$root/JobFinder/build/test-results" "$output/"; fi
-    if [ -d "$root/JobFinder/build/traffic" ]; then cp -R "$root/JobFinder/build/traffic" "$output/"; fi
+    if [ -d "$root/JobFinder/build/reports" ]; then cp -R "$root/JobFinder/build/reports" "$output/" || result=1; fi
+    if [ -d "$root/JobFinder/build/test-results" ]; then cp -R "$root/JobFinder/build/test-results" "$output/" || result=1; fi
+    if [ -d "$root/JobFinder/build/traffic" ]; then cp -R "$root/JobFinder/build/traffic" "$output/" || result=1; fi
+    chown -R "${ARTIFACT_UID:?}:${ARTIFACT_GID:?}" "$output" || result=1
     printf '%s\n' "$result" > "$output/test-exit-code.txt"
     exit "$result"
 }
