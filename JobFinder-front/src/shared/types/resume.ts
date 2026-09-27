@@ -60,6 +60,7 @@ export interface ResumeRequest {
 }
 
 export interface ResumeUpdateRequest {
+    applicantId?: number;
     categoryId?: number;
     description?: string;
     skillIds?: number[];

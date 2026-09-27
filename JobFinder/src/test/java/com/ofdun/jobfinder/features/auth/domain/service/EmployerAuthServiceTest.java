@@ -21,7 +21,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class EmployerAuthServiceTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void logout_whenStorageFails_propagatesFailure() {
+        var failure = new IllegalStateException("storage unavailable");
+        doThrow(failure).when(tokenRepository).deleteToken("token");
+
+        var error =
+                assertThrows(
+                        IllegalStateException.class, () -> employerAuthService.logout("token"));
+
+        assertSame(failure, error);
+    }
 
     @Mock private EncryptionService encryptionService;
 

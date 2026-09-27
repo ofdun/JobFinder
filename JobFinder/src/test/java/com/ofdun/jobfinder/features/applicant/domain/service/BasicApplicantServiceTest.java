@@ -15,7 +15,41 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@org.junit.jupiter.api.Tag("equivalence")
 class BasicApplicantServiceTest {
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void createApplicant_whenValidationFails_skipsStorage() {
+        var input = com.ofdun.jobfinder.support.TestDataMother.applicant();
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(applicantValidator)
+                .validateApplicantForCreate(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> applicantService.createApplicant(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(applicantRepository);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("equivalence")
+    void deleteApplicant_whenValidationFails_skipsStorage() {
+        Long input = 0L;
+        doThrow(new IllegalArgumentException("invalid"))
+                .when(applicantValidator)
+                .validateApplicantForDelete(input);
+
+        var error =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> applicantService.deleteApplicant(input));
+
+        assertEquals("invalid", error.getMessage());
+        verifyNoInteractions(applicantRepository);
+    }
 
     @Mock private ApplicantRepository applicantRepository;
 

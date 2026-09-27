@@ -3,7 +3,6 @@ package com.ofdun.jobfinder.features.resume.domain.service;
 import com.ofdun.jobfinder.common.domain.model.OffsetPagination;
 import com.ofdun.jobfinder.common.domain.model.PageResult;
 import com.ofdun.jobfinder.features.resume.domain.chain.EmbeddingResumeHandler;
-import com.ofdun.jobfinder.features.resume.domain.chain.ResumeHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.get.RelationalResumeGetHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.get.VectorResumeGetHandler;
 import com.ofdun.jobfinder.features.resume.domain.chain.save.RelationalResumeSaveHandler;
@@ -17,6 +16,7 @@ import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeReposit
 import com.ofdun.jobfinder.features.resume.exception.FailedToCreateResumeException;
 import jakarta.validation.Valid;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +28,9 @@ public class BasicResumeService implements ResumeService {
     private final RelationalResumeRepository relationalResumeRepository;
     private final VectorResumeRepository vectorResumeRepository;
 
-    private final ResumeHandler saveChain;
-    private final ResumeHandler getChain;
-    private final ResumeHandler updateChain;
+    private final Function<ResumeModel, Optional<ResumeModel>> saveChain;
+    private final Function<ResumeModel, Optional<ResumeModel>> getChain;
+    private final Function<ResumeModel, Optional<ResumeModel>> updateChain;
 
     public BasicResumeService(
             @NonNull RelationalResumeRepository relationalResumeRepository,
@@ -45,23 +45,30 @@ public class BasicResumeService implements ResumeService {
         this.relationalResumeRepository = relationalResumeRepository;
         this.vectorResumeRepository = vectorResumeRepository;
 
-        saveChain = relationalResumeSaveHandler;
-        relationalResumeSaveHandler
-                .setNext(embeddingResumeHandler)
-                .setNext(vectorResumeSaveHandler);
+        saveChain =
+                model ->
+                        relationalResumeSaveHandler
+                                .handle(model)
+                                .flatMap(embeddingResumeHandler::handle)
+                                .flatMap(vectorResumeSaveHandler::handle);
 
-        updateChain = relationalResumeUpdateHandler;
-        relationalResumeUpdateHandler
-                .setNext(embeddingResumeHandler)
-                .setNext(vectorResumeUpdateHandler);
+        updateChain =
+                model ->
+                        relationalResumeUpdateHandler
+                                .handle(model)
+                                .flatMap(embeddingResumeHandler::handle)
+                                .flatMap(vectorResumeUpdateHandler::handle);
 
-        getChain = relationalResumeGetHandler;
-        relationalResumeGetHandler.setNext(vectorResumeGetHandler);
+        getChain =
+                model ->
+                        relationalResumeGetHandler
+                                .handle(model)
+                                .flatMap(vectorResumeGetHandler::handle);
     }
 
     @Override
     public Long createResume(@NonNull @Valid ResumeModel resumeModel) {
-        var result = saveChain.handle(resumeModel);
+        var result = saveChain.apply(resumeModel);
         return result.orElseThrow(
                         () -> new FailedToCreateResumeException(resumeModel.getApplicantId()))
                 .getId();
@@ -72,12 +79,12 @@ public class BasicResumeService implements ResumeService {
     public Optional<ResumeModel> getResumeById(@NonNull Long resumeId) {
         var model = new ResumeModel();
         model.setId(resumeId);
-        return getChain.handle(model);
+        return getChain.apply(model);
     }
 
     @Override
     public Optional<ResumeModel> updateResume(@NonNull @Valid ResumeModel resumeModel) {
-        return updateChain.handle(resumeModel);
+        return updateChain.apply(resumeModel);
     }
 
     @Override
