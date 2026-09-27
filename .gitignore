@@ -2,6 +2,11 @@
 .venv
 **bkp**
 .DS_Store
+.ci-artifacts/
+.ci-gradle/
+.ci-history/
+.ci-inputs/
+.ci-report/
 *cities500.txt
 *.log
 *.gz
