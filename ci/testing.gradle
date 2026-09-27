@@ -1,0 +1,13 @@
+tasks.register('e2eTest', Test) {
+    group = 'verification'
+    description = 'Run the HTTP acceptance scenario against an isolated application and databases.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/*E2E.class'
+    shouldRunAfter tasks.named('integrationTest')
+}
+
+tasks.named('testAll') {
+    description = 'Run unit, integration and HTTP acceptance tests (requires Docker, curl, jq and the Ollama image).'
+    dependsOn tasks.named('e2eTest')
+}
