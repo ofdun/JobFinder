@@ -50,4 +50,5 @@ if [ "$ready" != true ]; then exit 1; fi
 docker run --name "$runner" --network "$run_id" \
     -e DOCKER_HOST=tcp://engine:2375 -e TESTCONTAINERS_HOST_OVERRIDE=engine \
     -e CI_STAGE="$stage" -e CI_FORCE_FAILURE="${CI_FORCE_FAILURE:-}" \
+    -e ARTIFACT_UID="$(id -u)" -e ARTIFACT_GID="$(id -g)" \
     -v "$root:/workspace" jobfinder-test-runner:local "$stage" 2>&1 | tee "$output/run.log"
