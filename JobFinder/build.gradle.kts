@@ -189,6 +189,8 @@ tasks.register("testAll") {
     dependsOn("unitTest", "integrationTest")
 }
 
+apply(from = "../ci/testing.gradle")
+
 spotless {
     ratchetFrom("origin/main")
 
