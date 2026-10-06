@@ -1,0 +1,52 @@
+name: Test dashboard
+
+on:
+  push:
+    branches: [testing/lab2]
+    paths:
+      - ci/dashboard.html
+      - ci/report.py
+      - ci/history.py
+      - ci/history-seed.json
+      - .github/workflows/dashboard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/testing/lab2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s ci -p 'test_*.py'
+      - run: node ci/test_dashboard.cjs
+      - run: python3 ci/history.py --history .ci-history/history.json
+      - name: Render recorded results without adding a test run
+        run: |
+          python3 - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'ci')
+          from report import render_dashboard
+          render_dashboard(Path('.ci-report'), json.loads(Path('.ci-history/history.json').read_text()))
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .ci-report/pages
+      - uses: actions/deploy-pages@v4
+        id: deployment
