@@ -28,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s ci -p 'test_*.py'
+      - run: node ci/test_dashboard.cjs
       - run: bash ci/run.sh unit
       - uses: actions/upload-artifact@v4
         if: always()
@@ -83,6 +84,9 @@ jobs:
           path: .ci-history
           key: test-history-${{ github.ref }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: test-history-${{ github.ref }}-
+      - name: Restore published history
+        if: always() && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+        run: python3 ci/history.py --history .ci-history/history.json
       - name: Generate report, skipped-stage results and trends
         if: always()
         env:
@@ -100,3 +104,26 @@ jobs:
           path: .ci-report/
           include-hidden-files: true
           retention-days: 30
+      - uses: actions/upload-pages-artifact@v4
+        if: always() && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+        with:
+          path: .ci-report/pages
+
+  pages:
+    if: always() && needs.report.result == 'success' && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+    needs: report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment

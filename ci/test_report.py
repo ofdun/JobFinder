@@ -5,10 +5,30 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
 
-from report import generate
+from report import generate, render_dashboard
+from history import merge
 
 
 class ReportTest(unittest.TestCase):
+    def test_dashboard_does_not_count_synthetic_stage_markers_as_tests(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record = generate(root, root / "report", root / "history.json", {"unit": {"result": "failure"}})
+            self.assertEqual([0, 0, 0], [s["actual"]["tests"] for s in record["stages"]])
+            self.assertEqual(1, record["stages"][0]["failures"])
+            self.assertEqual({"index.html", "history.json"}, {p.name for p in (root / "report/pages").iterdir()})
+
+    def test_history_merges_and_deduplicates_without_a_thirty_run_limit(self):
+        rows = [{"run": str(i), "time": f"{i:03}", "stages": []} for i in range(40)]
+        self.assertEqual(rows, merge(rows[:30], rows[20:]))
+
+    def test_dashboard_escapes_embedded_script_markup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            render_dashboard(root, [{"run": "</script><script>alert(1)</script>", "stages": []}])
+            self.assertNotIn("</script><script>alert(1)</script>", (root / "index.html").read_text())
+            self.assertNotIn("__HISTORY_JSON__", (root / "index.html").read_text())
+
     def test_failed_stage_preserves_failures_and_marks_downstream_skipped(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
