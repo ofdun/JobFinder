@@ -49,6 +49,7 @@ def generate(inputs, output, history_path, statuses):
     ET.ElementTree(combined).write(output / "junit.xml", encoding="utf-8", xml_declaration=True)
     record = {
         "run": os.environ.get("GITHUB_RUN_ID", "local") + "." + os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+        "number": int(os.environ["GITHUB_RUN_NUMBER"]) if os.environ.get("GITHUB_RUN_NUMBER") else None,
         "time": datetime.now(timezone.utc).isoformat(),
         "sha": os.environ.get("GITHUB_SHA", "local"),
         "branch": os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME", "local"),
