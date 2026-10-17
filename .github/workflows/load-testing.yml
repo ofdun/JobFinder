@@ -5,6 +5,7 @@ run-name: >-
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
     inputs:
       profile:
@@ -40,6 +41,7 @@ concurrency:
 
 jobs:
   load:
+    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'load-test')
     name: ${{ github.event_name == 'pull_request' && 'Load smoke + report' || 'Load testing + report' }}
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 330 }}
