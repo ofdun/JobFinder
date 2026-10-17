@@ -1,6 +1,10 @@
 name: Load testing
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('Load smoke · PR #{0}', github.event.pull_request.number) || format('Load testing · {0}', github.ref_name) }}
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       profile:
@@ -31,13 +35,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: load-testing
+  group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
   load:
+    name: ${{ github.event_name == 'pull_request' && 'Load smoke + report' || 'Load testing + report' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 330
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 330 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,13 +50,13 @@ jobs:
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
       - name: Поднять стенд и выполнить нагрузочное тестирование
-        timeout-minutes: 300
+        timeout-minutes: ${{ github.event_name == 'pull_request' && 20 || 300 }}
         env:
-          LOAD_PROFILE: ${{ inputs.profile }}
-          LOAD_SMOKE: ${{ inputs.smoke }}
-          LOAD_PEAK_VUS: ${{ inputs.peak_vus }}
-          LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds }}
-          LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds }}
+          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+          LOAD_SMOKE: ${{ github.event_name == 'pull_request' || inputs.smoke }}
+          LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
+          LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
+          LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds || '600' }}
         shell: bash
         run: |
           args=(
@@ -94,3 +99,19 @@ jobs:
               printf 'Постоянная нагрузка: 4 пользователя. CPU: приложение — 0,1; генератор — 2; мониторинг — 3. Результаты этого стенда не следует напрямую сравнивать с локальными.\n'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          rows = []
+          for path in sorted(Path('load-testing/results').glob('*/*/summary.json')):
+              result = json.loads(path.read_text())
+              latency = result.get('latency_ms')
+              p95 = f"{latency['percentiles']['0.95']:.2f}" if latency else '—'
+              rows.append(f"| {result['profile']} | {'SMOKE' if result['smoke'] else 'Полный'} | {result['requests']} | {p95} | {result['rps']['mean']:.2f} | {result['unexpected_errors']} |")
+          if rows:
+              print('\n| Сценарий | Режим | Запросы | p95, мс | RPS | Неожиданные ошибки |')
+              print('|---|---|---:|---:|---:|---:|')
+              print('\n'.join(rows))
+              print('\nSMOKE проверяет работоспособность стенда и не заменяет полное нагрузочное исследование.')
+          PY
