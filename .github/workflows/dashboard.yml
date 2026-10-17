@@ -36,6 +36,7 @@ jobs:
         with:
           name: dashboard-report
           path: .ci-report/
+          include-hidden-files: true
           retention-days: 14
 
   pages:
