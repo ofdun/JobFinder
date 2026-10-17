@@ -7,3 +7,7 @@
 !JobFinder/src/**
 !ci
 !ci/testing.gradle
+
+!docs
+!docs/swagger.yml
+!docs/schema.graphqls

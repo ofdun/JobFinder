@@ -62,6 +62,9 @@ class ApplicationWorkflowIT {
 
     @Test
     void applicantApplies_employerInvites_applicationIsWithdrawn() {
+        // The seeded pair already has an application; start this journey before applying.
+        // The surrounding test transaction restores that seed row on rollback.
+        jdbc.update("delete from jobfinder.applications where vacancy_id = 1 and resume_id = 1");
         var application = new ApplicationModel(null, 1L, 1L, new Date(), ApplicationStatus.NEW);
 
         Long id = service.saveApplication(application);

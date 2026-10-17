@@ -4,6 +4,7 @@ COPY JobFinder/gradle gradle
 COPY JobFinder/gradlew JobFinder/build.gradle.kts JobFinder/settings.gradle.kts ./
 COPY JobFinder/src src
 COPY ci/testing.gradle /ci/testing.gradle
+COPY docs/swagger.yml docs/schema.graphqls /docs/
 RUN --mount=type=cache,target=/home/gradle/.gradle gradle --no-daemon --console=plain bootJar -x test
 
 FROM gradle:9.1-jdk25
