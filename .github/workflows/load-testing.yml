@@ -1,0 +1,96 @@
+name: Load testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Сценарий нагрузки
+        type: choice
+        default: all
+        options: [all, ramp, stress, soak, soak-10, soak-20]
+      smoke:
+        description: Короткая проверка стенда вместо полного измерения
+        type: boolean
+        default: false
+      peak_vus:
+        description: Пиковые пользователи для ramp/stress (5–1024; smoke — максимум 8)
+        type: number
+        default: 128
+      soak_seconds:
+        description: Длительность каждого soak без прогрева, секунды
+        type: choice
+        default: '600'
+        options: ['600', '1800', '3600']
+      recovery_seconds:
+        description: Наблюдение восстановления после перегрузки, секунды
+        type: choice
+        default: '600'
+        options: ['600', '900', '1800']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-testing
+  cancel-in-progress: false
+
+jobs:
+  load:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверка расчётов статистики
+        run: python3 -m unittest discover -s load-testing -p 'test_*.py'
+
+      - name: Поднять стенд и выполнить нагрузочное тестирование
+        timeout-minutes: 300
+        env:
+          LOAD_PROFILE: ${{ inputs.profile }}
+          LOAD_SMOKE: ${{ inputs.smoke }}
+          LOAD_PEAK_VUS: ${{ inputs.peak_vus }}
+          LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds }}
+          LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds }}
+        shell: bash
+        run: |
+          args=(
+            --profile "$LOAD_PROFILE"
+            --peak-vus "$LOAD_PEAK_VUS"
+            --soak-seconds "$LOAD_SOAK_SECONDS"
+            --recovery-seconds "$LOAD_RECOVERY_SECONDS"
+            --stable-vus 4
+            --application-cpus '0,1'
+            --generator-cpus 2
+            --monitor-cpus 3
+          )
+          if [[ "$LOAD_SMOKE" == "true" ]]; then
+            args+=(--smoke)
+          fi
+          python3 -u load-testing/run.py "${args[@]}"
+
+      - name: Сохранить отчёты, измерения и логи
+        id: results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: load-testing/results/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Ссылка на результаты
+        if: always()
+        env:
+          RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
+        shell: bash
+        run: |
+          if [[ -n "$RESULTS_URL" ]]; then
+            {
+              printf '### Нагрузочное тестирование\n\n'
+              printf '[Скачать отчёты и логи](%s)\n\n' "$RESULTS_URL"
+              printf 'Распакуйте архив и откройте index.html в папке запуска.\n\n'
+              printf 'Зелёный статус означает завершение измерений, а не соблюдение SLO. Превышения порогов, ошибки и восстановление показаны в отчёте.\n\n'
+              printf 'Постоянная нагрузка: 4 пользователя. CPU: приложение — 0,1; генератор — 2; мониторинг — 3. Результаты этого стенда не следует напрямую сравнивать с локальными.\n'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
