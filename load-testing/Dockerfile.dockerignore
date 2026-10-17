@@ -1,9 +1,0 @@
-**
-!JobFinder
-!JobFinder/gradle/**
-!JobFinder/gradlew
-!JobFinder/build.gradle.kts
-!JobFinder/settings.gradle.kts
-!JobFinder/src/**
-!ci
-!ci/testing.gradle
