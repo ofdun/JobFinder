@@ -246,4 +246,36 @@ class RestContractAlignmentTest {
                                     method.getKey().toUpperCase(Locale.ROOT) + " " + path.getKey()),
                             method.getKey() + " " + path.getKey());
     }
+
+    @ParameterizedTest
+    @org.junit.jupiter.api.Tag("boundary")
+    @org.junit.jupiter.params.provider.CsvSource({
+        "limit,0", "limit,101", "limit,invalid", "offset,-1",
+        "employerId,invalid", "locationId,9223372036854775808", "sortDesc,yes", "status,DELETED"
+    })
+    void invalidCollectionParametersNeverReachTheService(String name, String value)
+            throws Exception {
+        var vacancies = mock(VacancyService.class);
+        mvc(controller(VacancyController.class, vacancies))
+                .perform(get("/api/v2/vacancies").param(name, value))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(vacancies);
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.api.Tag("boundary")
+    @ValueSource(ints = {1, 100})
+    void collectionAcceptsBothPaginationBoundaries(int limit) throws Exception {
+        var vacancies = mock(VacancyService.class);
+        when(vacancies.searchVacancies(any(), any()))
+                .thenReturn(new PageResult<>(List.of(), 0, limit, 0L, 0));
+        mvc(controller(VacancyController.class, vacancies))
+                .perform(
+                        get("/api/v2/vacancies")
+                                .param("limit", String.valueOf(limit))
+                                .param("offset", "0"))
+                .andExpect(status().isOk());
+        verify(vacancies)
+                .searchVacancies(any(), argThat(p -> p.getLimit() == limit && p.getOffset() == 0));
+    }
 }

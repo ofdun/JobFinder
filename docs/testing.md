@@ -178,7 +178,6 @@ HTML-отчёты находятся в `build/reports/tests/integrationTest/ind
 | [SecurityExpressionsTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/SecurityExpressionsTest.java) | Собственный/чужой ID, обе роли, отсутствие аутентификации, неизвестный principal, принадлежность вакансии/резюме/отклика, отсутствующие записи и ошибки репозиториев |
 | [JwtAuthenticationFilterTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/JwtAuthenticationFilterTest.java) | Отсутствующий/пустой/неверный Bearer header, валидные токены обеих ролей, отклонённые токены, ошибки разбора и проверки, очистка контекста/атрибутов, вызов следующего фильтра и передача исключений |
 | [SecurityConfigurationTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/SecurityConfigurationTest.java) | Разрешённые публичные маршруты, отказ для защищённых маршрутов без токена, разрешение с токеном, POST без CSRF в stateless-режиме, порядок JWT/logging фильтров, разрешённый и запрещённый CORS |
-| [JobFinderPrincipalTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/JobFinderPrincipalTest.java) | Сохранение ID/роли и null, равенство одинаковых identities, различие ID/роли |
 
 Все новые тесты отмечены `equivalence`: данные выбираются по категориям «разрешено/запрещено», «свой/чужой», «валидно/невалидно», «существует/отсутствует». В параметризованных сценариях каждая строка является отдельным запуском. Фильтр тестируется через публичный `doFilter`, а не прямым вызовом защищённого `doFilterInternal`.
 
@@ -191,7 +190,7 @@ HTML-отчёты находятся в `build/reports/tests/integrationTest/ind
 
 Первая команда перезаписывает отчёт выбранным пакетом; вторая восстанавливает полный отчёт. Конкретные примеры для ручной проверки: `employerOwnsVacancy_checksOwner`, `canAccessApplication_checksOwnershipForEachRole`, `doFilter_whenProviderThrows_clearsIdentityAndContinues`, `securityFilterChain_whenProtectedRoute_rejectsAnonymousRequest`.
 
-После полного прогона пакет `com.ofdun.jobfinder.features.auth.security` содержит 98 test cases в четырёх test classes. Покрытие строк каждого production-класса — 100%: `SecurityExpressions` 59/59, `JwtAuthenticationFilter` 30/30, `SecurityConfiguration` 40/40, `JobFinderPrincipal` 1/1. Итого LINE 130/130, BRANCH 61/66 = 92.42%.
+Исторический замер до расширения API и удаления тестов сгенерированного record: пакет `com.ofdun.jobfinder.features.auth.security` содержал 98 test cases в четырёх test classes. Покрытие строк каждого production-класса — 100%: `SecurityExpressions` 59/59, `JwtAuthenticationFilter` 30/30, `SecurityConfiguration` 40/40, `JobFinderPrincipal` 1/1. Итого LINE 130/130, BRANCH 61/66 = 92.42%.
 
 Оставшиеся пять ветвей не скрыты: две относятся к повторным проверкам `p != null` в `SecurityExpressions` после проверки типа principal; три — к сгенерированным Lombok проверкам `@NonNull` параметров защищённого `doFilterInternal`. Пользовательские ветви фильтра для заголовка и проверки токена выполнены. 100% строк не означает исчерпывающий аудит безопасности или проверку всех последовательностей ошибок.
 
@@ -204,7 +203,6 @@ HTML-отчёты находятся в `build/reports/tests/integrationTest/ind
 | [SecurityExpressions](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/SecurityExpressionsTest.java) | `isSelf`, `isApplicant`, `isEmployer`, `employerOwnsVacancy`, `applicantOwnsResume`, `canAccessApplication` |
 | [JwtAuthenticationFilter](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/JwtAuthenticationFilterTest.java) | `doFilter (унаследованный)` |
 | [SecurityConfiguration](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/SecurityConfigurationTest.java) | `securityFilterChain`, `corsConfigurationSource` |
-| [JobFinderPrincipal](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/security/JobFinderPrincipalTest.java) | Конструктор record, `id`, `accountType`, `equals`, `hashCode` |
 | [ApplicantAccountMapper](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/data/mapper/ApplicantAccountMapperTest.java) | `toModel` |
 | [ApplicantAuthService](../JobFinder/src/test/java/com/ofdun/jobfinder/features/auth/domain/service/ApplicantAuthServiceTest.java) | `login`, `refreshToken`, `logout` |
 | [ApplicantMongoMapper](../JobFinder/src/test/java/com/ofdun/jobfinder/features/applicant/data/mongo/mapper/ApplicantMongoMapperTest.java) | `toEntity`, `toModel` |
@@ -504,3 +502,41 @@ CLI: `check installDist` — 8 HTTP-тестов, все успешны. Про�
 
 В этом прогоне отдельный backend по HTTP не запускался; приведённые выше исторические
 HTTP-проверки не заменяют проверку нового развёртывания.
+
+## Регрессии REST v2 и CLI
+
+Дополнительные сценарии используют существующие задачи JUnit и те же тестовые контейнеры.
+Не добавлены отдельные тяжёлые стадии CI или контейнеры для каждого случая.
+
+| Уровень | Проверяемое поведение | Тесты |
+| --- | --- | --- |
+| Unit | Полная замена резюме очищает необязательные поля, сохраняет дату публикации; чужой владелец и отсутствующая запись отклоняются до записи; ошибка БД не запускает индексацию | [BasicResumeServiceTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/resume/domain/service/BasicResumeServiceTest.java) |
+| HTTP-компонентный | Границы пагинации, неверные типы фильтров, переполнение Long и недопустимые enum отклоняются до вызова сервиса | [RestContractAlignmentTest](../JobFinder/src/test/java/com/ofdun/jobfinder/features/api/RestContractAlignmentTest.java) |
+| CLI с локальным HTTP-сервером | Неуспешный refresh не повторяет исходный запрос; второй 401 останавливает повторы; неполная пара токенов не портит сессию; частичный GraphQL-ответ с errors не считается успехом | [ApiClientTest](../JobFinder-CLI/src/test/java/com/ofdun/jobfinder/cli/http/ApiClientTest.java) |
+| Интеграционный PostgreSQL | БД запрещает повтор пары вакансия–резюме; повторная смена статуса сохраняет ID, связи и дату; проверка перечитывает запись после очистки persistence context | [PostgreSQLApplicationRepositoryIT](../JobFinder/src/test/java/com/ofdun/jobfinder/features/application/data/repository/PostgreSQLApplicationRepositoryIT.java) |
+| E2E | Вход и ротация токенов обеих ролей; отказ при чужой роли, повторном refresh и подмене access/refresh; создание отклика и конфликт повтора; PUT статуса с проверкой роли и идемпотентности; чтение результата через GraphQL; восстановление и удаление версии вакансии | [ApplicationJourneyE2E](../JobFinder/src/test/java/com/ofdun/jobfinder/features/application/api/ApplicationJourneyE2E.java) |
+
+Удалены шесть проверок сгенерированных конструктора, геттеров, `equals/hashCode`
+у `JobFinderPrincipal`. Роли и владение по-прежнему проверяются через
+`SecurityExpressionsTest`, JWT-фильтр и HTTP-сценарии. Проверки мапперов сохранены:
+они проверяют преобразование моделей между API, доменом и хранилищем.
+
+Команды из корня репозитория:
+
+```sh
+./JobFinder/gradlew -p JobFinder test
+./JobFinder/gradlew -p JobFinder-CLI test
+./JobFinder/gradlew -p JobFinder testPostgres --tests '*PostgreSQLApplicationRepositoryIT'
+./JobFinder/gradlew -p JobFinder e2eTest
+```
+
+Для двух последних команд нужен Docker. E2E использует один набор временных
+PostgreSQL, Redis, MongoDB и Qdrant для всех сценариев; база приложения не затрагивается.
+После каждого сценария восстанавливаются SQL-фикстуры и очищаются тестовые сессии.
+После пересоздания схемы обновляются соединения пула, чтобы PostgreSQL не использовал
+кэшированные планы запросов к удалённым типам.
+
+Результат прогона 18.10.2026: 673 unit/компонентных теста backend, 12 тестов CLI,
+9 целевых интеграционных PostgreSQL-тестов и 4 E2E-сценария — без ошибок и пропусков.
+В сумме добавлены 23 сценария/параметризованных случая и удалены 6 проверок record.
+Полный набор MongoDB-интеграционных тестов в этом прогоне не запускался.

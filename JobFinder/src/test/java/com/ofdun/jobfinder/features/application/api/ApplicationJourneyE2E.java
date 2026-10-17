@@ -86,6 +86,7 @@ class ApplicationJourneyE2E {
 
     @Autowired JdbcTemplate jdbc;
     @Autowired Flyway flyway;
+    @Autowired com.zaxxer.hikari.HikariDataSource dataSource;
 
     final JsonMapper json = JsonMapper.builder().build();
     final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
@@ -162,7 +163,13 @@ class ApplicationJourneyE2E {
     JsonNode request(String method, String path, String token, String payload, int expected)
             throws Exception {
         var request =
-                HttpRequest.newBuilder(URI.create(base + path)).timeout(Duration.ofSeconds(15));
+                HttpRequest.newBuilder(
+                                URI.create(
+                                        path.startsWith("/api/")
+                                                ? "http://localhost:18080" + path
+                                                : base + path))
+                        .timeout(Duration.ofSeconds(15));
+        if (path.equals("/api/v2")) request.header("Accept", "application/graphql-response+json");
         if (token != null) request.header("Authorization", "Bearer " + token);
         if (payload != null) request.header("Content-Type", "application/json");
         request.method(
@@ -180,6 +187,8 @@ class ApplicationJourneyE2E {
         try {
             flyway.clean();
             flyway.migrate();
+            // Recreated PostgreSQL enum types invalidate cached prepared statements.
+            dataSource.getHikariPoolMXBean().softEvictConnections();
             assertEquals(
                     2,
                     jdbc.queryForObject(
@@ -195,5 +204,115 @@ class ApplicationJourneyE2E {
             assertEquals("0", redis.execInContainer("redis-cli", "DBSIZE").getStdout().trim());
             System.out.println("SESSIONS_CLEARED redis_keys=0");
         }
+    }
+
+    @Test
+    void unifiedAuthenticationRotatesRefreshAndRejectsWrongRoleAndReplay() throws Exception {
+        for (String role : new String[] {"APPLICANT", "EMPLOYER"}) {
+            String email = role.equals("APPLICANT") ? "alice@example.com" : "employer@example.com";
+            var tokens = loginV2(role, email);
+            String refresh = tokens.get("refreshToken").asText();
+            String wrongRole = role.equals("APPLICANT") ? "EMPLOYER" : "APPLICANT";
+            request("POST", "/api/v2/auth/refresh", null, refreshBody(wrongRole, refresh), 401);
+            var rotated =
+                    request("POST", "/api/v2/auth/refresh", null, refreshBody(role, refresh), 200);
+            assertNotEquals(refresh, rotated.get("refreshToken").asText());
+            request("POST", "/api/v2/auth/refresh", null, refreshBody(role, refresh), 401);
+            request(
+                    "POST",
+                    "/api/v2/auth/refresh",
+                    null,
+                    refreshBody(role, tokens.get("accessToken").asText()),
+                    401);
+            String profile = role.equals("APPLICANT") ? "/applicants/1" : "/employers/1";
+            request("GET", "/api/v2" + profile, rotated.get("accessToken").asText(), null, 200);
+            request("GET", "/api/v2" + profile, rotated.get("refreshToken").asText(), null, 401);
+        }
+    }
+
+    @Test
+    void v2ApplicationStatusIsIdempotentAndOnlyEmployerCanChangeIt() throws Exception {
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String body = "{\"vacancyId\":1,\"resumeId\":1,\"applicationStatus\":\"NEW\"}";
+        long id = request("POST", "/api/v2/applications", applicant, body, 201).asLong();
+        request("POST", "/api/v2/applications", applicant, body, 409);
+        var before = request("GET", "/api/v2/applications/" + id, applicant, null, 200);
+        String statusPath = "/api/v2/applications/" + id + "/status";
+        String invitation = "{\"applicationStatus\":\"INVITATION\"}";
+        request("PUT", statusPath, applicant, invitation, 403);
+        request("PUT", statusPath, null, invitation, 401);
+        request("PUT", statusPath, employer, "{\"applicationStatus\":\"UNKNOWN\"}", 400);
+        for (int attempt = 0; attempt < 2; attempt++) {
+            var after = request("PUT", statusPath, employer, invitation, 200);
+            assertEquals("INVITATION", after.get("applicationStatus").asText());
+            for (String field : new String[] {"id", "vacancyId", "resumeId", "applicationDate"}) {
+                assertNotNull(before.get(field), field);
+                assertEquals(before.get(field), after.get(field), field);
+            }
+        }
+        assertEquals(
+                "INVITATION",
+                jdbc.queryForObject(
+                        "select status::text from jobfinder.applications where id=?",
+                        String.class,
+                        id));
+        var graphql =
+                request(
+                        "POST",
+                        "/api/v2",
+                        applicant,
+                        "{\"operationName\":\"ReadApplication\",\"query\":\"query"
+                                + " ReadApplication($id: ID!) { application(id: $id) { id"
+                                + " applicationStatus } }\",\"variables\":{\"id\":\""
+                                + id
+                                + "\"}}",
+                        200);
+        assertFalse(graphql.has("errors"), graphql.toString());
+        assertEquals("INVITATION", graphql.at("/data/application/applicationStatus").asText());
+        assertEquals(id, graphql.at("/data/application/id").asLong());
+        request("DELETE", "/api/v2/applications/" + id, applicant, null, 204);
+    }
+
+    @Test
+    void canonicalDraftRestoreRestoresSnapshotAndChecksRole() throws Exception {
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        var original = request("GET", "/api/v2/vacancies/1", null, null, 200);
+        long draft =
+                request("POST", "/api/v2/vacancies/1/drafts", employer, null, 201)
+                        .get("id")
+                        .asLong();
+        jdbc.update(
+                "update jobfinder.vacancies set description='changed', status='INACTIVE' where"
+                        + " id=1");
+        String path = "/api/v2/vacancies/1/drafts/" + draft;
+        request("POST", path, applicant, null, 403);
+        assertEquals(
+                "changed",
+                jdbc.queryForObject(
+                        "select description from jobfinder.vacancies where id=1", String.class));
+        var restored = request("POST", path, employer, null, 200);
+        assertEquals(original.get("description"), restored.get("description"));
+        assertEquals("ACTIVE", restored.get("status").asText());
+        request("DELETE", path, employer, null, 204);
+        request("POST", path, employer, null, 404);
+    }
+
+    JsonNode loginV2(String role, String email) throws Exception {
+        return request(
+                "POST",
+                "/api/v2/auth/login",
+                null,
+                "{\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"userType\":\""
+                        + role
+                        + "\"}",
+                200);
+    }
+
+    String refreshBody(String role, String token) {
+        return "{\"userType\":\"" + role + "\",\"refreshToken\":\"" + token + "\"}";
     }
 }

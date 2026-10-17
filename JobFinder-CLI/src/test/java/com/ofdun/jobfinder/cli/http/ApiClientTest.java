@@ -193,4 +193,49 @@ class ApiClientTest {
         assertThrows(ApiException.class, () -> client.deleteResume(20L));
         assertTrue(calls.isEmpty());
     }
+
+    @Test
+    void rejectedRefreshDoesNotReplayProtectedRequestOrReplaceSession() throws Exception {
+        replies.add(new Reply(401, "{}"));
+        replies.add(new Reply(401, "{}"));
+        assertThrows(ApiException.class, () -> client.getApplicant(1L));
+        assertEquals("GET_APPLICANT", next().body().path("operationName").asText());
+        assertEquals("REFRESH", next().body().path("operationName").asText());
+        assertTrue(calls.isEmpty());
+        assertEquals("access", client.getSession().getAccessToken());
+        assertEquals("refresh", client.getSession().getRefreshToken());
+    }
+
+    @Test
+    void second401StopsAfterOneRefresh() throws Exception {
+        replies.add(new Reply(401, "{}"));
+        success("{\"accessToken\":\"new-access\",\"refreshToken\":\"new-refresh\"}");
+        replies.add(new Reply(401, "{}"));
+        assertThrows(ApiException.class, () -> client.getApplicant(1L));
+        next();
+        assertEquals("REFRESH", next().body().path("operationName").asText());
+        assertEquals("Bearer new-access", next().auth());
+        assertTrue(calls.isEmpty());
+    }
+
+    @Test
+    void incompleteRefreshPairDoesNotOverwriteValidSession() throws Exception {
+        success("{\"accessToken\":\"new-access\"}");
+        assertThrows(ApiException.class, () -> client.refreshTokens());
+        assertEquals("REFRESH", next().body().path("operationName").asText());
+        assertEquals("access", client.getSession().getAccessToken());
+        assertEquals("refresh", client.getSession().getRefreshToken());
+        assertTrue(calls.isEmpty());
+    }
+
+    @Test
+    void partialGraphqlDataWithErrorsCannotBeMistakenForSuccess() throws Exception {
+        replies.add(
+                new Reply(
+                        200,
+                        "{\"data\":{\"result\":{\"id\":\"1\"}},\"errors\":[{\"message\":\"denied\",\"extensions\":{\"code\":\"FORBIDDEN\"}}]}"));
+        assertThrows(ApiException.class, () -> client.getApplicant(1L));
+        next();
+        assertTrue(calls.isEmpty());
+    }
 }

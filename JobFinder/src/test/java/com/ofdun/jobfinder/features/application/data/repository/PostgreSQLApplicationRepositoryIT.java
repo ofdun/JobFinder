@@ -190,4 +190,44 @@ class PostgreSQLApplicationRepositoryIT {
                         .getId());
         assertTrue(applicationRepository.getApplicationsByApplicantId(999999L, 20, 0).isEmpty());
     }
+
+    @Test
+    @Tag("equivalence")
+    void duplicateVacancyResumePairIsRejectedByDatabase() {
+        var original = applicationRepository.getApplicationById(1L).orElseThrow();
+        var duplicate =
+                buildApplicationModel(
+                        null,
+                        original.getVacancyId(),
+                        original.getResumeId(),
+                        new Date(),
+                        ApplicationStatus.NEW);
+        assertThrows(
+                org.springframework.dao.DataIntegrityViolationException.class,
+                () -> applicationRepository.createApplication(duplicate));
+    }
+
+    @Test
+    @Tag("state-transition")
+    void repeatedStatusUpdatePreservesIdentityRelationshipsAndDate() {
+        var original = applicationRepository.getApplicationById(1L).orElseThrow();
+        var changed =
+                buildApplicationModel(
+                        original.getId(),
+                        original.getVacancyId(),
+                        original.getResumeId(),
+                        original.getApplicationDate(),
+                        ApplicationStatus.INVITATION);
+        applicationRepository.updateApplication(changed);
+        applicationRepository.updateApplication(changed);
+        entityManager.flush();
+        entityManager.clear();
+        var stored = applicationRepository.getApplicationById(original.getId()).orElseThrow();
+        assertEquals(original.getVacancyId(), stored.getVacancyId());
+        assertEquals(original.getResumeId(), stored.getResumeId());
+        assertEquals(original.getApplicationDate(), stored.getApplicationDate());
+        assertEquals(ApplicationStatus.INVITATION, stored.getApplicationStatus());
+    }
+
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 }
