@@ -2,6 +2,7 @@ name: Tests
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -16,7 +17,7 @@ permissions:
 
 concurrency:
   group: tests-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CI_FORCE_FAILURE: ${{ inputs.force_failure || 'none' }}
