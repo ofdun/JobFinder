@@ -31,6 +31,10 @@ class MongoSequenceServiceTest {
         var result = service.generateSequence("applicant");
 
         assertEquals(42L, result);
+        assertNotEquals(
+                "unit",
+                System.getenv("CI_FORCE_FAILURE"),
+                "Requested unit-test failure for the pipeline dashboard demonstration");
         verify(storage)
                 .findAndModify(
                         argThat(

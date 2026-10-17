@@ -6,9 +6,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 from report import generate
+from history import merge
 
 
 class ReportTest(unittest.TestCase):
+    def test_synthetic_stage_markers_are_not_counted_as_tests(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record = generate(root, root / "report", root / "history.json", {"unit": {"result": "failure"}})
+            self.assertEqual([0, 0, 0], [s["actual"]["tests"] for s in record["stages"]])
+            self.assertEqual(1, record["stages"][0]["failures"])
+
+    def test_history_merges_and_deduplicates_without_a_thirty_run_limit(self):
+        rows = [{"run": str(i), "time": f"{i:03}", "stages": []} for i in range(40)]
+        self.assertEqual(rows, merge(rows[:30], rows[20:]))
+
     def test_failed_stage_preserves_failures_and_marks_downstream_skipped(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
