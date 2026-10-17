@@ -387,7 +387,18 @@ def generate_suite(directory):
                      str(summary['requests']), fmt(summary['latency_ms']['percentiles']['0.95'] if summary['latency_ms'] else None),
                      fmt(summary['rps']['mean']), str(summary['unexpected_errors'])])
     validate_run_conditions(manifests)
-    (directory / 'index.html').write_text(page('Нагрузочное тестирование JobFinder', table(['Прогон', 'Режим', 'Измерение, с', 'Запросы', 'p95, мс', 'Средний RPS', 'Отказы'], rows)))
+    body = table(['Прогон', 'Режим', 'Измерение, с', 'Запросы', 'p95, мс', 'Средний RPS', 'Отказы'], rows)
+    machines = []
+    for manifest in manifests:
+        machine = manifest.get('machine')
+        if machine:
+            machines.append([TITLES[manifest['plan']['profile']], html.escape(machine['cpu_model']),
+                             str(machine['logical_cpus']), fmt(machine['memory_bytes'] / 2 ** 30),
+                             html.escape(machine['architecture']), html.escape(machine['kernel'])])
+    if machines:
+        body += '<section class="card"><h2>Окружение</h2>' + table(
+            ['Сценарий', 'CPU', 'Логических CPU', 'RAM, ГиБ', 'Архитектура', 'Ядро ОС'], machines) + '</section>'
+    (directory / 'index.html').write_text(page('Нагрузочное тестирование JobFinder', body))
 
 
 if __name__ == '__main__':

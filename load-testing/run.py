@@ -45,6 +45,25 @@ def prepare_images(output, skip_build):
     return {name: inspect('image', image)['Id'] for name, image in IMAGES.items()}
 
 
+def pinned_images(path):
+    expected = json.loads(Path(path).read_text())
+    if set(expected) != set(IMAGES):
+        raise ValueError('Image bundle must include every component')
+    actual = {name: inspect('image', image)['Id'] for name, image in IMAGES.items()}
+    if actual != expected:
+        raise ValueError('Loaded images do not match the shared image bundle')
+    return actual
+
+
+def machine_info(info):
+    cpuinfo = Path('/proc/cpuinfo')
+    models = sorted({line.partition(':')[2].strip() for line in cpuinfo.read_text().splitlines()
+                     if line.startswith('model name')}) if cpuinfo.exists() else []
+    return {'os': os.uname().sysname, 'kernel': os.uname().release, 'architecture': os.uname().machine,
+            'cpu_model': ', '.join(models) or 'unknown', 'logical_cpus': info['NCPU'],
+            'memory_bytes': info['MemTotal'], 'runner_image': os.environ.get('ImageVersion')}
+
+
 def wait_for_backend(container, seconds=180):
     deadline = time.monotonic() + seconds
     while time.monotonic() < deadline:
@@ -61,7 +80,7 @@ def wait_for_backend(container, seconds=180):
     raise TimeoutError('Backend readiness exceeded 180 seconds')
 
 
-def run_one(directory, plan, images, cpus, index):
+def run_one(directory, plan, images, cpus, index, machine=None):
     directory.mkdir()
     write_json(directory / 'plan.json', plan)
     token = 'jf-load-' + secrets.token_hex(6)
@@ -70,7 +89,7 @@ def run_one(directory, plan, images, cpus, index):
     run_images = {}
     containers = {}
     manifest = {'status': 'running', 'plan': plan, 'started_at': datetime.now(timezone.utc).isoformat(),
-                'cpu_sets': cpus, 'containers': {}, 'base_images': images, 'gpu': 'not used',
+                'cpu_sets': cpus, 'containers': {}, 'base_images': images, 'gpu': 'not used', 'machine': machine,
                 'source_sha256': hashlib.sha256(b''.join(p.read_bytes() for p in sorted(ROOT.glob('*')) if p.is_file())).hexdigest()}
     process = None
     network_created = False
@@ -209,6 +228,7 @@ def main():
     parser.add_argument('--recovery-seconds', type=int, default=600)
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--skip-build', action='store_true')
+    parser.add_argument('--images-file', type=Path)
     parser.add_argument('--application-cpus', default='0,1')
     parser.add_argument('--generator-cpus', default='2,3')
     parser.add_argument('--monitor-cpus', default='4')
@@ -226,17 +246,19 @@ def main():
     output = ROOT / 'results' / (datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + secrets.token_hex(3))
     output.mkdir(parents=True)
     background = docker('ps', '--format', '{{.Names}}', capture_output=True).stdout.splitlines()
+    machine = machine_info(info)
     write_json(output / 'environment.json', {'docker': {k: info.get(k) for k in ('ServerVersion', 'OperatingSystem', 'Architecture', 'NCPU', 'MemTotal')},
                                            'background_containers': background, 'cpu_sets': cpus,
+                                           'machine': machine,
                                            'gpu': 'not used', 'host': os.uname().sysname,
                                            'isolation_scope': 'disjoint Docker VM CPU sets for this test; background containers unchanged'})
     print('Results:', output, flush=True)
-    images = prepare_images(output, args.skip_build)
+    images = pinned_images(args.images_file) if args.images_file else prepare_images(output, args.skip_build)
     for attempt in range(args.repeat):
         for plan in plans:
             name = f'{attempt + 1:02d}-{plan["profile"]}'
             print('Starting:', name, flush=True)
-            run_one(output / name, plan, images, cpus, name)
+            run_one(output / name, plan, images, cpus, name, machine)
     from report import generate_suite
     generate_suite(output)
     print('Report:', output / 'index.html', flush=True)

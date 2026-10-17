@@ -41,23 +41,72 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  load:
+  prepare:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1
-    name: Load testing
+    name: prepare
     runs-on: ubuntu-24.04
     outputs:
-      report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
-    timeout-minutes: 330
+      profiles: ${{ steps.profiles.outputs.profiles }}
+      images_artifact: load-images-${{ github.run_id }}-${{ github.run_attempt }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       - name: Проверка расчётов статистики
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
-      - name: Поднять стенд и выполнить нагрузочное тестирование
-        timeout-minutes: 300
+      - name: Выбрать сценарии
+        id: profiles
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+        run: python3 load-testing/pipeline.py profiles --profile "$LOAD_PROFILE"
+
+      - name: Подготовить общие образы
+        run: python3 -u load-testing/pipeline.py bundle --output .ci-load-images
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: load-build-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci-load-images/build.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: load-images-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .ci-load-images/images.tar
+            .ci-load-images/images.json
+          compression-level: 1
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
+  load:
+    name: ${{ matrix.profile }}
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        profile: ${{ fromJSON(needs.prepare.outputs.profiles || '["ramp","stress","soak","soak-10","soak-20"]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare.outputs.images_artifact }}
+          path: .ci-load-images
+      - name: Загрузить общие образы
+        run: docker image load --input .ci-load-images/images.tar
+
+      - name: Поднять стенд и выполнить нагрузочное тестирование
+        timeout-minutes: 75
+        env:
+          LOAD_PROFILE: ${{ matrix.profile }}
           LOAD_SMOKE: ${{ inputs.smoke || false }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
           LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
@@ -65,6 +114,7 @@ jobs:
         shell: bash
         run: |
           args=(
+            --images-file .ci-load-images/images.json
             --profile "$LOAD_PROFILE"
             --peak-vus "$LOAD_PEAK_VUS"
             --soak-seconds "$LOAD_SOAK_SECONDS"
@@ -84,9 +134,41 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+          name: load-results-${{ github.run_id }}-${{ matrix.profile }}
           path: load-testing/results/
           if-no-files-found: warn
+          overwrite: true
+          retention-days: 14
+
+      - name: Ссылка на результаты сценария
+        if: always() && steps.results.outputs.artifact-url != ''
+        env:
+          RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
+        run: printf '[Скачать отчёт и логи](%s)\n' "$RESULTS_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  report:
+    name: report
+    needs: load
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: load-results-${{ github.run_id }}-*
+          path: .ci-load-inputs
+      - name: Собрать общий отчёт
+        env:
+          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+        run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE"
+      - uses: actions/upload-artifact@v4
+        id: results
+        with:
+          name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci-load-report/
+          if-no-files-found: error
           retention-days: 14
 
       - name: Ссылка на результаты
@@ -106,7 +188,7 @@ jobs:
           from pathlib import Path
 
           rows = []
-          for path in sorted(Path('load-testing/results').glob('*/*/summary.json')):
+          for path in sorted(Path('.ci-load-report').glob('*/*/summary.json')):
               result = json.loads(path.read_text())
               latency = result.get('latency_ms')
               p95 = f"{latency['percentiles']['0.95']:.2f}" if latency else '—'
@@ -118,13 +200,13 @@ jobs:
           PY
 
   pages:
-    if: ${{ !cancelled() && needs.load.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    needs: load
+    if: ${{ !cancelled() && needs.report.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: report
     permissions:
       contents: read
       pages: write
       id-token: write
     uses: ./.github/workflows/publish-report.yml
     with:
-      artifact: ${{ needs.load.outputs.report_artifact }}
+      artifact: ${{ needs.report.outputs.report_artifact }}
       kind: load-testing
