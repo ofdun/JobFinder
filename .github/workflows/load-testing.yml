@@ -1,11 +1,10 @@
 name: Load testing
-run-name: >-
-  ${{ github.event_name == 'pull_request' && format('Load smoke · PR #{0}', github.event.pull_request.number) || format('Load testing · {0}', github.ref_name) }}
+run-name: Load testing
 
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       profile:
@@ -41,8 +40,8 @@ concurrency:
 
 jobs:
   load:
-    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'load-test')
-    name: ${{ github.event_name == 'pull_request' && 'Load smoke + report' || 'Load testing + report' }}
+    if: github.event_name == 'workflow_dispatch' || github.run_attempt > 1
+    name: Load testing
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 330 }}
     steps:
