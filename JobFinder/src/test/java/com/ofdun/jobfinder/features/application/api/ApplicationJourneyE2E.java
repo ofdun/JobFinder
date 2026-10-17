@@ -179,7 +179,22 @@ class ApplicationJourneyE2E {
                         : HttpRequest.BodyPublishers.ofString(payload));
         var response = http.send(request.build(), HttpResponse.BodyHandlers.ofString());
         assertEquals(expected, response.statusCode(), method + " " + path + ": " + response.body());
-        return response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+        if (expected == 204)
+            assertTrue(response.body().isBlank(), "204 must not contain a response body");
+        var result = response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+        if (path.startsWith("/api/v2/") && expected == 201) {
+            long createdId = result.isNumber() ? result.asLong() : result.get("id").asLong();
+            assertEquals(
+                    path + "/" + createdId,
+                    response.headers().firstValue("Location").orElseThrow());
+        }
+        if (path.startsWith("/api/v2/") && expected >= 400) {
+            assertEquals(expected, result.get("code").asInt());
+            assertTrue(result.get("exceptionName").isNull());
+            assertTrue(result.get("exceptionMessage").isNull());
+            assertEquals(0, result.get("stackTrace").size());
+        }
+        return result;
     }
 
     @AfterEach
@@ -314,5 +329,147 @@ class ApplicationJourneyE2E {
 
     String refreshBody(String role, String token) {
         return "{\"userType\":\"" + role + "\",\"refreshToken\":\"" + token + "\"}";
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"APPLICANT,applicants", "EMPLOYER,employers"})
+    void profileCrudPreservesPasswordAndRejectsOtherOwners(String role, String collection)
+            throws Exception {
+        String email = "crud-" + role.toLowerCase() + "@example.com";
+        String path = "/api/v2/" + collection;
+        String registration =
+                "{\"name\":\"New User\",\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"locationId\":1}";
+        long id = request("POST", path, null, registration, 201).asLong();
+        assertTrue(id > 1);
+        request("POST", path, null, registration, 409);
+        String token = loginV2(role, email).get("accessToken").asText();
+        var profile = request("GET", path + "/" + id, token, null, 200);
+        assertFalse(profile.has("password"));
+        assertFalse(profile.has("passwordHash"));
+        String otherEmail = role.equals("APPLICANT") ? "alice@example.com" : "employer@example.com";
+        String other = loginV2(role, otherEmail).get("accessToken").asText();
+        String update =
+                "{\"name\":\"Changed User\",\"email\":\""
+                        + email
+                        + "\",\"locationId\":2,\"address\":null}";
+        request("PUT", path + "/" + id, other, update, 403);
+        request("DELETE", path + "/" + id, other, null, 403);
+        request("PUT", path + "/" + id, token, update, 200);
+        profile = request("GET", path + "/" + id, token, null, 200);
+        assertEquals("Changed User", profile.get("name").asText());
+        assertEquals(2L, profile.get("location").get("id").asLong());
+        assertTrue(profile.get("address").isNull());
+        loginV2(role, email); // Omitting password on replacement must preserve the existing hash.
+        request("DELETE", path + "/" + id, token, null, 204);
+        request("GET", path + "/" + id, token, null, 404);
+        request(
+                "POST",
+                "/api/v2/auth/login",
+                null,
+                "{\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"userType\":\""
+                        + role
+                        + "\"}",
+                401);
+    }
+
+    @Test
+    void vacancyCrudKeepsPublicationDateAndRejectsOwnershipTransfer() throws Exception {
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String input =
+                "{\"employerId\":1,\"locationId\":2,\"salary\":123456.78,\"paymentFrequency\":\"MONTHLY\",\"experience\":\"2"
+                    + " years\",\"jobFormat\":\"REMOTE\",\"employmentType\":\"FULL_TIME\",\"description\":\"contract-crud-vacancy\",\"address\":\"Moscow\",\"skillIds\":[1],\"languageIds\":[1],\"status\":\"ACTIVE\"}";
+        request("POST", "/api/v2/vacancies", applicant, input, 403);
+        long id = request("POST", "/api/v2/vacancies", employer, input, 201).asLong();
+        String path = "/api/v2/vacancies/" + id;
+        var before = request("GET", path, null, null, 200);
+        request("PUT", path, employer, input.replace("\"employerId\":1", "\"employerId\":2"), 403);
+        request("DELETE", path, applicant, null, 403);
+        request(
+                "PUT",
+                path,
+                employer,
+                input.replace("contract-crud-vacancy", "changed-contract-crud"),
+                200);
+        var after = request("GET", path, null, null, 200);
+        assertEquals(before.get("publicationDate"), after.get("publicationDate"));
+        assertEquals("changed-contract-crud", after.get("description").asText());
+        var page =
+                request(
+                        "GET",
+                        "/api/v2/vacancies?q=changed-contract-crud&employerId=1&limit=1&sortBy=salary&sortDesc=true",
+                        null,
+                        null,
+                        200);
+        assertEquals(1L, page.get("totalElements").asLong());
+        assertEquals(id, page.get("items").get(0).get("id").asLong());
+        assertEquals(
+                "changed-contract-crud",
+                request("GET", "/vacancies/" + id, null, null, 200).get("description").asText());
+        request("DELETE", path, employer, null, 204);
+        request("GET", path, null, null, 404);
+    }
+
+    @Test
+    void foreignApplicationCannotBeReadDeletedOrReassigned() throws Exception {
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        // Seed application 2 belongs to Bob's resume, not Alice's.
+        request("GET", "/api/v2/applications/2", applicant, null, 403);
+        request("DELETE", "/api/v2/applications/2", applicant, null, 403);
+        request(
+                "POST",
+                "/api/v2/applications",
+                applicant,
+                "{\"vacancyId\":1,\"resumeId\":2,\"applicationStatus\":\"NEW\"}",
+                403);
+        request(
+                "PUT",
+                "/api/v2/applications/2",
+                employer,
+                "{\"vacancyId\":1,\"resumeId\":1,\"applicationStatus\":\"REJECTION\"}",
+                409);
+        assertEquals(
+                2L,
+                jdbc.queryForObject(
+                        "select resume_id from jobfinder.applications where id=2", Long.class));
+        assertEquals(
+                "INVITATION",
+                jdbc.queryForObject(
+                        "select status::text from jobfinder.applications where id=2",
+                        String.class));
+    }
+
+    @Test
+    void failedRegistrationDoesNotStoreInvalidOrUnknownFields() throws Exception {
+        long before = jdbc.queryForObject("select count(*) from jobfinder.applicants", Long.class);
+        String body =
+                "{\"name\":\"User"
+                    + " Name\",\"email\":\"valid@example.com\",\"password\":\"password\",\"locationId\":1}";
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("valid@example.com", "invalid-email"),
+                400);
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("\"password\":\"password\"", "\"password\":\"short\""),
+                400);
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("\"locationId\":1", "\"locationId\":1,\"admin\":true"),
+                400);
+        assertEquals(
+                before,
+                jdbc.queryForObject("select count(*) from jobfinder.applicants", Long.class));
     }
 }

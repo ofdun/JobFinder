@@ -20,11 +20,17 @@ import org.springframework.test.context.ActiveProfiles;
 @Tag("mongo")
 @ActiveProfiles("test-mongo")
 @Import({
+    com.ofdun.jobfinder.common.data.mongo.service.MongoSequenceService.class,
+    com.ofdun.jobfinder.features.resume.data.mongo.listener.ResumeDocumentMongoEventListener.class,
+    com.ofdun.jobfinder.features.education.data.mongo.listener.EducationDocumentMongoEventListener
+            .class,
+    com.ofdun.jobfinder.features.experience.data.mongo.listener
+            .JobExperienceDocumentMongoEventListener.class,
     MongoResumeRepository.class,
     MongoEducationRepository.class,
     MongoJobExperienceRepository.class
 })
-class MongoResumeRepositoryIT extends MongoRepositoryITBase {
+class MongoResumeRepositoryIT extends MongoRepositoryITBase implements ResumePersistenceContract {
 
     @Autowired private MongoResumeRepository mongoResumeRepository;
     @Autowired private MongoResumeCRUDRepository mongoResumeCRUDRepository;
@@ -42,13 +48,7 @@ class MongoResumeRepositoryIT extends MongoRepositoryITBase {
                         new Date(1000L)));
         mongoResumeCRUDRepository.save(
                 new com.ofdun.jobfinder.features.resume.data.mongo.entity.ResumeDocument(
-                        2L,
-                        11L,
-                        3L,
-                        "Frontend",
-                        List.of(3L),
-                        List.of(2L),
-                        new Date(2000L)));
+                        2L, 11L, 3L, "Frontend", List.of(3L), List.of(2L), new Date(2000L)));
 
         var result =
                 mongoResumeRepository.searchResumes(
@@ -66,13 +66,7 @@ class MongoResumeRepositoryIT extends MongoRepositoryITBase {
     void updateResume_updatesDocument() {
         mongoResumeCRUDRepository.save(
                 new com.ofdun.jobfinder.features.resume.data.mongo.entity.ResumeDocument(
-                        5L,
-                        33L,
-                        4L,
-                        "Old",
-                        List.of(1L),
-                        List.of(1L),
-                        new Date()));
+                        5L, 33L, 4L, "Old", List.of(1L), List.of(1L), new Date()));
 
         var updated =
                 mongoResumeRepository.updateResume(
@@ -89,5 +83,57 @@ class MongoResumeRepositoryIT extends MongoRepositoryITBase {
 
         assertEquals("New", updated.getDescription());
         assertEquals(2, updated.getSkillIds().size());
+    }
+
+    @Override
+    public com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository
+            repository() {
+        return mongoResumeRepository;
+    }
+
+    @Override
+    public void assertNoChildren(long id) {
+        var query =
+                org.springframework.data.mongodb.core.query.Query.query(
+                        org.springframework.data.mongodb.core.query.Criteria.where("resumeId")
+                                .is(id));
+        assertEquals(0L, mongoTemplate.count(query, "educations"));
+        assertEquals(0L, mongoTemplate.count(query, "experiences"));
+    }
+
+    @Test
+    @Override
+    public void nestedRecordsRoundTripWithCurrentEmployment() {
+        ResumePersistenceContract.super.nestedRecordsRoundTripWithCurrentEmployment();
+    }
+
+    @Test
+    @Override
+    public void replacingWithEmptyCollectionsRemovesStoredRelations() {
+        ResumePersistenceContract.super.replacingWithEmptyCollectionsRemovesStoredRelations();
+    }
+
+    @Test
+    @Override
+    public void replacingChildrenDoesNotAppendOrModifyAnotherResume() {
+        ResumePersistenceContract.super.replacingChildrenDoesNotAppendOrModifyAnotherResume();
+    }
+
+    @Test
+    @Override
+    public void deletingResumeRemovesItsChildrenOnly() {
+        ResumePersistenceContract.super.deletingResumeRemovesItsChildrenOnly();
+    }
+
+    @Test
+    @Override
+    public void paginationWithEqualDatesHasStableOrderAndFullCount() {
+        ResumePersistenceContract.super.paginationWithEqualDatesHasStableOrderAndFullCount();
+    }
+
+    @Test
+    @Override
+    public void ownershipFilterCannotReturnOtherApplicantsResumes() {
+        ResumePersistenceContract.super.ownershipFilterCannotReturnOtherApplicantsResumes();
     }
 }

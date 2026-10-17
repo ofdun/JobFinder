@@ -57,6 +57,14 @@ class GraphQlHttpTest {
     private final LanguageService languages = mock(LanguageService.class);
     private final LocationService locations = mock(LocationService.class);
     private final MatchingService matching = mock(MatchingService.class);
+    private static final jakarta.validation.ValidatorFactory validators =
+            Validation.buildDefaultValidatorFactory();
+
+    @AfterAll
+    static void closeValidators() {
+        validators.close();
+    }
+
     private MockMvc mvc;
     private GraphQL graphQL;
 
@@ -84,7 +92,7 @@ class GraphQlHttpTest {
                         new ResumeApiMapper(),
                         new ApplicationApiMapper(),
                         new DraftVacancyApiMapper(),
-                        Validation.buildDefaultValidatorFactory().getValidator());
+                        validators.getValidator());
         graphQL = new GraphQlConfiguration().graphQL(operations);
         mvc = MockMvcBuilders.standaloneSetup(new GraphQlController(graphQL, json)).build();
     }
@@ -334,5 +342,344 @@ class GraphQlHttpTest {
                                         r.getDescription() == null
                                                 && r.getEducations().isEmpty()
                                                 && r.getApplicantId() == 1L));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(AccountType.class)
+    void loginAndRefreshUseSelectedRoleWithoutBearer(AccountType role) throws Exception {
+        var service = role == AccountType.APPLICANT ? applicantAuth : employerAuth;
+        var other = role == AccountType.APPLICANT ? employerAuth : applicantAuth;
+        when(service.login("person@example.com", "password"))
+                .thenReturn(
+                        new com.ofdun.jobfinder.features.auth.domain.model.TokenPair(
+                                "access", "refresh"));
+        when(service.refreshToken("refresh"))
+                .thenReturn(
+                        new com.ofdun.jobfinder.features.auth.domain.model.TokenPair(
+                                "new-access", "new-refresh"));
+        mvc.perform(
+                        operation(
+                                "mutation M { login(input:{accountType:"
+                                        + role
+                                        + ",email:\"person@example.com\",password:\"password\"}) {"
+                                        + " accessToken refreshToken } }",
+                                "M",
+                                Map.of()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.login.accessToken").value("access"));
+        mvc.perform(
+                        operation(
+                                "mutation M { refreshTokens(input:{accountType:"
+                                        + role
+                                        + ",refreshToken:\"refresh\"}) { accessToken refreshToken }"
+                                        + " }",
+                                "M",
+                                Map.of()))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.refreshTokens.refreshToken").value("new-refresh"));
+        verifyNoInteractions(other);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(
+            strings = {"Applicant", "Employer", "Vacancy", "Resume", "Application"})
+    void deletionChecksRoleAndOwnershipBeforeChangingData(String resource) throws Exception {
+        boolean employer = resource.equals("Employer") || resource.equals("Vacancy");
+        var role = employer ? AccountType.EMPLOYER : AccountType.APPLICANT;
+        when(vacancies.getVacancyById(20L)).thenReturn(vacancy(20, 1));
+        when(resumeRepository.getResumeById(20L)).thenReturn(Optional.of(resume(20, 1)));
+        when(applications.getApplication(20L))
+                .thenReturn(
+                        new ApplicationModel(20L, 20L, 20L, new Date(0), ApplicationStatus.NEW));
+        // Profiles are addressed by account ID; related resources use their own IDs.
+        long id = resource.equals("Applicant") || resource.equals("Employer") ? 1 : 20;
+        String field = "delete" + resource;
+        String query = "mutation M { " + field + "(id:\"" + id + "\") { id } }";
+        mvc.perform(operation(query, "M", Map.of()).principal(actor(role, 2)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        mvc.perform(
+                        operation(query, "M", Map.of())
+                                .principal(
+                                        actor(
+                                                employer
+                                                        ? AccountType.APPLICANT
+                                                        : AccountType.EMPLOYER,
+                                                1)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        verify(applicants, never()).deleteApplicant(any());
+        verify(employers, never()).deleteEmployer(any());
+        verify(vacancies, never()).deleteVacancy(any());
+        verify(resumes, never()).deleteResume(any());
+        verify(applications, never()).deleteApplication(any());
+        mvc.perform(operation(query, "M", Map.of()).principal(actor(role, 1)))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data." + field + ".id").value(String.valueOf(id)));
+        switch (resource) {
+            case "Applicant" -> verify(applicants).deleteApplicant(id);
+            case "Employer" -> verify(employers).deleteEmployer(id);
+            case "Vacancy" -> verify(vacancies).deleteVacancy(id);
+            case "Resume" -> verify(resumes).deleteResume(id);
+            case "Application" -> verify(applications).deleteApplication(id);
+        }
+    }
+
+    @Test
+    void applicantResumeSearchForcesOwnIdAndRejectsForeignFilter() throws Exception {
+        when(resumes.searchResumes(any(), any()))
+                .thenReturn(
+                        new com.ofdun.jobfinder.common.domain.model.PageResult<>(
+                                List.of(), 0, 20, 0L, 0));
+        mvc.perform(
+                        operation(
+                                        "query Q { resumes { items { id } totalElements } }",
+                                        "Q",
+                                        Map.of())
+                                .principal(actor(AccountType.APPLICANT, 7)))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(resumes)
+                .searchResumes(argThat(f -> Long.valueOf(7).equals(f.getApplicantId())), any());
+        clearInvocations(resumes);
+        mvc.perform(
+                        operation(
+                                        "query Q { resumes(filter:{applicantId:\"8\"}) { items { id"
+                                                + " } } }",
+                                        "Q",
+                                        Map.of())
+                                .principal(actor(AccountType.APPLICANT, 7)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        verifyNoInteractions(resumes);
+    }
+
+    @Test
+    void employerResumeSearchKeepsFilterAndSort() throws Exception {
+        when(resumes.searchResumes(any(), any()))
+                .thenReturn(
+                        new com.ofdun.jobfinder.common.domain.model.PageResult<>(
+                                List.of(), 1, 5, 0L, 0));
+        mvc.perform(
+                        operation(
+                                        "query Q {"
+                                            + " resumes(filter:{applicantId:\"8\"},page:{limit:5,offset:5},sort:ID,direction:ASC)"
+                                            + " { size } }",
+                                        "Q",
+                                        Map.of())
+                                .principal(actor(AccountType.EMPLOYER, 7)))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(resumes)
+                .searchResumes(
+                        argThat(f -> Long.valueOf(8).equals(f.getApplicantId())),
+                        argThat(
+                                p ->
+                                        p.getLimit() == 5
+                                                && p.getOffset() == 5
+                                                && "id".equals(p.getSortBy())
+                                                && !p.isSortDesc()));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(
+            strings = {
+                "page:{limit:0}",
+                "page:{limit:101}",
+                "page:{offset:-1}",
+                "filter:{salaryMin:\"20\",salaryMax:\"10\"}",
+                "filter:{publicationDateFrom:\"2026-10-02T00:00:00Z\",publicationDateTo:\"2026-10-01T00:00:00Z\"}"
+            })
+    @Tag("boundary")
+    void invalidVacancySearchDoesNotReachStorage(String args) throws Exception {
+        mvc.perform(operation("query Q { vacancies(" + args + ") { size } }", "Q", Map.of()))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("BAD_USER_INPUT"));
+        verifyNoInteractions(vacancies);
+    }
+
+    @Test
+    void vacancySearchKeepsDecimalPrecisionAndFilterPaginationSeparation() throws Exception {
+        when(vacancies.searchVacancies(any(), any()))
+                .thenReturn(
+                        new com.ofdun.jobfinder.common.domain.model.PageResult<>(
+                                List.of(), 1, 5, 0L, 0));
+        mvc.perform(
+                        operation(
+                                "query Q {"
+                                    + " vacancies(filter:{salaryMin:\"100000.01\",employerId:\"2\"},page:{limit:5,offset:5},sort:SALARY,direction:DESC)"
+                                    + " { size } }",
+                                "Q",
+                                Map.of()))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(vacancies)
+                .searchVacancies(
+                        argThat(
+                                f ->
+                                        new java.math.BigDecimal("100000.01")
+                                                        .equals(f.getSalaryMin())
+                                                && Long.valueOf(2).equals(f.getEmployerId())),
+                        argThat(
+                                p ->
+                                        p.getLimit() == 5
+                                                && p.getOffset() == 5
+                                                && p.isSortDesc()
+                                                && "salary".equals(p.getSortBy())));
+    }
+
+    @Test
+    void draftPaginationUsesTimestampThenIdAndProtectsForeignVacancy() throws Exception {
+        when(vacancies.getVacancyById(10L)).thenReturn(vacancy(10, 2));
+        when(drafts.getDrafts(10L))
+                .thenReturn(
+                        List.of(
+                                new DraftVacancyModel(1L, 10L, new Date(1000), "{}"),
+                                new DraftVacancyModel(3L, 10L, new Date(2000), "{}"),
+                                new DraftVacancyModel(2L, 10L, new Date(2000), "{}")));
+        String query = "query Q { vacancyDrafts(vacancyId:\"10\",page:{limit:1,offset:1}) { id } }";
+        mvc.perform(operation(query, "Q", Map.of()).principal(actor(AccountType.EMPLOYER, 3)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        verifyNoInteractions(drafts);
+        mvc.perform(operation(query, "Q", Map.of()).principal(actor(AccountType.EMPLOYER, 2)))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.vacancyDrafts.length()").value(1))
+                .andExpect(jsonPath("$.data.vacancyDrafts[0].id").value("2"));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"vacancyId", "resumeId"})
+    void applicationReplacementCannotMoveRelationships(String field) throws Exception {
+        when(applications.getApplication(40L))
+                .thenReturn(
+                        new ApplicationModel(40L, 10L, 20L, new Date(0), ApplicationStatus.NEW));
+        when(vacancies.getVacancyById(10L)).thenReturn(vacancy(10, 2));
+        String vacancyId = field.equals("vacancyId") ? "11" : "10";
+        String resumeId = field.equals("resumeId") ? "21" : "20";
+        mvc.perform(
+                        operation(
+                                        "mutation M {"
+                                            + " replaceApplication(id:\"40\",input:{vacancyId:\""
+                                                + vacancyId
+                                                + "\",resumeId:\""
+                                                + resumeId
+                                                + "\",applicationStatus:INVITATION}) { id } }",
+                                        "M",
+                                        Map.of())
+                                .principal(actor(AccountType.EMPLOYER, 2)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("CONFLICT"));
+        verify(applications, never()).updateApplication(any());
+    }
+
+    @Test
+    void missingResumeIsNotFoundAndInternalErrorsDoNotLeakDetails() throws Exception {
+        when(resumeRepository.getResumeById(20L)).thenReturn(Optional.empty());
+        mvc.perform(
+                        operation("query Q { resume(id:\"20\") { id } }", "Q", Map.of())
+                                .principal(actor(AccountType.APPLICANT, 1)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("NOT_FOUND"));
+        when(categories.getAllCategories()).thenThrow(new IllegalStateException("password=secret"));
+        mvc.perform(operation("query Q { categories { id } }", "Q", Map.of()))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("INTERNAL_SERVER_ERROR"))
+                .andExpect(
+                        content()
+                                .string(
+                                        org.hamcrest.Matchers.not(
+                                                org.hamcrest.Matchers.containsString(
+                                                        "password=secret"))));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(AccountType.class)
+    void profileRegistrationAndReplacementKeepPasswordPrivateAndPreserveOmittedPassword(
+            AccountType role) throws Exception {
+        String resource = role == AccountType.APPLICANT ? "Applicant" : "Employer";
+        when(locations.getLocationById(any()))
+                .thenReturn(com.ofdun.jobfinder.support.TestDataMother.location());
+        if (role == AccountType.APPLICANT) {
+            var model = com.ofdun.jobfinder.support.TestDataMother.applicant();
+            model.setId(1L);
+            model.setPasswordHash("stored-secret-hash");
+            when(applicants.createApplicant(any())).thenReturn(1L);
+            when(applicants.getApplicantById(1L)).thenReturn(model);
+        } else {
+            var model = com.ofdun.jobfinder.support.TestDataMother.employer();
+            model.setId(1L);
+            model.setPasswordHash("stored-secret-hash");
+            when(employers.createEmployer(any())).thenReturn(1L);
+            when(employers.getEmployerById(1L)).thenReturn(model);
+        }
+        mvc.perform(
+                        operation(
+                                "mutation M { register"
+                                        + resource
+                                        + "(input:{name:\"Test"
+                                        + " User\",email:\"test@example.com\",password:\"password\",locationId:\"1\"})"
+                                        + " { id name email } }",
+                                "M",
+                                Map.of()))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.register" + resource + ".id").value("1"))
+                .andExpect(
+                        content()
+                                .string(
+                                        org.hamcrest.Matchers.not(
+                                                org.hamcrest.Matchers.containsString(
+                                                        "stored-secret-hash"))));
+        String replacement =
+                "mutation M { replace"
+                        + resource
+                        + "(id:\"1\",input:{name:\"Changed"
+                        + " User\",email:\"test@example.com\",locationId:\"1\"}) { id name } }";
+        mvc.perform(operation(replacement, "M", Map.of()).principal(actor(role, 2)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        verify(applicants, never()).updateApplicant(any());
+        verify(employers, never()).updateEmployer(any());
+        mvc.perform(operation(replacement, "M", Map.of()).principal(actor(role, 1)))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+        if (role == AccountType.APPLICANT)
+            verify(applicants)
+                    .updateApplicant(
+                            argThat(
+                                    m ->
+                                            m.getId() == 1L
+                                                    && "Changed User".equals(m.getName())
+                                                    && "stored-secret-hash"
+                                                            .equals(m.getPasswordHash())));
+        else
+            verify(employers)
+                    .updateEmployer(
+                            argThat(
+                                    m ->
+                                            m.getId() == 1L
+                                                    && "Changed User".equals(m.getName())
+                                                    && "stored-secret-hash"
+                                                            .equals(m.getPasswordHash())));
+    }
+
+    @Test
+    void matchingRequiresVacancyOwnerAndPassesBoundedLimit() throws Exception {
+        when(vacancies.getVacancyById(10L)).thenReturn(vacancy(10, 2));
+        when(matching.findSuitableCandidates(10L, 5)).thenReturn(List.of());
+        String query = "query Q { matchingCandidates(vacancyId:\"10\",limit:5) { id score } }";
+        mvc.perform(operation(query, "Q", Map.of()).principal(actor(AccountType.APPLICANT, 2)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        mvc.perform(operation(query, "Q", Map.of()).principal(actor(AccountType.EMPLOYER, 3)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("FORBIDDEN"));
+        verifyNoInteractions(matching);
+        mvc.perform(operation(query, "Q", Map.of()).principal(actor(AccountType.EMPLOYER, 2)))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.matchingCandidates").isEmpty());
+        verify(matching).findSuitableCandidates(10L, 5);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {0, 101})
+    void matchingRejectsInvalidLimitsBeforeCallingModel(int limit) throws Exception {
+        when(vacancies.getVacancyById(10L)).thenReturn(vacancy(10, 2));
+        mvc.perform(
+                        operation(
+                                        "query Q { matchingCandidates(vacancyId:\"10\",limit:"
+                                                + limit
+                                                + ") { id } }",
+                                        "Q",
+                                        Map.of())
+                                .principal(actor(AccountType.EMPLOYER, 2)))
+                .andExpect(jsonPath("$.errors[0].extensions.code").value("BAD_USER_INPUT"));
+        verifyNoInteractions(matching);
     }
 }
