@@ -1,0 +1,129 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      force_failure:
+        description: Stage to fail deliberately when checking cleanup and skipped stages
+        type: choice
+        default: none
+        options: [none, unit, integration, e2e]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI_FORCE_FAILURE: ${{ inputs.force_failure || 'none' }}
+
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s ci -p 'test_*.py'
+      - run: node ci/test_dashboard.cjs
+      - run: bash ci/run.sh unit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-results
+          path: .ci-artifacts/unit/
+          include-hidden-files: true
+          retention-days: 14
+
+  integration:
+    needs: unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash ci/run.sh integration
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-results
+          path: .ci-artifacts/integration/
+          include-hidden-files: true
+          retention-days: 14
+
+  e2e:
+    needs: integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash ci/run.sh e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results
+          path: .ci-artifacts/e2e/
+          include-hidden-files: true
+          retention-days: 7
+
+  report:
+    if: always()
+    needs: [unit, integration, e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-results'
+          path: .ci-inputs
+      - uses: actions/cache/restore@v4
+        with:
+          path: .ci-history
+          key: test-history-${{ github.ref }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: test-history-${{ github.ref }}-
+      - name: Restore published history
+        if: always() && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+        run: python3 ci/history.py --history .ci-history/history.json
+      - name: Generate report, skipped-stage results and trends
+        if: always()
+        env:
+          STAGE_RESULTS: ${{ toJSON(needs) }}
+        run: python3 ci/report.py --inputs .ci-inputs --output .ci-report --history .ci-history/history.json
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .ci-history
+          key: test-history-${{ github.ref }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report
+          path: .ci-report/
+          include-hidden-files: true
+          retention-days: 30
+      - uses: actions/upload-pages-artifact@v4
+        if: always() && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+        with:
+          path: .ci-report/pages
+
+  pages:
+    if: always() && needs.report.result == 'success' && github.ref == 'refs/heads/testing/lab2' && github.event_name != 'pull_request'
+    needs: report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment

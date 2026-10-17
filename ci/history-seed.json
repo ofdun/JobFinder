@@ -1,0 +1,104 @@
+[
+  {
+    "run": "36332178954.1",
+    "time": "2026-09-27T16:20:13.401492+00:00",
+    "sha": "942a6a9ca9693c6f26edfcaaee731cbcbc3eec83",
+    "stages": [
+      {
+        "tests": 621,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 9.564,
+        "status": "success",
+        "stage": "unit"
+      },
+      {
+        "tests": 84,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 61.486,
+        "status": "success",
+        "stage": "integration"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 38.459,
+        "status": "success",
+        "stage": "e2e"
+      }
+    ]
+  },
+  {
+    "run": "36332549577.1",
+    "time": "2026-09-27T16:21:14.266055+00:00",
+    "sha": "eabe8a088537047682222636b33d76bc8223d36f",
+    "stages": [
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "seconds": 0.0,
+        "status": "cancelled",
+        "stage": "unit"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "seconds": 0.0,
+        "status": "cancelled",
+        "stage": "integration"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "seconds": 0.0,
+        "status": "cancelled",
+        "stage": "e2e"
+      }
+    ]
+  },
+  {
+    "run": "36332551796.1",
+    "time": "2026-09-27T16:26:58.157061+00:00",
+    "sha": "8de595eed98b2ae85b3bfdb9d1efafd5419f8e83",
+    "stages": [
+      {
+        "tests": 621,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 12.972,
+        "status": "success",
+        "stage": "unit"
+      },
+      {
+        "tests": 84,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 62.388,
+        "status": "success",
+        "stage": "integration"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 39.735,
+        "status": "success",
+        "stage": "e2e"
+      }
+    ]
+  }
+]
