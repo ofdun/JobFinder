@@ -25,7 +25,7 @@ public class UserActionLoggingFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        if (!request.getRequestURI().startsWith("/api/v1")) {
+        if (!request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }

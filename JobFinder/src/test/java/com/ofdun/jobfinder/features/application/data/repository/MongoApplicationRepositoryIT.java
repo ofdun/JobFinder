@@ -36,4 +36,31 @@ class MongoApplicationRepositoryIT extends MongoRepositoryITBase {
         assertTrue(result.stream().allMatch(a -> a.getVacancyId().equals(100L)));
         assertEquals(2L, result.get(0).getId());
     }
+
+    @Test
+    void ownApplicationsUseResumeOwnershipAndStablePagination() {
+        mongoTemplate.save(
+                new com.ofdun.jobfinder.features.resume.data.mongo.entity.ResumeDocument(
+                        11L, 7L, 1L, "Own", java.util.List.of(), java.util.List.of(), new Date()));
+        mongoTemplate.save(
+                new com.ofdun.jobfinder.features.resume.data.mongo.entity.ResumeDocument(
+                        12L,
+                        8L,
+                        1L,
+                        "Other",
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        new Date()));
+        applicationRepository.createApplication(
+                new ApplicationModel(1L, 100L, 11L, new Date(1000), ApplicationStatus.NEW));
+        applicationRepository.createApplication(
+                new ApplicationModel(2L, 200L, 11L, new Date(1000), ApplicationStatus.NEW));
+        applicationRepository.createApplication(
+                new ApplicationModel(3L, 100L, 12L, new Date(2000), ApplicationStatus.NEW));
+        var first = applicationRepository.getApplicationsByApplicantId(7L, 1, 0);
+        var second = applicationRepository.getApplicationsByApplicantId(7L, 1, 1);
+        assertEquals(java.util.List.of(2L), first.stream().map(ApplicationModel::getId).toList());
+        assertEquals(java.util.List.of(1L), second.stream().map(ApplicationModel::getId).toList());
+        assertTrue(applicationRepository.getApplicationsByApplicantId(999L, 20, 0).isEmpty());
+    }
 }

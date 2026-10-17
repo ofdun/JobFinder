@@ -30,5 +30,5 @@ public class JobExperienceEntity {
 
     @NotNull private LocalDate startDate;
 
-    @NotNull private LocalDate endDate;
+    private LocalDate endDate;
 }

@@ -9,9 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JobExperienceCreateDto {
-    private String position;
-    private String companyName;
+    @jakarta.validation.constraints.NotBlank private String position;
+    @jakarta.validation.constraints.NotBlank private String companyName;
     private String description;
-    private LocalDate startDate;
+    @jakarta.validation.constraints.NotNull private LocalDate startDate;
     private LocalDate endDate;
+
+    @jakarta.validation.constraints.AssertTrue
+    public boolean isDateRangeValid() {
+        return startDate == null || endDate == null || !startDate.isAfter(endDate);
+    }
 }

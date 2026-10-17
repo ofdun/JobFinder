@@ -2,7 +2,6 @@ package com.ofdun.jobfinder.cli.ui;
 
 import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.auth.UserRole;
-import com.ofdun.jobfinder.cli.dto.auth.LoginRequest;
 import com.ofdun.jobfinder.cli.dto.auth.TokenPair;
 import com.ofdun.jobfinder.cli.http.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +39,8 @@ public final class AuthMenu {
         String email = p.readNonBlank("email: ");
         String password = p.readNonBlank("password: ");
 
-        String path = role == UserRole.APPLICANT ? "/auth/applicant/login" : "/auth/employer/login";
         try {
-            TokenPair pair =
-                    ctx.getApi()
-                            .post(path, new LoginRequest(email, password), TokenPair.class, false);
+            TokenPair pair = ctx.getApi().login(role, email, password);
             if (pair == null || pair.accessToken() == null || pair.refreshToken() == null) {
                 p.println("Сервер вернул пустой ответ.");
                 return;
@@ -67,18 +63,7 @@ public final class AuthMenu {
                 p.println("Вы гость. Нечего обновлять.");
                 return;
             }
-            String path =
-                    ctx.getSession().getRole() == UserRole.APPLICANT
-                            ? "/auth/applicant/refresh"
-                            : "/auth/employer/refresh";
-            var pair =
-                    ctx.getApi()
-                            .post(
-                                    path,
-                                    new com.ofdun.jobfinder.cli.dto.auth.RefreshRequest(
-                                            ctx.getSession().getRefreshToken()),
-                                    TokenPair.class,
-                                    false);
+            var pair = ctx.getApi().refreshTokens();
             if (pair == null || pair.accessToken() == null || pair.refreshToken() == null) {
                 p.println("Сервер вернул пустой ответ.");
                 return;

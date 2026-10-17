@@ -1,6 +1,5 @@
 package com.ofdun.jobfinder.features.auth.domain.service;
 
-import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
@@ -9,6 +8,7 @@ import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.exception.InvalidPasswordException;
 import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
 import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
+import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import java.time.Duration;
 import lombok.NonNull;
@@ -35,8 +35,7 @@ public class EmployerAuthService implements AuthService {
         }
 
         var accessToken = jwtProvider.generateAccessToken(AccountType.EMPLOYER, employer.getId());
-        var refreshToken =
-                jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employer.getId());
+        var refreshToken = jwtProvider.generateRefreshToken(AccountType.EMPLOYER, employer.getId());
 
         tokenRepository.saveToken(
                 refreshToken,
@@ -48,7 +47,7 @@ public class EmployerAuthService implements AuthService {
 
     @Override
     public TokenPair refreshToken(@NonNull String refreshToken) {
-        if (!jwtProvider.validateToken(refreshToken, AccountType.EMPLOYER)) {
+        if (!jwtProvider.validateRefreshToken(refreshToken, AccountType.EMPLOYER)) {
             throw new InvalidRefreshTokenException();
         }
 

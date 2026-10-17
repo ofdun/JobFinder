@@ -7,16 +7,15 @@ import com.ofdun.jobfinder.features.resume.data.mongo.mapper.ResumeMongoMapper;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -32,20 +31,24 @@ public class MongoResumeRepository implements RelationalResumeRepository {
         var resumeId = savedResume.getId();
 
         if (resumeModel.getEducations() != null && !resumeModel.getEducations().isEmpty()) {
-            resumeModel.getEducations().forEach(
-                    e -> {
-                        e.setId(null);
-                        e.setResumeId(resumeId);
-                    });
+            resumeModel
+                    .getEducations()
+                    .forEach(
+                            e -> {
+                                e.setId(null);
+                                e.setResumeId(resumeId);
+                            });
             mongoEducationRepository.createEducations(resumeModel.getEducations());
         }
 
         if (resumeModel.getJobExperiences() != null && !resumeModel.getJobExperiences().isEmpty()) {
-            resumeModel.getJobExperiences().forEach(
-                    e -> {
-                        e.setId(null);
-                        e.setResumeId(resumeId);
-                    });
+            resumeModel
+                    .getJobExperiences()
+                    .forEach(
+                            e -> {
+                                e.setId(null);
+                                e.setResumeId(resumeId);
+                            });
             mongoJobExperienceRepository.createJobExperiences(resumeModel.getJobExperiences());
         }
 
@@ -59,9 +62,11 @@ public class MongoResumeRepository implements RelationalResumeRepository {
                 .map(
                         entity -> {
                             var model = ResumeMongoMapper.toModel(entity);
-                            var educations = mongoEducationRepository.getEducationsByResumeId(resumeId);
+                            var educations =
+                                    mongoEducationRepository.getEducationsByResumeId(resumeId);
                             var experiences =
-                                    mongoJobExperienceRepository.getJobExperiencesByResumeId(resumeId);
+                                    mongoJobExperienceRepository.getJobExperiencesByResumeId(
+                                            resumeId);
                             model.setEducations(educations.isEmpty() ? null : educations);
                             model.setJobExperiences(experiences.isEmpty() ? null : experiences);
                             return model;
@@ -77,20 +82,24 @@ public class MongoResumeRepository implements RelationalResumeRepository {
         mongoJobExperienceRepository.deleteAllByResumeId(resumeId);
 
         if (resumeModel.getEducations() != null && !resumeModel.getEducations().isEmpty()) {
-            resumeModel.getEducations().forEach(
-                    e -> {
-                        e.setId(null);
-                        e.setResumeId(resumeId);
-                    });
+            resumeModel
+                    .getEducations()
+                    .forEach(
+                            e -> {
+                                e.setId(null);
+                                e.setResumeId(resumeId);
+                            });
             mongoEducationRepository.createEducations(resumeModel.getEducations());
         }
 
         if (resumeModel.getJobExperiences() != null && !resumeModel.getJobExperiences().isEmpty()) {
-            resumeModel.getJobExperiences().forEach(
-                    e -> {
-                        e.setId(null);
-                        e.setResumeId(resumeId);
-                    });
+            resumeModel
+                    .getJobExperiences()
+                    .forEach(
+                            e -> {
+                                e.setId(null);
+                                e.setResumeId(resumeId);
+                            });
             mongoJobExperienceRepository.createJobExperiences(resumeModel.getJobExperiences());
         }
 
@@ -146,21 +155,25 @@ public class MongoResumeRepository implements RelationalResumeRepository {
             return false;
         }
 
-        if (filter.getCategoryId() != null && !Objects.equals(resume.getCategoryId(), filter.getCategoryId())) {
+        if (filter.getCategoryId() != null
+                && !Objects.equals(resume.getCategoryId(), filter.getCategoryId())) {
             return false;
         }
 
-        if (filter.getCreationDateFrom() != null && !isAfterOrEqual(resume.getDate(), filter.getCreationDateFrom())) {
+        if (filter.getCreationDateFrom() != null
+                && !isAfterOrEqual(resume.getDate(), filter.getCreationDateFrom())) {
             return false;
         }
 
-        if (filter.getCreationDateTo() != null && !isBeforeOrEqual(resume.getDate(), filter.getCreationDateTo())) {
+        if (filter.getCreationDateTo() != null
+                && !isBeforeOrEqual(resume.getDate(), filter.getCreationDateTo())) {
             return false;
         }
 
         if (filter.getQ() != null && !filter.getQ().isBlank()) {
             var query = filter.getQ().trim().toLowerCase();
-            var description = resume.getDescription() == null ? "" : resume.getDescription().toLowerCase();
+            var description =
+                    resume.getDescription() == null ? "" : resume.getDescription().toLowerCase();
             if (!description.contains(query)) {
                 return false;
             }
@@ -203,7 +216,8 @@ public class MongoResumeRepository implements RelationalResumeRepository {
         Comparator<ResumeModel> comparator;
 
         if (sortBy == null || sortBy.isBlank()) {
-            comparator = Comparator.comparing(ResumeModel::getId, Comparator.nullsLast(Long::compareTo));
+            comparator =
+                    Comparator.comparing(ResumeModel::getId, Comparator.nullsLast(Long::compareTo));
         } else {
             comparator =
                     switch (sortBy) {
@@ -216,15 +230,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
                                         ResumeModel::getCategoryId,
                                         Comparator.nullsLast(Long::compareTo));
                         case "creationDate", "date" ->
-                                Comparator.comparing(ResumeModel::getDate, Comparator.nullsLast(Date::compareTo));
+                                Comparator.comparing(
+                                        ResumeModel::getDate,
+                                        Comparator.nullsLast(Date::compareTo));
                         default ->
                                 Comparator.comparing(
                                         ResumeModel::getId, Comparator.nullsLast(Long::compareTo));
                     };
         }
 
+        comparator =
+                comparator.thenComparing(ResumeModel::getId, Comparator.nullsLast(Long::compareTo));
         return sortDesc ? comparator.reversed() : comparator;
     }
 }
-
-

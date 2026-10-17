@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/employers")
+@RequestMapping({"/api/v1/employers", "/api/v2/employers"})
 @RequiredArgsConstructor
 public class EmployerController {
     private final EmployerService employerService;

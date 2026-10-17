@@ -20,13 +20,13 @@ public class ApplicantEntity {
     private Long id;
 
     @NotNull
-    @Size(min = 1, max = 50)
+    @Size(min = 2, max = 100)
     @Pattern(regexp = ".*\\S.*", message = "Name cannot be only whitespace")
     private String name;
 
     @NotNull
     @Email
-    @Size(min = 1, max = 50)
+    @Size(min = 1, max = 320)
     private String email;
 
     @NotNull
@@ -35,7 +35,7 @@ public class ApplicantEntity {
 
     private String address;
 
-    @NotNull private String phoneNumber;
+    private String phoneNumber;
 
     @NotNull private Long locationId;
 }

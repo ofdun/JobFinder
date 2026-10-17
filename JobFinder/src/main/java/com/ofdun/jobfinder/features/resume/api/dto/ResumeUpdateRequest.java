@@ -15,7 +15,7 @@ public class ResumeUpdateRequest {
     private Long categoryId;
     private String description;
     private List<Long> skillIds;
-    private List<EducationCreateDto> educations;
-    private List<JobExperienceCreateDto> jobExperiences;
+    @jakarta.validation.Valid private List<EducationCreateDto> educations;
+    @jakarta.validation.Valid private List<JobExperienceCreateDto> jobExperiences;
     private List<Long> languageIds;
 }

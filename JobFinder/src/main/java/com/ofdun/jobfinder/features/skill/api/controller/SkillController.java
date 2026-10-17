@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/skills")
+@RequestMapping({"/api/v1/skills", "/api/v2/skills"})
 @RequiredArgsConstructor
 public class SkillController {
     private final SkillService skillService;
@@ -22,4 +22,3 @@ public class SkillController {
         return ResponseEntity.ok(skills);
     }
 }
-

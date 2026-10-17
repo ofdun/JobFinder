@@ -58,7 +58,8 @@ public class BasicDraftVacancyService implements DraftVacancyService {
     }
 
     private VacancyModel getVacancyRequired(Long vacancyId) {
-        return vacancyRepository.getVacancyById(vacancyId)
+        return vacancyRepository
+                .getVacancyById(vacancyId)
                 .orElseThrow(() -> new VacancyNotFoundException(vacancyId));
     }
 
@@ -79,10 +80,17 @@ public class BasicDraftVacancyService implements DraftVacancyService {
     }
 
     private DraftVacancyModel getDraftRequired(Long vacancyId, Long draftId) {
-        var draft = draftVacancyRepository.getById(draftId)
-                .orElseThrow(() -> new IllegalArgumentException("Draft not found: " + draftId));
+        var draft =
+                draftVacancyRepository
+                        .getById(draftId)
+                        .orElseThrow(
+                                () ->
+                                        new com.ofdun.jobfinder.features.vacancy.exception
+                                                .DraftNotFoundException(
+                                                "Draft not found: " + draftId));
         if (!draft.getVacancyId().equals(vacancyId)) {
-            throw new IllegalArgumentException("Draft does not belong to vacancy: " + vacancyId);
+            throw new com.ofdun.jobfinder.features.vacancy.exception.DraftNotFoundException(
+                    "Draft does not belong to vacancy: " + vacancyId);
         }
         return draft;
     }

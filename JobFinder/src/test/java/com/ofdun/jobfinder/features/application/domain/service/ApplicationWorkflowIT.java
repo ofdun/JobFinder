@@ -7,9 +7,8 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.validator.BasicApplicationValidator;
 import com.ofdun.jobfinder.features.application.enums.ApplicationStatus;
 import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
-
 import jakarta.persistence.EntityManager;
-
+import java.util.Date;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,6 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.Date;
 
 @DataJpaTest
 @ActiveProfiles("test-postgres")

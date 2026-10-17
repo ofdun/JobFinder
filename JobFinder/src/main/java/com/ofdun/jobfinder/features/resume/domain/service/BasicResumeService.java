@@ -28,6 +28,7 @@ public class BasicResumeService implements ResumeService {
     private final RelationalResumeRepository relationalResumeRepository;
     private final VectorResumeRepository vectorResumeRepository;
 
+    private final Function<ResumeModel, Optional<ResumeModel>> replaceChain;
     private final Function<ResumeModel, Optional<ResumeModel>> saveChain;
     private final Function<ResumeModel, Optional<ResumeModel>> getChain;
     private final Function<ResumeModel, Optional<ResumeModel>> updateChain;
@@ -45,6 +46,11 @@ public class BasicResumeService implements ResumeService {
         this.relationalResumeRepository = relationalResumeRepository;
         this.vectorResumeRepository = vectorResumeRepository;
 
+        replaceChain =
+                model ->
+                        Optional.ofNullable(relationalResumeRepository.updateResume(model))
+                                .flatMap(embeddingResumeHandler::handle)
+                                .flatMap(vectorResumeUpdateHandler::handle);
         saveChain =
                 model ->
                         relationalResumeSaveHandler
@@ -80,6 +86,22 @@ public class BasicResumeService implements ResumeService {
         var model = new ResumeModel();
         model.setId(resumeId);
         return getChain.apply(model);
+    }
+
+    @Override
+    public Optional<ResumeModel> replaceResume(ResumeModel model) {
+        var existing =
+                relationalResumeRepository
+                        .getResumeById(model.getId())
+                        .orElseThrow(
+                                () ->
+                                        new com.ofdun.jobfinder.features.resume.exception
+                                                .ResumeNotFoundException(model.getId()));
+        if (!existing.getApplicantId().equals(model.getApplicantId())) {
+            throw new IllegalArgumentException("Resume owner cannot change");
+        }
+        model.setDate(existing.getDate());
+        return replaceChain.apply(model);
     }
 
     @Override

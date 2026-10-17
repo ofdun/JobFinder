@@ -28,16 +28,31 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/resumes")
+@RequestMapping({"/api/v1/resumes", "/api/v2/resumes"})
 @RequiredArgsConstructor
 public class ResumeController {
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.ofdun.jobfinder.features.api.ApiAccess apiAccess;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private jakarta.servlet.http.HttpServletRequest servletRequest;
+
+    private boolean v2() {
+        return servletRequest != null && servletRequest.getRequestURI().startsWith("/api/v2/");
+    }
+
+    private org.springframework.security.core.Authentication actor() {
+        return org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication();
+    }
+
     private final ResumeService resumeService;
     private final CategoryService categoryService;
     private final SkillService skillService;
     private final LanguageService languageService;
     private final ResumeApiMapper mapper;
 
-    @GetMapping("/search")
+    @GetMapping({"", "/search"})
     @PreAuthorize(
             "@sec.isEmployer(authentication) || (#applicantId != null &&"
                 + " @sec.isApplicant(authentication) && @sec.isSelf(authentication, #applicantId))")
@@ -106,11 +121,15 @@ public class ResumeController {
     @PreAuthorize("@sec.applicantOwnsResume(authentication, #id)")
     public ResponseEntity<@NonNull ResumeResponse> updateResume(
             @PathVariable Long id, @Valid @RequestBody ResumeUpdateRequest request) {
+        if (v2()) {
+            var existing = apiAccess.ownResume(actor(), id);
+            com.ofdun.jobfinder.features.api.ApiAccess.require(
+                    existing.getApplicantId().equals(request.getApplicantId()));
+        }
         ResumeModel model = mapper.toModel(request);
         model.setId(id);
         ResumeModel updated =
-                resumeService
-                        .updateResume(model)
+                (v2() ? resumeService.replaceResume(model) : resumeService.updateResume(model))
                         .orElseThrow(() -> new ResumeNotFoundException(id));
         return ResponseEntity.ok(mapToResponse(updated));
     }
