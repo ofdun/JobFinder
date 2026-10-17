@@ -7,6 +7,8 @@
 .ci-history/
 .ci-inputs/
 .ci-report/
+.ci-publish/
+.ci-pages/
 *cities500.txt
 *.log
 *.gz

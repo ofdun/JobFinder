@@ -7,6 +7,7 @@ on:
       - ci/dashboard.html
       - ci/report.py
       - ci/history.py
+      - ci/publish.py
       - .github/workflows/dashboard.yml
   workflow_dispatch:
 
@@ -14,20 +15,9 @@ permissions:
   contents: read
 
 jobs:
-  publish:
-    if: github.ref == 'refs/heads/testing/lab2'
+  report:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    concurrency:
-      group: github-pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s ci -p 'test_*.py'
@@ -42,9 +32,19 @@ jobs:
           from report import render_dashboard
           render_dashboard(Path('.ci-report'), json.loads(Path('.ci-history/history.json').read_text()))
           PY
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          path: .ci-report/pages
-      - uses: actions/deploy-pages@v4
-        id: deployment
+          name: dashboard-report
+          path: .ci-report/
+          retention-days: 14
+
+  pages:
+    needs: report
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/publish-report.yml
+    with:
+      artifact: dashboard-report
+      kind: tests

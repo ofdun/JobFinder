@@ -43,6 +43,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.run_attempt > 1
     name: Load testing
     runs-on: ubuntu-24.04
+    outputs:
+      report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
     timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 330 }}
     steps:
       - uses: actions/checkout@v4
@@ -116,3 +118,15 @@ jobs:
               print('\n'.join(rows))
               print('\nSMOKE проверяет работоспособность стенда и не заменяет полное нагрузочное исследование.')
           PY
+
+  pages:
+    if: ${{ !cancelled() && needs.load.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: load
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/publish-report.yml
+    with:
+      artifact: ${{ needs.load.outputs.report_artifact }}
+      kind: load-testing
