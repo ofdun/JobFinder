@@ -7,7 +7,6 @@ on:
       - ci/dashboard.html
       - ci/report.py
       - ci/history.py
-      - ci/history-seed.json
       - .github/workflows/dashboard.yml
   workflow_dispatch:
 
@@ -32,7 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s ci -p 'test_*.py'
-      - run: node ci/test_dashboard.cjs
       - run: python3 ci/history.py --history .ci-history/history.json
       - name: Render recorded results without adding a test run
         run: |

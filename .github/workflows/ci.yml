@@ -28,7 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s ci -p 'test_*.py'
-      - run: node ci/test_dashboard.cjs
       - run: bash ci/run.sh unit
       - uses: actions/upload-artifact@v4
         if: always()

@@ -19,8 +19,7 @@ def merge(*histories):
 
 def restore(path):
     local = json.loads(path.read_text()) if path.exists() else []
-    seed = Path(__file__).with_name("history-seed.json")
-    previous = json.loads(seed.read_text()) if seed.exists() else []
+    previous = []
     try:
         request = urllib.request.Request("https://ofdun.github.io/JobFinder/history.json", headers={"Cache-Control": "no-cache"})
         with urllib.request.urlopen(request, timeout=30) as response:
