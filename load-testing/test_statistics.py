@@ -53,6 +53,16 @@ class LoadStatisticsTest(unittest.TestCase):
         self.assertIsNone(data[1]['p95_ms'])
         self.assertEqual(5, data[-1]['seconds'])
 
+    def test_windows_include_all_required_latency_percentiles(self):
+        samples = [dict(time=1, latency_ms=n, expected_error='false', unexpected='false')
+                   for n in range(1, 101)]
+        samples.append(dict(time=1, latency_ms=10000, expected_error='true', unexpected='false'))
+        data = windows(samples, 0, 20, 10)
+        for p in (0.5, 0.75, 0.9, 0.95, 0.99):
+            key = f'p{int(p * 100)}_ms'
+            self.assertAlmostEqual(1 + 99 * p, data[0][key])
+            self.assertIsNone(data[1][key])
+
     def test_intentional_errors_are_not_reported_as_system_failures(self):
         samples = [dict(time=1, latency_ms=20, expected_error='false', unexpected='false'),
                    dict(time=2, latency_ms=10, expected_error='true', unexpected='false'),
@@ -75,6 +85,7 @@ class LoadStatisticsTest(unittest.TestCase):
         self.assertEqual(2, result['requests'])
         self.assertEqual(result['requests'], sum(w['requests'] for w in result['windows']))
         self.assertEqual(25, result['latency_ms']['mean'])
+        self.assertEqual(25, result['all_latency_ms']['mean'])
         self.assertEqual([1, 2], [p['requests'] for p in result['phases']])
 
     def test_recovery_requires_real_overload_and_three_good_windows(self):

@@ -2,6 +2,8 @@ name: Load testing
 run-name: Load testing
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
@@ -13,11 +15,11 @@ on:
         default: all
         options: [all, ramp, stress, soak, soak-10, soak-20]
       smoke:
-        description: Короткая проверка стенда вместо полного измерения
+        description: Smoke
         type: boolean
         default: false
       peak_vus:
-        description: Пиковые пользователи для ramp/stress (5–1024; smoke — максимум 8)
+        description: Пиковые пользователи
         type: number
         default: 128
       soak_seconds:
@@ -40,12 +42,12 @@ concurrency:
 
 jobs:
   load:
-    if: github.event_name == 'workflow_dispatch' || github.run_attempt > 1
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1
     name: Load testing
     runs-on: ubuntu-24.04
     outputs:
       report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 330 }}
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
 
@@ -53,10 +55,10 @@ jobs:
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
       - name: Поднять стенд и выполнить нагрузочное тестирование
-        timeout-minutes: ${{ github.event_name == 'pull_request' && 20 || 300 }}
+        timeout-minutes: 300
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
-          LOAD_SMOKE: ${{ github.event_name == 'pull_request' || inputs.smoke }}
+          LOAD_SMOKE: ${{ inputs.smoke || false }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
           LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
           LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds || '600' }}
@@ -97,9 +99,6 @@ jobs:
             {
               printf '### Нагрузочное тестирование\n\n'
               printf '[Скачать отчёты и логи](%s)\n\n' "$RESULTS_URL"
-              printf 'Распакуйте архив и откройте index.html в папке запуска.\n\n'
-              printf 'Зелёный статус означает завершение измерений, а не соблюдение SLO. Превышения порогов, ошибки и восстановление показаны в отчёте.\n\n'
-              printf 'Постоянная нагрузка: 4 пользователя. CPU: приложение — 0,1; генератор — 2; мониторинг — 3. Результаты этого стенда не следует напрямую сравнивать с локальными.\n'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
@@ -116,7 +115,6 @@ jobs:
               print('\n| Сценарий | Режим | Запросы | p95, мс | RPS | Неожиданные ошибки |')
               print('|---|---|---:|---:|---:|---:|')
               print('\n'.join(rows))
-              print('\nSMOKE проверяет работоспособность стенда и не заменяет полное нагрузочное исследование.')
           PY
 
   pages:

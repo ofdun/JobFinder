@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'benchmarks'))
-from detail_charts import linear_histograms, plot
+from detail_charts import linear_histograms
 from report_view import number, table
 
 
@@ -79,8 +79,8 @@ def windows(samples, start, stop, width):
                        'rps': len(bucket) / seconds, 'successful_rps': len(good) / seconds,
                        'unexpected_rate': unexpected / len(bucket) if bucket else None,
                        'expected_error_rate': sum(s.get('expected_error') == 'true' for s in bucket) / len(bucket) if bucket else None,
-                       'p95_ms': quantile([s['latency_ms'] for s in regular], 0.95) if regular else None,
-                       'p50_ms': quantile([s['latency_ms'] for s in regular], 0.5) if regular else None})
+                       **{f'p{int(p * 100)}_ms': quantile([s['latency_ms'] for s in regular], p)
+                          if regular else None for p in QUANTILES}})
     return result
 
 
@@ -179,6 +179,7 @@ def summarize(samples, origin, resources, manifest):
             'measurement_start': start, 'measurement_stop': stop, 'requests': len(measured),
             'sample_sufficiency': len(measured) >= plan['minimum_samples'],
             'latency_ms': describe([s['latency_ms'] for s in normal]),
+            'all_latency_ms': describe([s['latency_ms'] for s in measured]),
             'expected_error_latency_ms': describe([s['latency_ms'] for s in measured if s.get('expected_error') == 'true']),
             'unexpected_errors': sum(s.get('unexpected') == 'true' for s in measured),
             'error_fraction_target': plan['error_percent'] / 100, 'error_fraction_observed': observed_errors,
@@ -201,29 +202,82 @@ def phase_title(phase):
     return PHASE_TITLES.get(phase['name'], 'Постоянная нагрузка' if phase['plateau'] else 'Рост нагрузки')
 
 
-def figure(title, series, xlabel='От начала нагрузки, с', ylabel='', **kwargs):
+def figure(title, series, xlabel='От начала нагрузки, с', ylabel='', mode='lines', bars=None):
     series = [(name, points) for name, points in series if points]
-    return '' if not series else '<section class="card"><h2>' + html.escape(title) + '</h2>' + plot(series, title, xlabel, ylabel, **kwargs) + '</section>'
+    if not series:
+        return ''
+    traces = []
+    for name, points in series:
+        trace = dict(name=name, legendgroup=name, x=[p[0] for p in points], y=[p[1] for p in points],
+                     type='bar' if bars else 'scatter')
+        if bars:
+            edges, _ = bars
+            trace.update(width=[(b - a) * 0.94 / len(series) for a, b in zip(edges, edges[1:])],
+                         customdata=list(zip(edges, edges[1:])),
+                         hovertemplate='%{customdata[0]:.2f}–%{customdata[1]:.2f}<br>%{y} <extra>%{fullData.name}</extra>')
+        else:
+            trace.update(mode='lines', line={'width': 2}, connectgaps=False,
+                         hovertemplate='%{y:.2f}<extra>%{fullData.name}</extra>')
+            if mode == 'percentiles':
+                trace['hovertemplate'] = 'p%{x:.1f}: %{y:.2f}<extra>%{fullData.name}</extra>'
+        traces.append(trace)
+        if mode == 'percentiles':
+            selected = [(x, y) for x, y in points if x in [p * 100 for p in QUANTILES]]
+            traces.append(dict(name=name, legendgroup=name, type='scatter', mode='markers', showlegend=False,
+                               x=[p[0] for p in selected], y=[p[1] for p in selected], marker={'size': 8},
+                               hovertemplate='p%{x}: %{y:.2f}<extra>%{fullData.name}</extra>'))
+    payload = json.dumps(dict(data=traces, xlabel=xlabel, ylabel=ylabel, mode=mode),
+                         ensure_ascii=False, allow_nan=False).replace('<', '\\u003c')
+    return (f'<section class="card"><h2>{html.escape(title)}</h2>'
+            f'<div class="interactive-chart" role="img" aria-label="{html.escape(title)}"></div>'
+            f'<script type="application/json" class="chart-data">{payload}</script></section>')
+
+
+def distribution(title, series, unit):
+    series = [(name, sorted(values)) for name, values in series if values]
+    if not series:
+        return ''
+    probabilities = sorted({i / 1000 for i in range(1001)} | set(QUANTILES))
+    curves = []
+    for name, values in series:
+        points = []
+        for p in probabilities:
+            position = (len(values) - 1) * p
+            lo, hi = math.floor(position), math.ceil(position)
+            value = values[lo] + (values[hi] - values[lo]) * (position - lo)
+            points.append((p * 100, value))
+        curves.append((name, points))
+    body = figure('Перцентили · ' + title, curves, 'Перцентиль, %', unit, mode='percentiles')
+    edges, counts = linear_histograms([values for _, values in series])
+    body += figure('Гистограмма · ' + title,
+                   [(name, [((edges[i] + edges[i + 1]) / 2, count) for i, count in enumerate(histogram)])
+                    for (name, _), histogram in zip(series, counts)], unit,
+                   'Количество запросов' if unit == 'Задержка, мс' else 'Количество окон', bars=(edges, counts))
+    return body
 
 
 def page(title, body):
-    css = (Path(__file__).resolve().parents[1] / 'benchmarks/report.css').read_text()
+    css = (Path(__file__).resolve().parents[1] / 'benchmarks/report.css').read_text().replace('svg{display:block;width:100%;height:auto}', '')
+    css += '\n.interactive-chart{width:100%;height:400px;min-width:0}nav{margin-bottom:20px}'
+    script = (Path(__file__).with_name('report.js')).read_text()
     return ('<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{html.escape(title)}</title><style>{css}</style><main><header><h1>{html.escape(title)}</h1></header>'
-            + body + '</main></html>')
+            + body + '</main><script src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>'
+            + f'<script>{script}</script></html>')
 
 
 def render(summary, samples, vus, resources, manifest):
     origin = summary['origin']
     plan = manifest['plan']
     rows = []
-    for name, key in [('Задержка штатных запросов, мс', 'latency_ms'), ('Задержка ошибочных действий, мс', 'expected_error_latency_ms'),
+    for name, key in [('Задержка всех запросов, мс', 'all_latency_ms'),
+                      ('Задержка штатных запросов, мс', 'latency_ms'), ('Задержка ошибочных действий, мс', 'expected_error_latency_ms'),
                       ('RPS', 'rps'), ('Успешные штатные запросы/с', 'successful_rps')]:
         info = summary[key]
         if info:
             rows.append([name, str(info['count']), fmt(info['mean']), fmt(info['min']), fmt(info['max']),
                          *[fmt(info['percentiles'][str(p)]) for p in QUANTILES]])
-    body = '<div class="warning">SMOKE · короткая проверка, не результаты исследования</div>' if summary['smoke'] else ''
+    body = '<div class="run-meta">SMOKE</div>' if summary['smoke'] else '<div class="run-meta">Полный</div>'
     body += '<nav><a href="../index.html">Все прогоны</a><a href="summary.json">Статистика</a><a href="manifest.json">Окружение</a></nav>'
     body += f'<div class="kpis"><div><strong>{summary["requests"]}</strong><span>запросов</span></div>'
     body += f'<div><strong>{summary["unexpected_errors"]}</strong><span>неожиданных ошибок</span></div>'
@@ -249,8 +303,9 @@ def render(summary, samples, vus, resources, manifest):
         body += '<section class="card"><h2>Восстановление</h2>' + table(['Результат', 'Время до первого устойчивого окна, с', 'Подтверждено через, с'],
             [[labels[info['state']], elapsed, fmt(info.get('confirmed_after_seconds'))]]) + '</section>'
     points = summary['windows']
-    body += figure('Задержка во времени', [(name, [(w['time'] - origin, w[key]) for w in points if w[key] is not None])
-                                         for name, key in [('p50', 'p50_ms'), ('p95', 'p95_ms')]], ylabel='Задержка, мс')
+    body += figure('Задержка штатных запросов во времени',
+                   [(f'p{int(p * 100)}', [(w['time'] - origin, w[f'p{int(p * 100)}_ms']) for w in points])
+                    for p in QUANTILES], ylabel='Задержка, мс')
     body += figure('Пропускная способность', [('Все запросы', [(w['time'] - origin, w['rps']) for w in points]),
                                              ('Успешные', [(w['time'] - origin, w['successful_rps']) for w in points])], ylabel='Запросов / с')
     body += figure('Неожиданные отказы', [('Отказы', [(w['time'] - origin, 100 * w['unexpected_rate'])
@@ -258,15 +313,9 @@ def render(summary, samples, vus, resources, manifest):
     body += figure('Виртуальные пользователи', [('Пользователи', [(t - origin, value) for t, value in vus])], ylabel='Активных пользователей')
     values = sorted(s['latency_ms'] for s in samples
                     if summary['measurement_start'] <= s['time'] < summary['measurement_stop'])
-    if values:
-        cdf = [(0, 0)]
-        stride = max(1, len(values) // 1000)
-        for index in sorted(set(range(0, len(values), stride)) | {len(values) - 1}):
-            cdf.append((values[index], (index + 1) * 100 / len(values)))
-        body += figure('Распределение задержек всех запросов', [('Запросы', cdf)], 'Задержка, мс', 'Завершилось, %', mode='cdf')
-        edges, counts = linear_histograms([values])
-        body += figure('Гистограмма задержек всех запросов', [('Запросы', [((edges[i] + edges[i+1]) / 2, value) for i, value in enumerate(counts[0])])],
-                       'Задержка, мс', 'Количество запросов', bars=(edges, counts))
+    body += distribution('задержка всех запросов', [('Запросы', values)], 'Задержка, мс')
+    body += distribution('пропускная способность', [('Все запросы', [w['rps'] for w in points]),
+                                                  ('Успешные', [w['successful_rps'] for w in points])], 'Запросов / с')
     names = sorted(summary['resources'], key=lambda name: (name != 'backend', name))
     body += '<section class="card"><h2>Ресурсы компонентов</h2><label>Компонент <select id="component">'
     body += ''.join(f'<option value="{html.escape(name)}">{html.escape(name)}</option>' for name in names) + '</select></label></section>'
@@ -282,10 +331,16 @@ def render(summary, samples, vus, resources, manifest):
         for label, key, scale in definitions:
             body += figure(label, [(name, [(r['time'] - origin, r[key] / scale) for r in items if r.get(key) is not None])], ylabel=label)
         body += '</section>'
-    body += '<footer>Окна RPS: ' + str(plan['window_seconds']) + ' с, включая нулевые. Задержка: отправка, ожидание и получение HTTP-ответа; соединение отдельно не включено. '
-    body += f'Пороги: p95 &lt; {plan["latency_limit_ms"]} мс, неожиданные отказы &lt; {plan["error_limit"] * 100:g}%. '
-    body += 'Запросы учитываются по времени завершения в пределах измеряемого интервала. Прогрев исключён. GPU не используется. CPU измеряется в логических ядрах Docker VM; прочие контейнеры хоста не изменялись.</footer>'
-    body += '<script>const select=document.getElementById("component");function show(){document.querySelectorAll("[data-component]").forEach(p=>p.hidden=p.dataset.component!==select.value)}select.addEventListener("change",show);show();</script>'
+    body += '<section class="card"><h2>Параметры измерения</h2>' + table(['Параметр', 'Значение'], [
+        ['Окно RPS, с', str(plan['window_seconds'])], ['Нулевые окна', 'учтены'],
+        ['Задержка', 'отправка + ожидание + получение HTTP-ответа'],
+        ['Учёт запросов', 'по завершению'], ['Прогрев', 'исключён'],
+        ['Порог p95, мс', '&lt; ' + str(plan['latency_limit_ms'])],
+        ['Порог неожиданных отказов, %', '&lt; ' + str(plan['error_limit'] * 100)],
+        ['Ошибочные действия: план / факт, %', f'{plan["error_percent"]} / {fmt(fraction * 100 if fraction is not None else None)}'],
+        ['Ошибки мониторинга', str(summary['monitor_errors'])], ['GPU', 'не используется'],
+        *[['CPU · ' + name, str(value)] for name, value in manifest.get('cpu_sets', {}).items()]
+    ]) + '</section>'
     return page(TITLES[summary['profile']], body)
 
 
