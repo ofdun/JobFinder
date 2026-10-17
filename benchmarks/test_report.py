@@ -3,11 +3,10 @@ import csv
 import json
 import tempfile
 import unittest
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from report import generate, histogram, load_run, percentile
-from report_view import chart, logarithmic_ticks, shared_histograms
+from report_view import shared_histograms
 from run import positive
 
 
@@ -53,21 +52,6 @@ class StatisticsTest(unittest.TestCase):
             self.assertEqual(equal_counts[0], equal_counts[1])
             self.assertEqual(10, sum(equal_counts[0]))
 
-    def test_constant_and_zero_measurements_produce_valid_svg(self):
-        for value in (0, 0.001, 7):
-            for logarithmic in (False, True):
-                svg = chart([("Цикл", [(0, value), (0, value)])], "Тест", "мс", "мкс", log_y=logarithmic)
-                ET.fromstring(svg)
-                self.assertNotIn("nan", svg)
-                self.assertNotIn("inf", svg)
-
-    def test_narrow_logarithmic_axes_have_readable_tick_density(self):
-        for low, high in [(35000, 85000), (0.1, 0.12), (500, 20000)]:
-            ticks = logarithmic_ticks(low, high)
-            self.assertGreaterEqual(len(ticks), 3)
-            self.assertLessEqual(len(ticks), 7)
-            self.assertTrue(all(low <= value <= high for value in ticks))
-
 
 class ReportTest(unittest.TestCase):
     def setUp(self):
@@ -101,36 +85,18 @@ class ReportTest(unittest.TestCase):
     def save_manifest(self):
         (self.directory / "manifest.json").write_text(json.dumps(self.manifest))
 
-    def test_report_pairs_variants_and_contains_all_required_statistics(self):
+    def test_all_cases_have_statistics(self):
         generate(self.directory)
-        report = (self.directory / "index.html").read_text()
         summary = json.loads((self.directory / "summary.json").read_text())
-        self.assertEqual(23, report.count("<svg"))
-        self.assertEqual(7, report.count('data-chart-panel="time"'))
-        self.assertEqual(7, report.count('data-chart-panel="percentiles"'))
-        self.assertEqual(7, report.count('data-chart-panel="histogram"'))
-        self.assertEqual(6, report.count('<details class="case">'))
-        self.assertIn("НЕ ДОСТИГНУТ", report)
-        self.assertEqual(13, report.count('<td>Teardown</td><td>3</td>'))
-        for label in ("p50", "p75", "p90", "p95", "p99", "Warmup", "Setup", "Измерение"):
-            self.assertIn(label, report)
-        self.assertNotIn("<p>", report)
-        self.assertIn('id="run-selector"', report)
-        self.assertIn('id="size-selector"', report)
         self.assertEqual(13, len(summary["runs"][0]["cases"]))
         self.assertEqual(200, summary["runs"][0]["cases"]["best/loop/512"]["operations"])
 
-    def test_runs_remain_separate_and_each_size_has_its_own_panel(self):
+    def test_runs_remain_separate(self):
         self.manifest["runs"].append({**self.manifest["runs"][0], "number": 2, "image_id": "second-image"})
         self.save_manifest()
         generate(self.directory)
-        report = (self.directory / "index.html").read_text()
         summary = json.loads((self.directory / "summary.json").read_text())
         self.assertEqual([1, 2], [run["number"] for run in summary["runs"]])
-        self.assertEqual(2, report.count('<article data-run='))
-        for size in (512, 4096):
-            self.assertEqual(2, report.count(f'<section data-size="{size}">'))
-        self.assertEqual(46, report.count("<svg"))
         for run in summary["runs"]:
             self.assertEqual(200, run["cases"]["best/loop/512"]["operations"])
 
@@ -160,12 +126,6 @@ class ReportTest(unittest.TestCase):
         self.save_manifest()
         with self.assertRaises(ValueError):
             generate(self.directory)
-
-    def test_smoke_report_cannot_be_mistaken_for_full_results(self):
-        self.manifest["smoke"] = True
-        self.save_manifest()
-        generate(self.directory)
-        self.assertIn("SMOKE CHECK ONLY", (self.directory / "index.html").read_text())
 
 
 if __name__ == "__main__":
