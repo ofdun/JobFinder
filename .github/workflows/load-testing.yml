@@ -51,12 +51,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     steps:
-      - uses: actions/checkout@v4
+      - name: Получение исходников
+        uses: actions/checkout@v4
 
       - name: Проверка расчётов статистики
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
-      - name: Последовательно выполнить сценарии на одном runner
+      - name: Нагрузочное тестирование
         timeout-minutes: 300
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
@@ -81,7 +82,7 @@ jobs:
           fi
           python3 -u load-testing/run.py "${args[@]}"
 
-      - name: Сохранить отчёты, измерения и логи
+      - name: Сохранение результатов
         id: results
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,14 +93,14 @@ jobs:
           overwrite: true
           retention-days: 14
 
-      - name: Ссылка на результаты
+      - name: Результаты
         if: always() && steps.results.outputs.artifact-url != ''
         env:
           RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
         run: printf '[Скачать отчёт и логи](%s)\n' "$RESULTS_URL" >> "$GITHUB_STEP_SUMMARY"
 
   report:
-    name: report
+    name: Report
     if: ${{ !cancelled() && (needs.load.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.report_run_id != '')) }}
     needs: load
     runs-on: ubuntu-24.04
@@ -110,22 +111,25 @@ jobs:
     outputs:
       report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Проверить ID запуска
+      - name: Получение исходников
+        uses: actions/checkout@v4
+      - name: Проверка параметров
         env:
           REPORT_RUN_ID: ${{ inputs.report_run_id || github.run_id }}
         run: python3 -c 'import os; value = os.environ["REPORT_RUN_ID"]; assert value.isascii() and value.isdecimal() and int(value) > 0, "Invalid run ID"'
-      - uses: actions/download-artifact@v4
+      - name: Загрузка результатов
+        uses: actions/download-artifact@v4
         with:
           pattern: load-results-${{ inputs.report_run_id || github.run_id }}-*
           path: .ci-load-inputs
           run-id: ${{ inputs.report_run_id || github.run_id }}
           github-token: ${{ github.token }}
-      - name: Собрать общий отчёт
+      - name: Сборка отчёта
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
         run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE"
-      - uses: actions/upload-artifact@v4
+      - name: Сохранение отчёта
+        uses: actions/upload-artifact@v4
         id: results
         with:
           name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
@@ -134,7 +138,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Ссылка на результаты
+      - name: Итоги
         if: always()
         env:
           RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
@@ -163,6 +167,7 @@ jobs:
           PY
 
   pages:
+    name: Pages
     if: ${{ !cancelled() && needs.report.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     needs: report
     permissions:
