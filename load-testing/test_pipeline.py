@@ -59,6 +59,14 @@ class LoadPipelineTest(unittest.TestCase):
         collect(self.source, self.output, ['stress'])
         render.assert_called_once_with(self.output)
 
+    @patch('pipeline.generate_suite')
+    def test_collect_accepts_all_profiles_from_one_sequential_run_artifact(self, render):
+        for profile in PROFILES:
+            self.fixture(profile, artifact='suite')
+        collect(self.source, self.output, list(PROFILES))
+        self.assertEqual(set(PROFILES), {path.name for path in self.output.iterdir()})
+        render.assert_called_once_with(self.output)
+
     def test_missing_and_duplicate_profiles_are_rejected(self):
         self.fixture('ramp')
         with self.assertRaisesRegex(ValueError, 'Missing profiles'):

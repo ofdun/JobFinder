@@ -45,72 +45,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  prepare:
+  load:
     if: inputs.report_run_id == '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1)
-    name: prepare
+    name: Load testing
     runs-on: ubuntu-24.04
-    outputs:
-      profiles: ${{ steps.profiles.outputs.profiles }}
-      images_artifact: load-images-${{ github.run_id }}-${{ github.run_attempt }}
-    timeout-minutes: 30
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
 
       - name: Проверка расчётов статистики
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
-      - name: Выбрать сценарии
-        id: profiles
+      - name: Последовательно выполнить сценарии на одном runner
+        timeout-minutes: 300
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
-        run: python3 load-testing/pipeline.py profiles --profile "$LOAD_PROFILE"
-
-      - name: Подготовить общие образы
-        run: python3 -u load-testing/pipeline.py bundle --output .ci-load-images
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: load-build-log-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .ci-load-images/build.log
-          include-hidden-files: true
-          if-no-files-found: ignore
-          retention-days: 14
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: load-images-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            .ci-load-images/images.tar
-            .ci-load-images/images.json
-          compression-level: 1
-          include-hidden-files: true
-          retention-days: 14
-          if-no-files-found: error
-
-  load:
-    name: ${{ matrix.profile }}
-    needs: prepare
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 5
-      matrix:
-        profile: ${{ fromJSON(needs.prepare.outputs.profiles || '["ramp","stress","soak","soak-10","soak-20"]') }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.prepare.outputs.images_artifact }}
-          path: .ci-load-images
-      - name: Загрузить общие образы
-        run: docker image load --input .ci-load-images/images.tar
-
-      - name: Поднять стенд и выполнить нагрузочное тестирование
-        timeout-minutes: 75
-        env:
-          LOAD_PROFILE: ${{ matrix.profile }}
           LOAD_SMOKE: ${{ inputs.smoke || false }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
           LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
@@ -118,7 +67,6 @@ jobs:
         shell: bash
         run: |
           args=(
-            --images-file .ci-load-images/images.json
             --profile "$LOAD_PROFILE"
             --peak-vus "$LOAD_PEAK_VUS"
             --soak-seconds "$LOAD_SOAK_SECONDS"
@@ -138,13 +86,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: load-results-${{ github.run_id }}-${{ matrix.profile }}
+          name: load-results-${{ github.run_id }}-suite
           path: load-testing/results/
           if-no-files-found: warn
           overwrite: true
           retention-days: 14
 
-      - name: Ссылка на результаты сценария
+      - name: Ссылка на результаты
         if: always() && steps.results.outputs.artifact-url != ''
         env:
           RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
