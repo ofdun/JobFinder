@@ -40,14 +40,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
-
 jobs:
   load:
     if: inputs.report_run_id == '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1)
     name: Load testing
+    concurrency:
+      group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     steps:
