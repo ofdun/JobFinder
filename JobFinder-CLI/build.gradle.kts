@@ -1,5 +1,6 @@
 plugins {
     java
+    application
     id("com.diffplug.spotless") version "8.4.0"
 }
 
@@ -68,4 +69,12 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+application {
+    mainClass.set("com.ofdun.jobfinder.cli.Main")
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }

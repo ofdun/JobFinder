@@ -80,7 +80,8 @@ public class PostgreSQLVacancyRepository implements VacancyRepository {
             cq.orderBy(
                     p.isSortDesc()
                             ? cb.desc(root.get(p.getSortBy()))
-                            : cb.asc(root.get(p.getSortBy())));
+                            : cb.asc(root.get(p.getSortBy())),
+                    p.isSortDesc() ? cb.desc(root.get("id")) : cb.asc(root.get("id")));
         }
 
         var typed = entityManager.createQuery(cq);

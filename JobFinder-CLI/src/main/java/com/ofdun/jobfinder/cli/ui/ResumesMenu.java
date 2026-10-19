@@ -15,11 +15,11 @@ public final class ResumesMenu {
         while (true) {
             p.println("\n--- Резюме ---");
             p.println("0. Назад");
-            p.println("1. Создать (POST /resumes) [auth]");
-            p.println("2. Получить по id (GET /resumes/{id}) [auth]");
-            p.println("3. Обновить по id (PUT /resumes/{id}) [auth]");
-            p.println("4. Удалить по id (DELETE /resumes/{id}) [auth]");
-            p.println("5. Поиск (GET /resumes/search) [auth employer]");
+            p.println("1. Создать [auth]");
+            p.println("2. Получить по id [auth]");
+            p.println("3. Обновить по id [auth]");
+            p.println("4. Удалить по id [auth]");
+            p.println("5. Поиск [auth; соискатель видит свои резюме]");
 
             int c = p.readInt("> ", false);
             switch (c) {
@@ -40,15 +40,10 @@ public final class ResumesMenu {
         var p = ctx.getPrompt();
         EducationDegree deg = p.readEnum("educationDegree", EducationDegree.class, false);
         String inst = p.readNonBlank("institutionName: ");
-        String faculty = p.readLine("faculty: ");
-        String dept = p.readLine("department: ");
+        String faculty = p.readNonBlank("faculty: ");
+        String dept = p.readNonBlank("department: ");
         var y = p.readInt("yearOfGraduation: ", false);
-        return new EducationCreate(
-                deg,
-                inst,
-                faculty.isBlank() ? null : faculty,
-                dept.isBlank() ? null : dept,
-                new Date(y));
+        return new EducationCreate(deg, inst, faculty, dept, y);
     }
 
     private JobExperienceCreate readJobExp() {
@@ -56,7 +51,7 @@ public final class ResumesMenu {
         String position = p.readNonBlank("position: ");
         String company = p.readNonBlank("companyName: ");
         String desc = p.readLine("description (можно пусто): ");
-        var start = p.readDate("startDate", true);
+        var start = p.readDate("startDate", false);
         var end = p.readDate("endDate", true);
         return new JobExperienceCreate(position, company, desc.isBlank() ? null : desc, start, end);
     }
@@ -64,7 +59,7 @@ public final class ResumesMenu {
     private ResumeRequest readCreateRequest() {
         var p = ctx.getPrompt();
         Long applicantId = p.readLong("applicantId: ", false);
-        Long categoryId = p.readLong("categoryId: ", true);
+        Long categoryId = p.readLong("categoryId: ", false);
         String description = p.readNonBlank("description: ");
         List<Long> skillIds = p.readLongList("skillIds", true);
         List<Long> languageIds = p.readLongList("languageIds", true);
@@ -95,14 +90,14 @@ public final class ResumesMenu {
 
     private ResumeUpdateRequest readUpdateRequest() {
         var p = ctx.getPrompt();
-        Long applicantId = p.readLong("applicantId (можно пусто): ", true);
-        Long categoryId = p.readLong("categoryId (можно пусто): ", true);
+        Long applicantId = p.readLong("applicantId: ", false);
+        Long categoryId = p.readLong("categoryId: ", false);
         String description = p.readLine("description (можно пусто): ");
         List<Long> skillIds = p.readLongList("skillIds (пусто = []): ", true);
         List<Long> languageIds = p.readLongList("languageIds (пусто = []): ", true);
 
         List<EducationCreate> educations = new ArrayList<>();
-        String eduAny = p.readLine("Заменить educations? (y/n, иначе оставим пустым списком): ");
+        String eduAny = p.readLine("Добавить образование? (y/n; n удалит прежние записи): ");
         if (eduAny.equalsIgnoreCase("y")) {
             while (true) {
                 String add = p.readLine("Добавить образование? (y/n): ");
@@ -112,8 +107,7 @@ public final class ResumesMenu {
         }
 
         List<JobExperienceCreate> jobs = new ArrayList<>();
-        String jobsAny =
-                p.readLine("Заменить jobExperiences? (y/n, иначе оставим пустым списком): ");
+        String jobsAny = p.readLine("Добавить опыт? (y/n; n удалит прежние записи): ");
         if (jobsAny.equalsIgnoreCase("y")) {
             while (true) {
                 String add = p.readLine("Добавить опыт работы? (y/n): ");
@@ -136,7 +130,7 @@ public final class ResumesMenu {
         var p = ctx.getPrompt();
         try {
             ResumeRequest req = readCreateRequest();
-            Long id = ctx.getApi().post("/resumes", req, Long.class, true);
+            Long id = ctx.getApi().createResume(req);
             p.println("Создано. id=" + id);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -149,7 +143,7 @@ public final class ResumesMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            Resume r = ctx.getApi().get("/resumes/" + id, Map.of(), Resume.class, true);
+            Resume r = ctx.getApi().getResume(id);
             p.println(String.valueOf(r));
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -163,7 +157,7 @@ public final class ResumesMenu {
         Long id = p.readLong("id: ", false);
         try {
             ResumeUpdateRequest req = readUpdateRequest();
-            Resume r = ctx.getApi().put("/resumes/" + id, req, Resume.class, true);
+            Resume r = ctx.getApi().replaceResume(id, req);
             p.println("Обновлено: " + r);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -176,7 +170,7 @@ public final class ResumesMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            ctx.getApi().delete("/resumes/" + id, true);
+            ctx.getApi().deleteResume(id);
             p.println("Удалено.");
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -206,8 +200,7 @@ public final class ResumesMenu {
             Integer offset = p.readInt("offset (по умолчанию 0): ", true);
             if (offset != null) q.put("offset", offset);
 
-            ResumePageResponse page =
-                    ctx.getApi().get("/resumes/search", q, ResumePageResponse.class, true);
+            ResumePageResponse page = ctx.getApi().searchResumes(q);
             if (page == null || page.items() == null) {
                 p.println("Пустой ответ.");
             } else {

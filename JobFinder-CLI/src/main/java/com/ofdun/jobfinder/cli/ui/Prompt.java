@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.cli.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
@@ -93,6 +94,19 @@ public final class Prompt {
             } catch (NumberFormatException e) {
                 println("Ожидалось целое число.");
             }
+        }
+    }
+
+    public BigDecimal readDecimal(String label, boolean allowBlank) {
+        while (true) {
+            String value = readLine(label);
+            if (value.isBlank() && allowBlank) return null;
+            try {
+                BigDecimal amount = new BigDecimal(value);
+                if (amount.signum() >= 0) return amount;
+            } catch (NumberFormatException ignored) {
+            }
+            println("Ожидалась неотрицательная сумма, например 150000.00.");
         }
     }
 

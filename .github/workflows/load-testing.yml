@@ -1,6 +1,12 @@
 name: Load testing
+run-name: Load testing
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       profile:
@@ -9,11 +15,11 @@ on:
         default: all
         options: [all, ramp, stress, soak, soak-10, soak-20]
       smoke:
-        description: Короткая проверка стенда вместо полного измерения
+        description: Smoke
         type: boolean
         default: false
       peak_vus:
-        description: Пиковые пользователи для ramp/stress (5–1024; smoke — максимум 8)
+        description: Пиковые пользователи
         type: number
         default: 128
       soak_seconds:
@@ -26,32 +32,38 @@ on:
         type: choice
         default: '600'
         options: ['600', '900', '1800']
+      report_run_id:
+        description: ID запуска для повторной публикации результатов
+        type: string
+        default: ''
 
 permissions:
   contents: read
 
-concurrency:
-  group: load-testing
-  cancel-in-progress: false
-
 jobs:
   load:
+    if: inputs.report_run_id == '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1)
+    name: Load testing
+    concurrency:
+      group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     steps:
-      - uses: actions/checkout@v4
+      - name: Получение исходников
+        uses: actions/checkout@v4
 
       - name: Проверка расчётов статистики
         run: python3 -m unittest discover -s load-testing -p 'test_*.py'
 
-      - name: Поднять стенд и выполнить нагрузочное тестирование
+      - name: Нагрузочное тестирование
         timeout-minutes: 300
         env:
-          LOAD_PROFILE: ${{ inputs.profile }}
-          LOAD_SMOKE: ${{ inputs.smoke }}
-          LOAD_PEAK_VUS: ${{ inputs.peak_vus }}
-          LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds }}
-          LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds }}
+          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+          LOAD_SMOKE: ${{ inputs.smoke || false }}
+          LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
+          LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
+          LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds || '600' }}
         shell: bash
         run: |
           args=(
@@ -69,17 +81,63 @@ jobs:
           fi
           python3 -u load-testing/run.py "${args[@]}"
 
-      - name: Сохранить отчёты, измерения и логи
+      - name: Сохранение результатов
         id: results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+          name: load-results-${{ github.run_id }}-suite
           path: load-testing/results/
           if-no-files-found: warn
+          overwrite: true
           retention-days: 14
 
-      - name: Ссылка на результаты
+      - name: Результаты
+        if: always() && steps.results.outputs.artifact-url != ''
+        env:
+          RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
+        run: printf '[Скачать отчёт и логи](%s)\n' "$RESULTS_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  report:
+    name: Report
+    if: ${{ !cancelled() && (needs.load.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.report_run_id != '')) }}
+    needs: load
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      report_artifact: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Получение исходников
+        uses: actions/checkout@v4
+      - name: Проверка параметров
+        env:
+          REPORT_RUN_ID: ${{ inputs.report_run_id || github.run_id }}
+        run: python3 -c 'import os; value = os.environ["REPORT_RUN_ID"]; assert value.isascii() and value.isdecimal() and int(value) > 0, "Invalid run ID"'
+      - name: Загрузка результатов
+        uses: actions/download-artifact@v4
+        with:
+          pattern: load-results-${{ inputs.report_run_id || github.run_id }}-*
+          path: .ci-load-inputs
+          run-id: ${{ inputs.report_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Сборка отчёта
+        env:
+          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+        run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE"
+      - name: Сохранение отчёта
+        uses: actions/upload-artifact@v4
+        id: results
+        with:
+          name: load-testing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci-load-report/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Итоги
         if: always()
         env:
           RESULTS_URL: ${{ steps.results.outputs.artifact-url }}
@@ -89,8 +147,33 @@ jobs:
             {
               printf '### Нагрузочное тестирование\n\n'
               printf '[Скачать отчёты и логи](%s)\n\n' "$RESULTS_URL"
-              printf 'Распакуйте архив и откройте index.html в папке запуска.\n\n'
-              printf 'Зелёный статус означает завершение измерений, а не соблюдение SLO. Превышения порогов, ошибки и восстановление показаны в отчёте.\n\n'
-              printf 'Постоянная нагрузка: 4 пользователя. CPU: приложение — 0,1; генератор — 2; мониторинг — 3. Результаты этого стенда не следует напрямую сравнивать с локальными.\n'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          rows = []
+          for path in sorted(Path('.ci-load-report').glob('*/*/summary.json')):
+              result = json.loads(path.read_text())
+              latency = result.get('latency_ms')
+              p95 = f"{latency['percentiles']['0.95']:.2f}" if latency else '—'
+              rows.append(f"| {result['profile']} | {'SMOKE' if result['smoke'] else 'Полный'} | {result['requests']} | {p95} | {result['rps']['mean']:.2f} | {result['unexpected_errors']} |")
+          if rows:
+              print('\n| Сценарий | Режим | Запросы | p95, мс | RPS | Неожиданные ошибки |')
+              print('|---|---|---:|---:|---:|---:|')
+              print('\n'.join(rows))
+          PY
+
+  pages:
+    name: Pages
+    if: ${{ !cancelled() && needs.report.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: report
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/publish-report.yml
+    with:
+      artifact: ${{ needs.report.outputs.report_artifact }}
+      kind: load-testing

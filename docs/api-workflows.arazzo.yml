@@ -1,0 +1,169 @@
+arazzo: 1.0.1
+info:
+  title: JobFinder mock API checks
+  version: 1.0.0
+  description: Проверка примеров и схем на Prism; mock не сохраняет данные и не проверяет бизнес-логику.
+sourceDescriptions:
+  - name: jobfinder
+    type: openapi
+    url: swagger.yml
+workflows:
+  - workflowId: applicant-lifecycle
+    summary: Регистрация, вход, чтение и удаление профиля соискателя
+    steps:
+      - stepId: register
+        operationId: postApplicants
+        requestBody:
+          contentType: application/json
+          payload:
+            name: Анна Иванова
+            email: anna@example.com
+            password: ExamplePass123!
+            address: Москва
+            phoneNumber: '+79990000000'
+            locationId: 1
+        successCriteria:
+          - condition: $statusCode == 201
+          - condition: $response.body == 1
+        outputs:
+          applicantId: $response.body
+      - stepId: login
+        operationId: postAuthLogin
+        requestBody:
+          contentType: application/json
+          payload:
+            email: anna@example.com
+            password: ExamplePass123!
+            userType: APPLICANT
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accessToken: $response.body#/accessToken
+          refreshToken: $response.body#/refreshToken
+      - stepId: refresh
+        operationId: postAuthRefresh
+        requestBody:
+          contentType: application/json
+          payload:
+            refreshToken: $steps.login.outputs.refreshToken
+            userType: APPLICANT
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accessToken: $response.body#/accessToken
+      - stepId: readProfile
+        operationId: getApplicantsId
+        parameters:
+          - name: id
+            in: path
+            value: $steps.register.outputs.applicantId
+          - name: Authorization
+            in: header
+            value: Bearer {$steps.refresh.outputs.accessToken}
+        successCriteria:
+          - condition: $statusCode == 200
+          - condition: $response.body#/id == $steps.register.outputs.applicantId
+      - stepId: listResumes
+        operationId: getResumes
+        parameters:
+          - name: applicantId
+            in: query
+            value: $steps.register.outputs.applicantId
+          - name: Authorization
+            in: header
+            value: Bearer {$steps.refresh.outputs.accessToken}
+        successCriteria:
+          - condition: $statusCode == 200
+      - stepId: deleteProfile
+        operationId: deleteApplicantsId
+        parameters:
+          - name: id
+            in: path
+            value: $steps.register.outputs.applicantId
+          - name: Authorization
+            in: header
+            value: Bearer {$steps.refresh.outputs.accessToken}
+        successCriteria:
+          - condition: $statusCode == 204
+  - workflowId: public-vacancy-search
+    summary: Публичный поиск вакансий
+    steps:
+      - stepId: search
+        operationId: getVacancies
+        parameters:
+          - name: limit
+            in: query
+            value: 20
+          - name: offset
+            in: query
+            value: 0
+        successCriteria:
+          - condition: $statusCode == 200
+      - stepId: findLocations
+        operationId: getLocations
+        parameters:
+          - name: q
+            in: query
+            value: Москва
+        successCriteria:
+          - condition: $statusCode == 200
+  - workflowId: employer-login
+    summary: Вход работодателя и восстановление версии вакансии
+    steps:
+      - stepId: login
+        operationId: postAuthLogin
+        requestBody:
+          contentType: application/json
+          payload:
+            email: hr@example.com
+            password: ExamplePass123!
+            userType: EMPLOYER
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accessToken: $response.body#/accessToken
+          refreshToken: $response.body#/refreshToken
+      - stepId: refresh
+        operationId: postAuthRefresh
+        requestBody:
+          contentType: application/json
+          payload:
+            refreshToken: $steps.login.outputs.refreshToken
+            userType: EMPLOYER
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accessToken: $response.body#/accessToken
+      - stepId: restoreVacancy
+        operationId: postVacanciesIdDraftsDraftId
+        parameters:
+          - name: id
+            in: path
+            value: 10
+          - name: draftId
+            in: path
+            value: 30
+          - name: Authorization
+            in: header
+            value: Bearer {$steps.refresh.outputs.accessToken}
+        successCriteria:
+          - condition: $statusCode == 200
+          - condition: $response.body#/id == 10
+          - condition: $response.body#/status == 'ACTIVE'
+      - stepId: replaceApplicationStatus
+        operationId: putApplicationsIdStatus
+        parameters:
+          - name: id
+            in: path
+            value: 40
+          - name: Authorization
+            in: header
+            value: Bearer {$steps.refresh.outputs.accessToken}
+        requestBody:
+          contentType: application/json
+          payload:
+            applicationStatus: INVITATION
+        successCriteria:
+          - condition: $statusCode == 200
+          - condition: $response.body#/id == 40
+          - condition: $response.body#/applicationStatus == 'INVITATION'

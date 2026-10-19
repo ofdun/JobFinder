@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/languages")
+@RequestMapping({"/api/v1/languages", "/api/v2/languages"})
 @RequiredArgsConstructor
 public class LanguageController {
     private final LanguageService languageService;
 
     @GetMapping
     public ResponseEntity<List<LanguageDto>> getLanguages() {
-        var languages = languageService.getAllLanguages().stream().map(LanguageApiMapper::toDto).toList();
+        var languages =
+                languageService.getAllLanguages().stream().map(LanguageApiMapper::toDto).toList();
         return ResponseEntity.ok(languages);
     }
 }
-

@@ -272,4 +272,70 @@ class BasicResumeServiceTest {
         verify(relationalResumeRepository, times(1)).deleteResume(id);
         verify(vectorResumeRepository, times(1)).deleteResume(id);
     }
+
+    @Test
+    @org.junit.jupiter.api.Tag("state-transition")
+    void replacementClearsOptionalFieldsButPreservesPublicationDate() {
+        var old = com.ofdun.jobfinder.support.TestDataMother.resume();
+        var replacement = com.ofdun.jobfinder.support.TestDataMother.resume();
+        replacement.setDescription(null);
+        replacement.setSkillIds(java.util.List.of());
+        replacement.setLanguageIds(java.util.List.of());
+        replacement.setDate(new java.util.Date(0));
+        when(relationalResumeRepository.getResumeById(old.getId())).thenReturn(Optional.of(old));
+        when(relationalResumeRepository.updateResume(replacement)).thenReturn(replacement);
+        when(embeddingResumeHandler.handle(replacement)).thenReturn(Optional.of(replacement));
+        when(vectorResumeUpdateHandler.handle(replacement)).thenReturn(Optional.of(replacement));
+
+        var result = resumeService.replaceResume(replacement).orElseThrow();
+
+        assertEquals(old.getDate(), result.getDate());
+        assertNull(result.getDescription());
+        assertTrue(result.getSkillIds().isEmpty());
+        assertTrue(result.getLanguageIds().isEmpty());
+        var order =
+                inOrder(
+                        relationalResumeRepository,
+                        embeddingResumeHandler,
+                        vectorResumeUpdateHandler);
+        order.verify(relationalResumeRepository).getResumeById(old.getId());
+        order.verify(relationalResumeRepository).updateResume(replacement);
+        order.verify(embeddingResumeHandler).handle(replacement);
+        order.verify(vectorResumeUpdateHandler).handle(replacement);
+        verifyNoInteractions(relationalResumeUpdateHandler);
+    }
+
+    @Test
+    void replacementCannotTransferResumeToAnotherApplicant() {
+        var old = com.ofdun.jobfinder.support.TestDataMother.resume();
+        var replacement = com.ofdun.jobfinder.support.TestDataMother.resume();
+        replacement.setApplicantId(old.getApplicantId() + 1);
+        when(relationalResumeRepository.getResumeById(old.getId())).thenReturn(Optional.of(old));
+        assertThrows(
+                IllegalArgumentException.class, () -> resumeService.replaceResume(replacement));
+        verify(relationalResumeRepository, never()).updateResume(any());
+        verifyNoInteractions(embeddingResumeHandler, vectorResumeUpdateHandler);
+    }
+
+    @Test
+    void replacementOfMissingResumeDoesNotWriteOrIndex() {
+        var replacement = com.ofdun.jobfinder.support.TestDataMother.resume();
+        when(relationalResumeRepository.getResumeById(replacement.getId()))
+                .thenReturn(Optional.empty());
+        assertThrows(
+                com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException.class,
+                () -> resumeService.replaceResume(replacement));
+        verify(relationalResumeRepository, never()).updateResume(any());
+        verifyNoInteractions(embeddingResumeHandler, vectorResumeUpdateHandler);
+    }
+
+    @Test
+    void failedReplacementDoesNotStartEmbeddingOrIndexing() {
+        var old = com.ofdun.jobfinder.support.TestDataMother.resume();
+        when(relationalResumeRepository.getResumeById(old.getId())).thenReturn(Optional.of(old));
+        when(relationalResumeRepository.updateResume(old))
+                .thenThrow(new IllegalStateException("offline"));
+        assertThrows(IllegalStateException.class, () -> resumeService.replaceResume(old));
+        verifyNoInteractions(embeddingResumeHandler, vectorResumeUpdateHandler);
+    }
 }

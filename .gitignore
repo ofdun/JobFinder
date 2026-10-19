@@ -7,6 +7,11 @@
 .ci-history/
 .ci-inputs/
 .ci-report/
+.ci-publish/
+.ci-pages/
+.ci-load-images/
+.ci-load-inputs/
+.ci-load-report/
 *cities500.txt
 *.log
 *.gz

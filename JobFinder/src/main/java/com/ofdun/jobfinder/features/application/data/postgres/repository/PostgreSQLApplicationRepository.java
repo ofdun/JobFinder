@@ -5,7 +5,6 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -16,9 +15,32 @@ import org.springframework.stereotype.Component;
 public class PostgreSQLApplicationRepository implements ApplicationRepository {
     private final ApplicationJpaRepository applicationJpaRepository;
 
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+
+    @Override
+    public List<ApplicationModel> getApplicationsByApplicantId(
+            Long applicantId, int limit, int offset) {
+        return entityManager
+                .createQuery(
+                        "select a from ApplicationEntity a where a.resumeId in (select r.id from"
+                            + " ResumeEntity r where r.applicantId = :applicantId) order by a.date"
+                            + " desc, a.id desc",
+                        com.ofdun.jobfinder.features.application.data.postgres.entity
+                                .ApplicationEntity.class)
+                .setParameter("applicantId", applicantId)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList()
+                .stream()
+                .map(ApplicationPostgreSQLMapper::toModel)
+                .toList();
+    }
+
     @Override
     public Long createApplication(ApplicationModel application) {
-        return applicationJpaRepository.save(ApplicationPostgreSQLMapper.toEntity(application)).getId();
+        return applicationJpaRepository
+                .save(ApplicationPostgreSQLMapper.toEntity(application))
+                .getId();
     }
 
     @Override

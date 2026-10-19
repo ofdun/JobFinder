@@ -32,6 +32,8 @@ public class BasicJwtProvider implements JwtProvider {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("role", type.name())
+                .claim("token_use", "access")
+                .id(java.util.UUID.randomUUID().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + this.accessExpirationTimeMs))
                 .signWith(secret)
@@ -43,6 +45,8 @@ public class BasicJwtProvider implements JwtProvider {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("role", type.name())
+                .claim("token_use", "refresh")
+                .id(java.util.UUID.randomUUID().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + this.refreshExpirationTimeMs))
                 .signWith(secret)
@@ -54,6 +58,30 @@ public class BasicJwtProvider implements JwtProvider {
         try {
             return getAccountType(token) == type;
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean validateAccessToken(String token, AccountType type) {
+        return validatePurpose(token, type, "access", false);
+    }
+
+    @Override
+    public Boolean validateRefreshToken(String token, AccountType type) {
+        // Legacy refresh tokens are additionally checked against their Redis record.
+        return validatePurpose(token, type, "refresh", true);
+    }
+
+    private boolean validatePurpose(
+            String token, AccountType type, String purpose, boolean allowLegacy) {
+        try {
+            if (!validateToken(token, type)) return false;
+            var claims =
+                    Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
+            var use = claims.get("token_use", String.class);
+            return purpose.equals(use) || (allowLegacy && use == null);
+        } catch (RuntimeException ex) {
             return false;
         }
     }

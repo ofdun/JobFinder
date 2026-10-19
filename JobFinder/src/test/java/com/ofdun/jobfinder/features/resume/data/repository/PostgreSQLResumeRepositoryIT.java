@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.ofdun.jobfinder.features.resume.data.postgres.repository.PostgreSQLResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,10 @@ import org.testcontainers.utility.DockerImageName;
 @Tag("postgres")
 @ActiveProfiles("test-postgres")
 @DataJpaTest
+@org.springframework.transaction.annotation.Transactional
 @Import(PostgreSQLResumeRepository.class)
 @Testcontainers
-class PostgreSQLResumeRepositoryIT {
+class PostgreSQLResumeRepositoryIT implements ResumePersistenceContract {
 
     @Container
     static final GenericContainer<?> postgres =
@@ -126,5 +126,71 @@ class PostgreSQLResumeRepositoryIT {
     void getResumeById_whenMissing_thenNullReturned() {
         long missingId = 9999L;
         assertTrue(resumeRepository.getResumeById(missingId).isEmpty());
+    }
+
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
+
+    @Override
+    public RelationalResumeRepository repository() {
+        return resumeRepository;
+    }
+
+    @Override
+    public void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    @Override
+    public void assertNoChildren(long id) {
+        assertEquals(
+                0L,
+                jdbc.queryForObject(
+                        "select count(*) from jobfinder.educations where resume_id=?",
+                        Long.class,
+                        id));
+        assertEquals(
+                0L,
+                jdbc.queryForObject(
+                        "select count(*) from jobfinder.experiences where resume_id=?",
+                        Long.class,
+                        id));
+    }
+
+    @Test
+    @Override
+    public void nestedRecordsRoundTripWithCurrentEmployment() {
+        ResumePersistenceContract.super.nestedRecordsRoundTripWithCurrentEmployment();
+    }
+
+    @Test
+    @Override
+    public void replacingWithEmptyCollectionsRemovesStoredRelations() {
+        ResumePersistenceContract.super.replacingWithEmptyCollectionsRemovesStoredRelations();
+    }
+
+    @Test
+    @Override
+    public void replacingChildrenDoesNotAppendOrModifyAnotherResume() {
+        ResumePersistenceContract.super.replacingChildrenDoesNotAppendOrModifyAnotherResume();
+    }
+
+    @Test
+    @Override
+    public void deletingResumeRemovesItsChildrenOnly() {
+        ResumePersistenceContract.super.deletingResumeRemovesItsChildrenOnly();
+    }
+
+    @Test
+    @Override
+    public void paginationWithEqualDatesHasStableOrderAndFullCount() {
+        ResumePersistenceContract.super.paginationWithEqualDatesHasStableOrderAndFullCount();
+    }
+
+    @Test
+    @Override
+    public void ownershipFilterCannotReturnOtherApplicantsResumes() {
+        ResumePersistenceContract.super.ownershipFilterCannotReturnOtherApplicantsResumes();
     }
 }

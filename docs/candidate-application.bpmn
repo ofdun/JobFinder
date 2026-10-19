@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_bpmn_application" targetNamespace="https://jobfinder.local/processes">
+  <bpmn:process id="Process_bpmn_application" name="BP-02 / Отправка отклика (после входа)" isExecutable="false">
+    <bpmn:startEvent id="start" name="Начало">
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="has" name="Есть резюме?">
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="choose" name="Соискатель: выбрать своё резюме">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="verify" name="Система: вакансия, резюме и права">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="valid" name="Проверка успешна?">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="save" name="Система: создать отклик NEW">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end" name="Отправлен">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="create" name="Соискатель: создать резюме">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="error" name="Система: показать причину">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="failed" name="Не отправлен">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="start" targetRef="has" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="has" targetRef="choose" name="Да" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="has" targetRef="create" name="Нет" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="create" targetRef="choose" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="choose" targetRef="verify" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="verify" targetRef="valid" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="valid" targetRef="save" name="Да" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="save" targetRef="end" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="valid" targetRef="error" name="Нет" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="error" targetRef="failed" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_bpmn-application">
+    <bpmndi:BPMNPlane id="Plane_bpmn-application" bpmnElement="Process_bpmn_application">
+      <bpmndi:BPMNShape id="Shape_start" bpmnElement="start">
+        <dc:Bounds x="32.0" y="122.0" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-15" y="167" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_has" bpmnElement="has" isMarkerVisible="true">
+        <dc:Bounds x="145.0" y="115.0" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="105" y="76" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_choose" bpmnElement="choose">
+        <dc:Bounds x="317.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_verify" bpmnElement="verify">
+        <dc:Bounds x="547.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_valid" bpmnElement="valid" isMarkerVisible="true">
+        <dc:Bounds x="795.0" y="115.0" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755" y="76" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_save" bpmnElement="save">
+        <dc:Bounds x="917.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end" bpmnElement="end">
+        <dc:Bounds x="1152.0" y="122.0" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1105" y="167" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_create" bpmnElement="create">
+        <dc:Bounds x="87.0" y="266.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_error" bpmnElement="error">
+        <dc:Bounds x="737.0" y="266.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_failed" bpmnElement="failed">
+        <dc:Bounds x="1022.0" y="282.0" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="975" y="327" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_0" bpmnElement="Flow_0">
+        <di:waypoint x="68" y="140" />
+        <di:waypoint x="145" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="195" y="140" />
+        <di:waypoint x="317" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="240.0" y="121.0" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="170" y="165" />
+        <di:waypoint x="170" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="154.0" y="196.5" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_3" bpmnElement="Flow_3">
+        <di:waypoint x="253" y="300" />
+        <di:waypoint x="400" y="300" />
+        <di:waypoint x="400" y="174" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_4" bpmnElement="Flow_4">
+        <di:waypoint x="483" y="140" />
+        <di:waypoint x="547" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5" bpmnElement="Flow_5">
+        <di:waypoint x="713" y="140" />
+        <di:waypoint x="795" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_6" bpmnElement="Flow_6">
+        <di:waypoint x="845" y="140" />
+        <di:waypoint x="917" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="865.0" y="121.0" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_7" bpmnElement="Flow_7">
+        <di:waypoint x="1083" y="140" />
+        <di:waypoint x="1152" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_8" bpmnElement="Flow_8">
+        <di:waypoint x="820" y="165" />
+        <di:waypoint x="820" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="804.0" y="196.5" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_9" bpmnElement="Flow_9">
+        <di:waypoint x="903" y="300" />
+        <di:waypoint x="1022" y="300" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

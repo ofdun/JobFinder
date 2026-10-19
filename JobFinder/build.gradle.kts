@@ -32,6 +32,10 @@ repositories {
 }
 
 dependencies {
+    implementation("com.graphql-java:graphql-java")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
+    implementation("com.networknt:json-schema-validator:2.0.4")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -213,4 +217,10 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+// Package the single maintained contract with the application.
+tasks.processResources {
+    from("../docs/schema.graphqls") { into("graphql") }
+    from("../docs/swagger.yml") { into("static/api/v2"); rename { "openapi.yml" } }
 }

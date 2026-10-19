@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping({"/api/v1", "/api/v2"})
 @RequiredArgsConstructor
 public class EmployerVacancyApplicationController {
     private final ApplicationService applicationService;
@@ -32,8 +32,11 @@ public class EmployerVacancyApplicationController {
         return ResponseEntity.ok(applications.stream().map(mapper::toResponse).toList());
     }
 
-    @PatchMapping("/applications/{id}/status")
-    @PreAuthorize("@sec.isEmployer(authentication) && @sec.canAccessApplication(authentication, #id)")
+    @RequestMapping(
+            path = "/applications/{id}/status",
+            method = {RequestMethod.PUT, RequestMethod.PATCH})
+    @PreAuthorize(
+            "@sec.isEmployer(authentication) && @sec.canAccessApplication(authentication, #id)")
     public ResponseEntity<@NonNull ApplicationResponse> updateApplicationStatus(
             @PathVariable Long id, @Valid @RequestBody ApplicationStatusUpdateRequest request) {
         var existing = applicationService.getApplication(id);
@@ -42,4 +45,3 @@ public class EmployerVacancyApplicationController {
         return ResponseEntity.ok(mapper.toResponse(updated));
     }
 }
-

@@ -14,8 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JobExperienceDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long resumeId;
 
@@ -27,6 +26,5 @@ public class JobExperienceDocument {
 
     @NotNull private LocalDate startDate;
 
-    @NotNull private LocalDate endDate;
+    private LocalDate endDate;
 }
-

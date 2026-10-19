@@ -48,7 +48,7 @@ public class ApplicantAuthService implements AuthService {
 
     @Override
     public TokenPair refreshToken(@NonNull String refreshToken) {
-        if (!jwtProvider.validateToken(refreshToken, AccountType.APPLICANT)) {
+        if (!jwtProvider.validateRefreshToken(refreshToken, AccountType.APPLICANT)) {
             throw new InvalidRefreshTokenException();
         }
 

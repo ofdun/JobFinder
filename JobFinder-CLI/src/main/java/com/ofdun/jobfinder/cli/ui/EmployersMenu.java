@@ -15,10 +15,10 @@ public final class EmployersMenu {
         while (true) {
             p.println("\n--- Работодатели ---");
             p.println("0. Назад");
-            p.println("1. Регистрация (POST /employers)");
-            p.println("2. Получить по id (GET /employers/{id}) [auth]");
-            p.println("3. Обновить по id (PUT /employers/{id}) [auth]");
-            p.println("4. Удалить по id (DELETE /employers/{id}) [auth]");
+            p.println("1. Регистрация");
+            p.println("2. Получить по id [auth]");
+            p.println("3. Обновить по id [auth]");
+            p.println("4. Удалить по id [auth]");
 
             int c = p.readInt("> ", false);
             switch (c) {
@@ -38,7 +38,7 @@ public final class EmployersMenu {
         var p = ctx.getPrompt();
         try {
             EmployerRequest req = readRequest();
-            Long id = ctx.getApi().post("/employers", req, Long.class, false);
+            Long id = ctx.getApi().createEmployer(req);
             p.println("Создано. id=" + id);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -51,8 +51,7 @@ public final class EmployersMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            Employer a =
-                    ctx.getApi().get("/employers/" + id, java.util.Map.of(), Employer.class, true);
+            Employer a = ctx.getApi().getEmployer(id);
             p.println(String.valueOf(a));
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -66,7 +65,7 @@ public final class EmployersMenu {
         Long id = p.readLong("id: ", false);
         try {
             EmployerRequest req = readRequest();
-            Employer a = ctx.getApi().put("/employers/" + id, req, Employer.class, true);
+            Employer a = ctx.getApi().replaceEmployer(id, req);
             p.println("Обновлено: " + a);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -79,8 +78,8 @@ public final class EmployersMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            ctx.getApi().delete("/employers/" + id, true);
-            ctx.getSession().logout();
+            ctx.getApi().deleteEmployer(id);
+            ctx.setSession(ctx.getSession().logout());
             p.println("Удалено.");
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -97,7 +96,7 @@ public final class EmployersMenu {
         String description = p.readLine("description (можно пусто): ");
         String address = p.readLine("address (можно пусто): ");
         String website = p.readLine("websiteLink (можно пусто): ");
-        Long locationId = p.readLong("locationId (можно пусто): ", true);
+        Long locationId = p.readLong("locationId: ", false);
 
         return new EmployerRequest(
                 name,

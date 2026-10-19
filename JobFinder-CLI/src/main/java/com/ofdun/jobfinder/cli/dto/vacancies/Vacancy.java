@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.cli.dto.vacancies;
 import com.ofdun.jobfinder.cli.dto.common.Language;
 import com.ofdun.jobfinder.cli.dto.common.Location;
 import com.ofdun.jobfinder.cli.dto.common.Skill;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record Vacancy(
         Long id,
         Long employerId,
         Location location,
-        Double salary,
+        BigDecimal salary,
         List<Skill> skills,
         List<Language> languages,
         PaymentFrequency paymentFrequency,

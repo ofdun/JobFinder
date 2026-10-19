@@ -1,8 +1,6 @@
 package com.ofdun.jobfinder.features.education.api.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ofdun.jobfinder.features.resume.enums.EducationDegree;
-import java.time.Year;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,10 +9,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EducationCreateDto {
-    private EducationDegree educationDegree;
-    private String institutionName;
-    private String faculty;
-    private String department;
+    @jakarta.validation.constraints.NotNull private EducationDegree educationDegree;
+    @jakarta.validation.constraints.NotBlank private String institutionName;
+    @jakarta.validation.constraints.NotBlank private String faculty;
+    @jakarta.validation.constraints.NotBlank private String department;
 
+    @jakarta.validation.constraints.NotNull
+    @jakarta.validation.constraints.Min(1900)
     private Integer yearOfGraduation;
+
+    @jakarta.validation.constraints.AssertTrue
+    public boolean isGraduationYearValid() {
+        return yearOfGraduation == null || yearOfGraduation <= java.time.Year.now().getValue() + 10;
+    }
 }

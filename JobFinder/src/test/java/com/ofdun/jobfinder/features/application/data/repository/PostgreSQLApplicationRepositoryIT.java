@@ -7,13 +7,13 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.enums.ApplicationStatus;
 import java.util.Date;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -58,7 +58,8 @@ class PostgreSQLApplicationRepositoryIT {
     @Test
     void createApplication_whenValidApplication_thenIdReturned() {
         ApplicationModel model =
-                buildApplicationModel(null, 1L, 1L, new Date(), ApplicationStatus.NEW);
+                buildApplicationModel(
+                        null, createVacancyForTests(), 1L, new Date(), ApplicationStatus.NEW);
 
         Long id = applicationRepository.createApplication(model);
 
@@ -66,7 +67,7 @@ class PostgreSQLApplicationRepositoryIT {
 
         var fromDbOpt = applicationRepository.getApplicationById(id);
         assertTrue(fromDbOpt.isPresent());
-        assertEquals(1L, fromDbOpt.get().getVacancyId());
+        assertEquals(model.getVacancyId(), fromDbOpt.get().getVacancyId());
         assertEquals(1L, fromDbOpt.get().getResumeId());
         assertEquals(ApplicationStatus.NEW, fromDbOpt.get().getApplicationStatus());
     }
@@ -129,11 +130,8 @@ class PostgreSQLApplicationRepositoryIT {
         Long secondVacancyId = createVacancyForTests();
 
         applicationRepository.createApplication(
-                buildApplicationModel(null, 1L, 1L, new Date(), ApplicationStatus.NEW));
-        applicationRepository.createApplication(
-                buildApplicationModel(null, 1L, 2L, new Date(), ApplicationStatus.INVITATION));
-        applicationRepository.createApplication(
-                buildApplicationModel(null, secondVacancyId, 1L, new Date(), ApplicationStatus.REJECTION));
+                buildApplicationModel(
+                        null, secondVacancyId, 1L, new Date(), ApplicationStatus.REJECTION));
 
         var items = applicationRepository.getApplicationsByVacancyId(1L);
 
@@ -166,4 +164,70 @@ class PostgreSQLApplicationRepositoryIT {
                 """,
                 Long.class);
     }
+
+    @Test
+    void ownApplicationsUseResumeOwnershipAndPagination() {
+        Long applicantId =
+                jdbcTemplate.queryForObject(
+                        "select applicant_id from jobfinder.resumes where id=1", Long.class);
+        var all = applicationRepository.getApplicationsByApplicantId(applicantId, 100, 0);
+        assertFalse(all.isEmpty());
+        assertTrue(
+                all.stream()
+                        .allMatch(
+                                a ->
+                                        applicantId.equals(
+                                                jdbcTemplate.queryForObject(
+                                                        "select applicant_id from jobfinder.resumes"
+                                                                + " where id=?",
+                                                        Long.class,
+                                                        a.getResumeId()))));
+        assertEquals(
+                all.getFirst().getId(),
+                applicationRepository
+                        .getApplicationsByApplicantId(applicantId, 1, 0)
+                        .getFirst()
+                        .getId());
+        assertTrue(applicationRepository.getApplicationsByApplicantId(999999L, 20, 0).isEmpty());
+    }
+
+    @Test
+    @Tag("equivalence")
+    void duplicateVacancyResumePairIsRejectedByDatabase() {
+        var original = applicationRepository.getApplicationById(1L).orElseThrow();
+        var duplicate =
+                buildApplicationModel(
+                        null,
+                        original.getVacancyId(),
+                        original.getResumeId(),
+                        new Date(),
+                        ApplicationStatus.NEW);
+        assertThrows(
+                org.springframework.dao.DataIntegrityViolationException.class,
+                () -> applicationRepository.createApplication(duplicate));
+    }
+
+    @Test
+    @Tag("state-transition")
+    void repeatedStatusUpdatePreservesIdentityRelationshipsAndDate() {
+        var original = applicationRepository.getApplicationById(1L).orElseThrow();
+        var changed =
+                buildApplicationModel(
+                        original.getId(),
+                        original.getVacancyId(),
+                        original.getResumeId(),
+                        original.getApplicationDate(),
+                        ApplicationStatus.INVITATION);
+        applicationRepository.updateApplication(changed);
+        applicationRepository.updateApplication(changed);
+        entityManager.flush();
+        entityManager.clear();
+        var stored = applicationRepository.getApplicationById(original.getId()).orElseThrow();
+        assertEquals(original.getVacancyId(), stored.getVacancyId());
+        assertEquals(original.getResumeId(), stored.getResumeId());
+        assertEquals(original.getApplicationDate(), stored.getApplicationDate());
+        assertEquals(ApplicationStatus.INVITATION, stored.getApplicationStatus());
+    }
+
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 }

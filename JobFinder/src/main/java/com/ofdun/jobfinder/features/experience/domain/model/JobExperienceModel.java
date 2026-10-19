@@ -23,5 +23,5 @@ public class JobExperienceModel {
 
     @NotNull private LocalDate startDate;
 
-    @NotNull private LocalDate endDate;
+    private LocalDate endDate;
 }
