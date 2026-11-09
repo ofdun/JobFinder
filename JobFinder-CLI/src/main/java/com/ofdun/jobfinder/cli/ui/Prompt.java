@@ -1,5 +1,9 @@
 package com.ofdun.jobfinder.cli.ui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,9 +13,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 public final class Prompt {
     private static final Logger log = LoggerFactory.getLogger(Prompt.class);
@@ -69,6 +70,28 @@ public final class Prompt {
         while (true) {
             String v = readLine(label);
             if (!v.isBlank()) return v;
+            println("Значение не может быть пустым.");
+        }
+    }
+
+    public String readSecret(String label) {
+        while (true) {
+            String value;
+            if (System.console() != null) {
+                char[] input = System.console().readPassword("%s", label);
+                if (input == null) throw new IllegalStateException("Ввод завершён");
+                value = new String(input);
+                java.util.Arrays.fill(input, '\0');
+            } else {
+                print(label);
+                try {
+                    value = in.readLine();
+                    if (value == null) throw new IllegalStateException("Ввод завершён");
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Не удалось прочитать секрет");
+                }
+            }
+            if (!value.isBlank()) return value;
             println("Значение не может быть пустым.");
         }
     }

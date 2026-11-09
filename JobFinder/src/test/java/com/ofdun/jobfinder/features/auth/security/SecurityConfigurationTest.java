@@ -142,7 +142,7 @@ class SecurityConfigurationTest {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer signed-token");
         var response = new MockHttpServletResponse();
         when(provider.getAccountType("signed-token")).thenReturn(AccountType.EMPLOYER);
-        when(provider.validateToken("signed-token", AccountType.EMPLOYER)).thenReturn(true);
+        when(provider.validateAccessToken("signed-token", AccountType.EMPLOYER)).thenReturn(true);
         when(provider.getUserId("signed-token")).thenReturn(42L);
         var observed = new AtomicReference<Authentication>();
         FilterChain downstream =
@@ -169,7 +169,7 @@ class SecurityConfigurationTest {
         var response = new MockHttpServletResponse();
         var downstream = mock(FilterChain.class);
         when(provider.getAccountType("invalid-token")).thenReturn(AccountType.APPLICANT);
-        when(provider.validateToken("invalid-token", AccountType.APPLICANT)).thenReturn(false);
+        when(provider.validateAccessToken("invalid-token", AccountType.APPLICANT)).thenReturn(false);
 
         security.doFilter(request, response, downstream);
 

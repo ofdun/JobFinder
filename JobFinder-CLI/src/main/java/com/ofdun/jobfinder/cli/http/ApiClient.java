@@ -13,17 +13,21 @@ import com.ofdun.jobfinder.cli.dto.profiles.*;
 import com.ofdun.jobfinder.cli.dto.resumes.*;
 import com.ofdun.jobfinder.cli.dto.vacancies.*;
 import com.ofdun.jobfinder.cli.logging.StructuredCliLogger;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+
+import okhttp3.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import okhttp3.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ApiClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -68,6 +72,20 @@ public final class ApiClient {
             throw new ApiException("Некорректная пара токенов");
         session = session.authorized(session.getRole(), pair.accessToken(), pair.refreshToken());
         return pair;
+    }
+
+    public TokenPair verifyTotp(String challengeToken, String code) {
+        return execute(
+                GraphqlOperation.VERIFY_TOTP,
+                Map.of("challengeToken", challengeToken, "code", code),
+                TokenPair.class);
+    }
+
+    public void renewPassword(String challengeToken, String password) {
+        execute(
+                GraphqlOperation.RENEW_PASSWORD,
+                Map.of("challengeToken", challengeToken, "newPassword", password),
+                Boolean.class);
     }
 
     public Long createApplicant(ApplicantRequest input) {

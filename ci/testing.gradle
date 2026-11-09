@@ -11,3 +11,12 @@ tasks.named('testAll') {
     description = 'Run unit, integration and HTTP acceptance tests (requires Docker, curl, jq and the Ollama image).'
     dependsOn tasks.named('e2eTest')
 }
+
+tasks.register('bddTest', Test) {
+    group = 'verification'
+    description = 'Run authentication BDD scenarios against an isolated application.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/AuthenticationBddE2E.class'
+    useJUnitPlatform { includeEngines 'junit-platform-suite' }
+}

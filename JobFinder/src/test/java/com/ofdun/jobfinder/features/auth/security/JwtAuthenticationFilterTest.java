@@ -5,11 +5,10 @@ import static org.mockito.Mockito.*;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -27,6 +26,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 @Tag("equivalence")
 @ExtendWith(MockitoExtension.class)
@@ -85,7 +88,7 @@ class JwtAuthenticationFilterTest {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer   signed-token  ");
         request.setRemoteAddr("127.0.0.2");
         when(provider.getAccountType("signed-token")).thenReturn(role);
-        when(provider.validateToken("signed-token", role)).thenReturn(true);
+        when(provider.validateAccessToken("signed-token", role)).thenReturn(true);
         when(provider.getUserId("signed-token")).thenReturn(42L);
 
         filter.doFilter(request, response, chain);
@@ -112,7 +115,8 @@ class JwtAuthenticationFilterTest {
     void doFilter_whenTokenInvalid_doesNotAuthenticate() throws Exception {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer invalid-token");
         when(provider.getAccountType("invalid-token")).thenReturn(AccountType.APPLICANT);
-        when(provider.validateToken("invalid-token", AccountType.APPLICANT)).thenReturn(false);
+        when(provider.validateAccessToken("invalid-token", AccountType.APPLICANT))
+                .thenReturn(false);
 
         filter.doFilter(request, response, chain);
 
@@ -138,12 +142,12 @@ class JwtAuthenticationFilterTest {
             case "role" -> when(provider.getAccountType("broken-token")).thenThrow(failure);
             case "validation" -> {
                 when(provider.getAccountType("broken-token")).thenReturn(AccountType.APPLICANT);
-                when(provider.validateToken("broken-token", AccountType.APPLICANT))
+                when(provider.validateAccessToken("broken-token", AccountType.APPLICANT))
                         .thenThrow(failure);
             }
             case "subject" -> {
                 when(provider.getAccountType("broken-token")).thenReturn(AccountType.APPLICANT);
-                when(provider.validateToken("broken-token", AccountType.APPLICANT))
+                when(provider.validateAccessToken("broken-token", AccountType.APPLICANT))
                         .thenReturn(true);
                 when(provider.getUserId("broken-token")).thenThrow(failure);
             }
@@ -161,7 +165,7 @@ class JwtAuthenticationFilterTest {
     void doFilter_whenValidatedRoleMissing_doesNotAuthenticate() throws Exception {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer token");
         when(provider.getAccountType("token")).thenReturn(null);
-        when(provider.validateToken("token", null)).thenReturn(true);
+        when(provider.validateAccessToken("token", null)).thenReturn(true);
         when(provider.getUserId("token")).thenReturn(42L);
 
         filter.doFilter(request, response, chain);
@@ -176,7 +180,7 @@ class JwtAuthenticationFilterTest {
     void doFilter_whenDownstreamThrowsServletException_propagatesFailure() throws Exception {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer token");
         when(provider.getAccountType("token")).thenReturn(AccountType.APPLICANT);
-        when(provider.validateToken("token", AccountType.APPLICANT)).thenReturn(true);
+        when(provider.validateAccessToken("token", AccountType.APPLICANT)).thenReturn(true);
         when(provider.getUserId("token")).thenReturn(42L);
         var failure = new ServletException("request failed");
         doThrow(failure).when(chain).doFilter(request, response);

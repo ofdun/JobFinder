@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { deleteEmployerById, getEmployerById, updateEmployerById } from '../../shared/api/employerApi';
 import { clearSession, getCurrentUserId } from '../../shared/session/sessionStore';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
+import { AccountSecurityPanel } from '../../features/auth/AccountSecurityPanel';
 
 export function EmployerProfilePage() {
   const userId = getCurrentUserId();
@@ -17,7 +18,6 @@ export function EmployerProfilePage() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
   const [websiteLink, setWebsiteLink] = useState('');
@@ -41,14 +41,12 @@ export function EmployerProfilePage() {
       updateEmployerById(userId as number, {
         name,
         email,
-        password: password || undefined,
         description,
         address,
         websiteLink,
         locationId: locationId as number,
       }),
     onSuccess: () => {
-      setPassword('');
       query.refetch();
     },
   });
@@ -80,13 +78,13 @@ export function EmployerProfilePage() {
       >
         <label>Название компании<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
         <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-        <label>Новый пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         <label>Описание<textarea rows={4} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
         <label>Адрес<input value={address} onChange={(event) => setAddress(event.target.value)} /></label>
         <label>Сайт<input type="url" value={websiteLink} onChange={(event) => setWebsiteLink(event.target.value)} /></label>
         <LocationTypeahead label="Локация" value={locationId} onChange={setLocationId} />
         <button type="submit" disabled={updateMutation.isPending || !locationId}>{updateMutation.isPending ? 'Сохранение...' : 'Сохранить профиль'}</button>
       </form>
+      <AccountSecurityPanel />
 
       <button type="button" className="danger profile-delete-action" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
         {deleteMutation.isPending ? 'Удаление...' : 'Удалить профиль'}

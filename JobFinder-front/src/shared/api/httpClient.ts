@@ -7,6 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
 interface RequestOptions extends RequestInit {
   auth?: boolean;
   retryAfterRefresh?: boolean;
+  manageAuthErrors?: boolean;
 }
 
 let refreshInFlight: Promise<string | null> | null = null;
@@ -165,7 +166,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   });
 
   if (!response.ok) {
-    if (response.status === 401 && options.auth && !options.retryAfterRefresh) {
+    if (response.status === 401 && options.auth && !options.retryAfterRefresh && options.manageAuthErrors !== false) {
       const refreshedToken = await refreshAccessToken();
       if (refreshedToken) {
         return request<T>(path, {
@@ -178,7 +179,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     const requestId = response.headers.get('X-Request-Id');
     const error = await parseErrorResponse(response);
 
-    handleAuthError(response.status, Boolean(options.auth));
+    if (options.manageAuthErrors !== false) handleAuthError(response.status, Boolean(options.auth));
 
     throw new ApiError(response.status, error.message, requestId, error.details);
   }

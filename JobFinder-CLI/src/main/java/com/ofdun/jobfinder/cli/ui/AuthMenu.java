@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.auth.UserRole;
 import com.ofdun.jobfinder.cli.dto.auth.TokenPair;
 import com.ofdun.jobfinder.cli.http.ApiException;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -37,10 +38,25 @@ public final class AuthMenu {
     private void login(UserRole role) {
         var p = ctx.getPrompt();
         String email = p.readNonBlank("email: ");
-        String password = p.readNonBlank("password: ");
+        String password = p.readSecret("Пароль: ");
 
         try {
             TokenPair pair = ctx.getApi().login(role, email, password);
+            if (pair != null && "TOTP".equals(pair.nextStep())) {
+                pair =
+                        ctx.getApi()
+                                .verifyTotp(
+                                        pair.challengeToken(),
+                                        p.readSecret("Код из приложения-аутентификатора: "));
+            }
+            if (pair != null && "PASSWORD_CHANGE".equals(pair.nextStep())) {
+                ctx.getApi()
+                        .renewPassword(
+                                pair.challengeToken(),
+                                p.readSecret("Новый пароль (от 12 символов): "));
+                p.println("Пароль изменён. Войдите повторно.");
+                return;
+            }
             if (pair == null || pair.accessToken() == null || pair.refreshToken() == null) {
                 p.println("Сервер вернул пустой ответ.");
                 return;

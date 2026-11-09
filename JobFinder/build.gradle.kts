@@ -32,6 +32,11 @@ repositories {
 }
 
 dependencies {
+    implementation("dev.samstevens.totp:totp:1.7.1")
+    testImplementation("io.cucumber:cucumber-java:7.34.2")
+    testImplementation("io.cucumber:cucumber-spring:7.34.2")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.2")
+    testImplementation("org.junit.platform:junit-platform-suite")
     implementation("com.graphql-java:graphql-java")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")

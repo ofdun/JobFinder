@@ -2,6 +2,7 @@ import argparse
 import copy
 import json
 import os
+import shutil
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,6 +63,13 @@ def generate(inputs, output, history_path, statuses):
     history_path.write_text(json.dumps(history, indent=2) + "\n")
     (output / "history.json").write_text(json.dumps(history, indent=2) + "\n")
     render_dashboard(output, history)
+    cucumber = inputs / "e2e-results" / "reports" / "cucumber" / "authentication.html"
+    if cucumber.is_file():
+        destination = output / "pages" / "authentication"
+        destination.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(cucumber, destination / "index.html")
+        index = output / "pages" / "index.html"
+        index.write_text(index.read_text().replace("</body>", '<p><a href="authentication/">BDD: аутентификация</a></p></body>'))
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
         with open(summary_path, "a") as stream:

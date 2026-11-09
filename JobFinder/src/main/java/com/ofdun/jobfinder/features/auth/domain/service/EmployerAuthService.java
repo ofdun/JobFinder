@@ -10,14 +10,20 @@ import com.ofdun.jobfinder.features.auth.exception.InvalidRefreshTokenException;
 import com.ofdun.jobfinder.features.auth.exception.SessionIsOverException;
 import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
 import com.ofdun.jobfinder.features.encrypt.EncryptionService;
-import java.time.Duration;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 public class EmployerAuthService implements AuthService {
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.ofdun.jobfinder.features.auth.mfa.AuthenticationProtection protection;
+
     private final EncryptionService encryptionService;
     private final EmployerAccountRepository employerAccountRepository;
     private final TokenRepository tokenRepository;
@@ -25,6 +31,7 @@ public class EmployerAuthService implements AuthService {
 
     @Override
     public TokenPair login(@NonNull String email, @NonNull String password) {
+        if (protection != null) return protection.login(AccountType.EMPLOYER, email, password);
         var employer = employerAccountRepository.findByEmail(email);
         if (employer == null) {
             throw new EmployerNotFoundException(email);
@@ -47,6 +54,7 @@ public class EmployerAuthService implements AuthService {
 
     @Override
     public TokenPair refreshToken(@NonNull String refreshToken) {
+        if (protection != null) return protection.refresh(AccountType.EMPLOYER, refreshToken);
         if (!jwtProvider.validateRefreshToken(refreshToken, AccountType.EMPLOYER)) {
             throw new InvalidRefreshTokenException();
         }

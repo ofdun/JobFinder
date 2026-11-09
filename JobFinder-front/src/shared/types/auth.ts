@@ -10,6 +10,13 @@ export interface TokenPair {
   refreshToken: string;
 }
 
+export interface AuthenticationChallenge {
+  challengeToken: string;
+  nextStep: 'TOTP' | 'PASSWORD_CHANGE';
+}
+
+export type LoginResult = TokenPair | AuthenticationChallenge;
+
 export interface ApplicantRegisterRequest {
   name: string;
   email: string;
