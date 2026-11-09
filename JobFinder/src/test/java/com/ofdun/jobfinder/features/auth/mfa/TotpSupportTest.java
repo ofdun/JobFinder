@@ -3,16 +3,18 @@ package com.ofdun.jobfinder.features.auth.mfa;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ofdun.jobfinder.features.api.ApiFailure;
-
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import org.apache.commons.codec.binary.Base32;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Base64;
-
 class TotpSupportTest {
+    private static final String RFC_6238_SECRET =
+            new Base32().encodeToString("12345678901234567890".getBytes(StandardCharsets.US_ASCII));
     private final TotpSupport totp =
             new TotpSupport(Base64.getEncoder().encodeToString(new byte[32]));
 
@@ -26,14 +28,12 @@ class TotpSupportTest {
         "20000000000,353130"
     })
     void matchesRfc6238Vectors(long seconds, String code) {
-        assertEquals(
-                seconds / 30,
-                totp.matchedStep("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", code, seconds * 1000, -1));
+        assertEquals(seconds / 30, totp.matchedStep(RFC_6238_SECRET, code, seconds * 1000, -1));
     }
 
     @Test
     void rejectsReplayAndOutOfWindowCodes() {
-        String secret = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
+        String secret = RFC_6238_SECRET;
         assertEquals(-1, totp.matchedStep(secret, "287082", 59_000, 1));
         assertEquals(-1, totp.matchedStep(secret, "287082", 150_000, -1));
         assertEquals(1, totp.matchedStep(secret, "287082", 60_000, -1));
