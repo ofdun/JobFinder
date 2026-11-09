@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
@@ -15,11 +17,18 @@ class BasicJwtProviderTest {
     private static final String SECRET = "0123456789abcdef0123456789abcdef";
 
     private static javax.crypto.SecretKey key() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
     private static BasicJwtProvider provider() {
-        return new BasicJwtProvider(SECRET, 60000L, 300000L);
+        return new BasicJwtProvider(SECRET, 60000L, 300000L, accounts());
+    }
+
+    private static AccountSecurity accounts() {
+        var accounts = mock(AccountSecurity.class);
+        when(accounts.sessionStamp(any(), anyLong())).thenReturn("stamp");
+        when(accounts.sessionAllowed(any(), anyLong(), any())).thenReturn(true);
+        return accounts;
     }
 
     private static String token(String subject, String role, Date expiration) {
@@ -96,7 +105,7 @@ class BasicJwtProviderTest {
     @Test
     @Tag("equivalence")
     void getRefreshTokenExpiration_preservesZeroBoundary() {
-        var provider = new BasicJwtProvider(SECRET, 60000L, 0L);
+        var provider = new BasicJwtProvider(SECRET, 60000L, 0L, accounts());
 
         var result = provider.getRefreshTokenExpiration();
 
@@ -202,5 +211,16 @@ class BasicJwtProviderTest {
         assertTrue(provider.validateToken(legacy, AccountType.APPLICANT));
         assertFalse(provider.validateAccessToken(legacy, AccountType.APPLICANT));
         assertTrue(provider.validateRefreshToken(legacy, AccountType.APPLICANT));
+    }
+
+    @Test
+    void revokedSessionInvalidatesBothTokenTypes() {
+        var accounts = accounts();
+        var provider = new BasicJwtProvider(SECRET, 60000L, 300000L, accounts);
+        var access = provider.generateAccessToken(AccountType.APPLICANT, 42L);
+        var refresh = provider.generateRefreshToken(AccountType.APPLICANT, 42L);
+        when(accounts.sessionAllowed(AccountType.APPLICANT, 42L, "stamp")).thenReturn(false);
+        assertFalse(provider.validateAccessToken(access, AccountType.APPLICANT));
+        assertFalse(provider.validateRefreshToken(refresh, AccountType.APPLICANT));
     }
 }

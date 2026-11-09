@@ -24,6 +24,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 class AuthenticationProtectionTest {
+    private AccountSecurity accounts;
     private final SecurityState state = new SecurityState();
     private final StringRedisTemplate redis = mock(StringRedisTemplate.class);
     private final TotpSupport totp =
@@ -61,20 +62,20 @@ class AuthenticationProtectionTest {
         @SuppressWarnings("unchecked")
         ValueOperations<String, String> values = mock(ValueOperations.class);
         when(redis.opsForValue()).thenReturn(values);
+        accounts =
+                new AccountSecurity(
+                        applicants,
+                        employers,
+                        passwords,
+                        states,
+                        redis,
+                        Clock.systemUTC(),
+                        3,
+                        90,
+                        900);
+        var factors = new TotpAuthentication(accounts, states, totp, Clock.systemUTC());
         return new AuthenticationProtection(
-                applicants,
-                employers,
-                passwords,
-                states,
-                totp,
-                redis,
-                jwt,
-                tokens,
-                Clock.systemUTC(),
-                3,
-                90,
-                300,
-                900);
+                accounts, factors, states, totp, redis, jwt, tokens, 300);
     }
 
     @ParameterizedTest
@@ -85,7 +86,7 @@ class AuthenticationProtectionTest {
             state.secret = "encrypted-secret";
             state.recoveryHashes = List.of("recovery-hash");
         }
-        String stamp = protection.sessionStamp(type, 1L);
+        String stamp = accounts.sessionStamp(type, 1L);
 
         for (int attempt = 0; attempt < 10; attempt++) {
             assertEquals(
@@ -101,7 +102,7 @@ class AuthenticationProtectionTest {
         assertFalse(state.locked);
         assertEquals(0, state.failures);
         assertEquals(0, state.lockedUntil);
-        assertTrue(protection.sessionAllowed(type, 1L, stamp));
+        assertTrue(accounts.sessionAllowed(type, 1L, stamp));
         if (enabled) {
             assertThrows(
                     AuthenticationChallenge.class,
@@ -202,7 +203,7 @@ class AuthenticationProtectionTest {
         var protection = protection(type);
         state.secret = totp.encrypt(totp.newSecret(), type.name() + ":1");
         state.recoveryHashes = List.of("recovery-hash");
-        String stamp = protection.sessionStamp(type, 1L);
+        String stamp = accounts.sessionStamp(type, 1L);
         var challenge =
                 assertThrows(
                         AuthenticationChallenge.class,
@@ -219,14 +220,14 @@ class AuthenticationProtectionTest {
 
         assertEquals(3, state.failures);
         assertEquals(1, state.sessionVersion);
-        assertFalse(protection.sessionAllowed(type, 1L, stamp));
+        assertFalse(accounts.sessionAllowed(type, 1L, stamp));
     }
 
     @ParameterizedTest
     @EnumSource(AccountType.class)
     void invalidChallengesDoNotExposeLockOrAuthorizeRevokedSession(AccountType type) {
         var protection = protection(type);
-        String stamp = protection.sessionStamp(type, 1L);
+        String stamp = accounts.sessionStamp(type, 1L);
         state.locked = true;
         state.secret = "encrypted-secret";
         state.recoveryHashes = List.of("recovery-hash");

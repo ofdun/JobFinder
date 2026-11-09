@@ -3,10 +3,12 @@ package com.ofdun.jobfinder.features.employer.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import com.ofdun.jobfinder.features.employer.domain.model.EmployerModel;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import com.ofdun.jobfinder.features.employer.domain.validator.EmployerValidator;
 import com.ofdun.jobfinder.features.employer.exception.EmployerNotFoundException;
+import com.ofdun.jobfinder.support.TestDataMother;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,7 @@ class BasicEmployerServiceTest {
     @Test
     @org.junit.jupiter.api.Tag("equivalence")
     void createEmployer_whenValidationFails_skipsStorage() {
-        var input = com.ofdun.jobfinder.support.TestDataMother.employer();
+        var input = TestDataMother.employer();
         doThrow(new IllegalArgumentException("invalid"))
                 .when(employerValidator)
                 .validateEmployerForCreate(input);
@@ -54,6 +56,8 @@ class BasicEmployerServiceTest {
     @Mock private EmployerRepository employerRepository;
 
     @Mock private EmployerValidator employerValidator;
+
+    @Mock private AccountSecurity protection;
 
     @InjectMocks private BasicEmployerService employerService;
 

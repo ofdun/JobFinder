@@ -5,25 +5,30 @@ import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.security.JobFinderPrincipal;
-
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-
+import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping({"/api/v1/auth/security", "/api/v2/auth/security"})
 public class AccountSecurityController {
     private final AuthenticationProtection protection;
     private final TokenRepository tokens;
+    private final AccountSecurity accounts;
+    private final TotpAuthentication factors;
 
-    public AccountSecurityController(AuthenticationProtection protection, TokenRepository tokens) {
+    public AccountSecurityController(
+            AuthenticationProtection protection,
+            TokenRepository tokens,
+            AccountSecurity accounts,
+            TotpAuthentication factors) {
         this.protection = protection;
         this.tokens = tokens;
+        this.accounts = accounts;
+        this.factors = factors;
     }
 
     public record Password(@NotBlank String password) {}
@@ -73,7 +78,7 @@ public class AccountSecurityController {
     @GetMapping
     public Map<String, Object> status(@AuthenticationPrincipal JobFinderPrincipal principal) {
         var actor = actor(principal);
-        return protection.status(actor.accountType(), actor.id());
+        return accounts.status(actor.accountType(), actor.id());
     }
 
     @PostMapping("/totp/setup")
@@ -81,7 +86,7 @@ public class AccountSecurityController {
             @AuthenticationPrincipal JobFinderPrincipal principal,
             @Valid @RequestBody Password request) {
         var actor = actor(principal);
-        return protection.setup(actor.accountType(), actor.id(), request.password());
+        return factors.setup(actor.accountType(), actor.id(), request.password());
     }
 
     @PostMapping("/totp/enable")
@@ -90,8 +95,7 @@ public class AccountSecurityController {
             @Valid @RequestBody Code request) {
         var actor = actor(principal);
         return Map.of(
-                "recoveryCodes",
-                protection.enable(actor.accountType(), actor.id(), request.code()));
+                "recoveryCodes", factors.enable(actor.accountType(), actor.id(), request.code()));
     }
 
     @PostMapping("/totp/verify")
@@ -105,7 +109,7 @@ public class AccountSecurityController {
             @AuthenticationPrincipal JobFinderPrincipal principal,
             @Valid @RequestBody Disable request) {
         var actor = actor(principal);
-        protection.disable(actor.accountType(), actor.id(), request.password(), request.code());
+        factors.disable(actor.accountType(), actor.id(), request.password(), request.code());
     }
 
     @PostMapping("/password")

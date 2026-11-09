@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.auth.domain.jwt.configuration;
 
 import com.ofdun.jobfinder.features.auth.data.jwt.impl.BasicJwtProvider;
 import com.ofdun.jobfinder.features.auth.domain.jwt.properties.JwtProviderProperties;
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,9 +10,12 @@ import org.springframework.context.annotation.Configuration;
 public class JwtProviderConfiguration {
 
     @Bean
-    public BasicJwtProvider basicJwtProvider(JwtProviderProperties jwtProviderProperties) {
-        return new BasicJwtProvider(jwtProviderProperties.getSecretKey(),
+    public BasicJwtProvider basicJwtProvider(
+            JwtProviderProperties jwtProviderProperties, AccountSecurity accounts) {
+        return new BasicJwtProvider(
+                jwtProviderProperties.getSecretKey(),
                 jwtProviderProperties.getAccessExpirationTimeMs(),
-                jwtProviderProperties.getRefreshExpirationTimeMs());
+                jwtProviderProperties.getRefreshExpirationTimeMs(),
+                accounts);
     }
 }
