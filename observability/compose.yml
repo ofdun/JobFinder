@@ -1,0 +1,45 @@
+services:
+  metrics-db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: metrics
+      POSTGRES_USER: metrics
+      POSTGRES_PASSWORD: metrics
+    volumes:
+    - metrics_data:/var/lib/postgresql/data
+    - ./schema.sql:/docker-entrypoint-initdb.d/10-metrics.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U metrics -d metrics]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  grafana:
+    image: grafana/grafana:13.2.2
+    restart: unless-stopped
+    ports:
+    - 127.0.0.1:${GRAFANA_PORT:-3000}:3000
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+      GF_PLUGINS_PREINSTALL_DISABLED: 'true'
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/comparison.json
+    volumes:
+    - load_grafana_data:/var/lib/grafana
+    - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      metrics-db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -O - http://127.0.0.1:3000/api/health >/dev/null']
+      interval: 5s
+      timeout: 3s
+      start_period: 20s
+      retries: 24
+volumes:
+  metrics_data:
+  load_grafana_data:

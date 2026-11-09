@@ -1,3 +1,6 @@
+include:
+- ./observability/compose.yml
+
 services:
   ollama:
     build: ./docker/ollama

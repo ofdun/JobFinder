@@ -37,6 +37,8 @@ dependencies {
     testImplementation("io.cucumber:cucumber-spring:7.34.2")
     testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.2")
     testImplementation("org.junit.platform:junit-platform-suite")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     implementation("com.graphql-java:graphql-java")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
