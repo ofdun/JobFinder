@@ -6,10 +6,6 @@ import com.ofdun.jobfinder.features.vacancy.data.mongo.mapper.VacancyMongoMapper
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,6 +13,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -137,7 +136,8 @@ public class MongoVacancyRepository implements VacancyRepository {
 
         if (filter.getQ() != null && !filter.getQ().isBlank()) {
             var query = filter.getQ().trim().toLowerCase();
-            var description = vacancy.getDescription() == null ? "" : vacancy.getDescription().toLowerCase();
+            var description =
+                    vacancy.getDescription() == null ? "" : vacancy.getDescription().toLowerCase();
             if (!description.contains(query)) {
                 return false;
             }
@@ -222,7 +222,9 @@ public class MongoVacancyRepository implements VacancyRepository {
                     };
         }
 
+        comparator =
+                comparator.thenComparing(
+                        VacancyModel::getId, Comparator.nullsLast(Long::compareTo));
         return sortDesc ? comparator.reversed() : comparator;
     }
 }
-

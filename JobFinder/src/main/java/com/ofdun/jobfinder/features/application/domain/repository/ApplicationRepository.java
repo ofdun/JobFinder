@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ApplicationRepository {
+    List<ApplicationModel> getApplicationsByApplicantId(Long applicantId, int limit, int offset);
+
     Long createApplication(ApplicationModel application);
 
     Optional<ApplicationModel> getApplicationById(Long id);

@@ -87,6 +87,10 @@ class SecurityConfigurationTest {
         "GET,/api/v1/locations",
         "GET,/api/v1/locations/1",
         "GET,/api/v1/vacancies/1",
+        "GET,/api/v2/vacancies",
+        "GET,/api/v2/locations",
+        "POST,/api/v2/auth/login",
+        "POST,/api/v2/auth/refresh",
         "GET,/api/v1/resumes/1"
     })
     void securityFilterChain_whenPublicRoute_allowsAnonymousRequest(String method, String path)
@@ -113,6 +117,10 @@ class SecurityConfigurationTest {
         "POST,/api/v1/categories",
         "GET,/api/v1/vacancies/1/private",
         "GET,/api/v1/applications",
+        "GET,/actuator",
+        "GET,/actuator/health",
+        "GET,/actuator/env",
+        "POST,/ready",
         "GET,/private"
     })
     void securityFilterChain_whenProtectedRoute_rejectsAnonymousRequest(String method, String path)
@@ -261,5 +269,47 @@ class SecurityConfigurationTest {
 
         assertEquals(403, response.getStatus());
         verifyNoInteractions(downstream, provider);
+    }
+
+    @Test
+    void v2ProtectedRouteUses401AndBearerChallenge() throws Exception {
+        var response = new MockHttpServletResponse();
+        var downstream = mock(FilterChain.class);
+        security.doFilter(request("GET", "/api/v2/applications"), response, downstream);
+        assertEquals(401, response.getStatus());
+        assertEquals("Bearer", response.getHeader("WWW-Authenticate"));
+        assertTrue(response.getContentAsString().contains("Authentication required"));
+        verifyNoInteractions(downstream);
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "/api/v2",
+                "/api/v2/docs",
+                "/api/v2/openapi.yml",
+                "/swagger-ui/index.html",
+                "/api/v2/categories"
+            })
+    void graphQlAndDocumentationAllowFieldLevelOrPublicAccess(String path) throws Exception {
+        var response = new MockHttpServletResponse();
+        var downstream = mock(FilterChain.class);
+        security.doFilter(request("GET", path), response, downstream);
+        assertEquals(200, response.getStatus());
+        verify(downstream).doFilter(any(), any());
+    }
+
+    @Test
+    void refreshBearerCannotAuthorizeV2() throws Exception {
+        var request = request("GET", "/api/v2/applications");
+        request.addHeader("Authorization", "Bearer refresh-token");
+        var response = new MockHttpServletResponse();
+        var downstream = mock(FilterChain.class);
+        when(provider.getAccountType("refresh-token")).thenReturn(AccountType.APPLICANT);
+        when(provider.validateAccessToken("refresh-token", AccountType.APPLICANT))
+                .thenReturn(false);
+        security.doFilter(request, response, downstream);
+        assertEquals(401, response.getStatus());
+        verifyNoInteractions(downstream);
     }
 }

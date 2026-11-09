@@ -10,6 +10,10 @@ public interface JwtProvider {
 
     Boolean validateToken(@NonNull String token, AccountType type);
 
+    Boolean validateAccessToken(String token, AccountType type);
+
+    Boolean validateRefreshToken(String token, AccountType type);
+
     Long getRefreshTokenExpiration();
 
     /**

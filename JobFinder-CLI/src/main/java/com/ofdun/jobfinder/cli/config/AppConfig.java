@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public final class AppConfig {
-    private static final String DEFAULT_BASE_URL = "http://localhost:8080/api/v1";
+    private static final String DEFAULT_BASE_URL = "http://localhost:8080/api/v2";
 
     private final String baseUrl;
 
@@ -25,7 +25,11 @@ public final class AppConfig {
         }
 
         String baseUrl =
-                Objects.requireNonNullElse(props.getProperty("jobfinder.baseUrl"), DEFAULT_BASE_URL)
+                Objects.requireNonNullElse(
+                                System.getProperty("jobfinder.baseUrl"),
+                                Objects.requireNonNullElse(
+                                        System.getenv("JOBFINDER_API_URL"),
+                                        props.getProperty("jobfinder.baseUrl", DEFAULT_BASE_URL)))
                         .trim();
         if (baseUrl.isBlank()) baseUrl = DEFAULT_BASE_URL;
         return new AppConfig(baseUrl);

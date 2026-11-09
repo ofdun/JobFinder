@@ -71,6 +71,7 @@ services:
       - "8080:8080"
     volumes:
       - ./JobFinder:/workspace/JobFinder
+      - ./docs:/workspace/docs:ro
       - gradle_cache:/home/gradle/.gradle
       - backend_logs:/workspace/JobFinder/logs
 

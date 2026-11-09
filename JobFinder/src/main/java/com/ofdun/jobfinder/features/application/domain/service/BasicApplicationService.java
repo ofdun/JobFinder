@@ -4,8 +4,8 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
 import com.ofdun.jobfinder.features.application.domain.validator.ApplicationValidator;
 import com.ofdun.jobfinder.features.application.exception.ApplicationNotFoundException;
-import java.util.List;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,12 @@ import org.springframework.stereotype.Service;
 public class BasicApplicationService implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ApplicationValidator applicationValidator;
+
+    @Override
+    public List<ApplicationModel> getApplicationsByApplicantId(
+            Long applicantId, int limit, int offset) {
+        return applicationRepository.getApplicationsByApplicantId(applicantId, limit, offset);
+    }
 
     @Override
     public Long saveApplication(@NonNull @Valid ApplicationModel application) {

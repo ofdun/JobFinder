@@ -123,7 +123,8 @@ class ApplicantAuthServiceTest {
         String newAccess = "newAccess";
         String newRefresh = "newRefresh";
 
-        when(jwtProvider.validateToken(oldRefreshToken, AccountType.APPLICANT)).thenReturn(true);
+        when(jwtProvider.validateRefreshToken(oldRefreshToken, AccountType.APPLICANT))
+                .thenReturn(true);
         when(tokenRepository.getUserIdByToken(oldRefreshToken)).thenReturn(userId);
         when(jwtProvider.generateAccessToken(AccountType.APPLICANT, userId)).thenReturn(newAccess);
         when(jwtProvider.generateRefreshToken(AccountType.APPLICANT, userId))
@@ -141,21 +142,21 @@ class ApplicantAuthServiceTest {
     @Test
     void refreshToken_whenInvalidToken_thenThrowsException() {
         String token = "invalidToken";
-        when(jwtProvider.validateToken(token, AccountType.APPLICANT)).thenReturn(false);
+        when(jwtProvider.validateRefreshToken(token, AccountType.APPLICANT)).thenReturn(false);
 
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class, () -> applicantAuthService.refreshToken(token));
 
         assertEquals("Refresh token is invalid", exception.getMessage());
-        verify(jwtProvider).validateToken(token, AccountType.APPLICANT);
+        verify(jwtProvider).validateRefreshToken(token, AccountType.APPLICANT);
         verifyNoInteractions(tokenRepository);
     }
 
     @Test
     void refreshToken_whenSessionIsOver_thenThrowsException() {
         String token = "expiredToken";
-        when(jwtProvider.validateToken(token, AccountType.APPLICANT)).thenReturn(true);
+        when(jwtProvider.validateRefreshToken(token, AccountType.APPLICANT)).thenReturn(true);
         when(tokenRepository.getUserIdByToken(token)).thenReturn(null);
 
         RuntimeException exception =
@@ -163,7 +164,7 @@ class ApplicantAuthServiceTest {
                         RuntimeException.class, () -> applicantAuthService.refreshToken(token));
 
         assertEquals("Session is over", exception.getMessage());
-        verify(jwtProvider).validateToken(token, AccountType.APPLICANT);
+        verify(jwtProvider).validateRefreshToken(token, AccountType.APPLICANT);
         verify(tokenRepository).getUserIdByToken(token);
         verify(tokenRepository, never()).deleteToken(anyString());
         verifyNoMoreInteractions(tokenRepository);

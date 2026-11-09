@@ -3,7 +3,6 @@ package com.ofdun.jobfinder.cli.ui;
 import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.dto.applications.*;
 import com.ofdun.jobfinder.cli.http.ApiException;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -15,10 +14,12 @@ public final class ApplicationsMenu {
         while (true) {
             p.println("\n--- Отклики (Applications) ---");
             p.println("0. Назад");
-            p.println("1. Создать отклик (POST /applications) [auth]");
-            p.println("2. Получить по id (GET /applications/{id}) [auth]");
-            p.println("3. Обновить статус (PUT /applications/{id}) [auth]");
-            p.println("4. Удалить (DELETE /applications/{id}) [auth]");
+            p.println("1. Создать отклик [auth]");
+            p.println("2. Получить по id [auth]");
+            p.println("3. Обновить статус [auth]");
+            p.println("4. Удалить [auth]");
+            p.println("5. Мои отклики [соискатель]");
+            p.println("6. Отклики на вакансию [работодатель]");
 
             int c = p.readInt("> ", false);
             switch (c) {
@@ -29,24 +30,19 @@ public final class ApplicationsMenu {
                 case 2 -> get();
                 case 3 -> update();
                 case 4 -> delete();
+                case 5 -> list(false);
+                case 6 -> list(true);
                 default -> p.println("Нет такого пункта.");
             }
         }
     }
 
-    private ApplicationRequest readRequest() {
-        var p = ctx.getPrompt();
-        Long vacancyId = p.readLong("vacancyId: ", false);
-        Long resumeId = p.readLong("resumeId: ", false);
-        ApplicationStatus status = p.readEnum("applicationStatus", ApplicationStatus.class, false);
-        return new ApplicationRequest(vacancyId, resumeId, status);
-    }
-
     private void create() {
         var p = ctx.getPrompt();
         try {
-            ApplicationRequest req = readRequest();
-            Long id = ctx.getApi().post("/applications", req, Long.class, true);
+            Long vacancyId = p.readLong("vacancyId: ", false);
+            Long resumeId = p.readLong("resumeId: ", false);
+            Long id = ctx.getApi().createApplication(vacancyId, resumeId);
             p.println("Создано. id=" + id);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -59,8 +55,7 @@ public final class ApplicationsMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            Application a =
-                    ctx.getApi().get("/applications/" + id, Map.of(), Application.class, true);
+            Application a = ctx.getApi().getApplication(id);
             p.println(String.valueOf(a));
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -73,8 +68,9 @@ public final class ApplicationsMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            ApplicationRequest req = readRequest();
-            Application a = ctx.getApi().put("/applications/" + id, req, Application.class, true);
+            ApplicationStatus status =
+                    p.readEnum("applicationStatus", ApplicationStatus.class, false);
+            Application a = ctx.getApi().updateApplicationStatus(id, status);
             p.println("Обновлено: " + a);
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
@@ -87,10 +83,31 @@ public final class ApplicationsMenu {
         var p = ctx.getPrompt();
         Long id = p.readLong("id: ", false);
         try {
-            ctx.getApi().delete("/applications/" + id, true);
+            ctx.getApi().deleteApplication(id);
             p.println("Удалено.");
         } catch (ApiException e) {
             p.println("Ошибка: " + e.getMessage());
+        } finally {
+            p.pause();
+        }
+    }
+
+    private void list(boolean forVacancy) {
+        var p = ctx.getPrompt();
+        try {
+            Long vacancyId = forVacancy ? p.readLong("vacancyId: ", false) : null;
+            Integer limit = p.readInt("limit (по умолчанию 20): ", true);
+            Integer offset = p.readInt("offset (по умолчанию 0): ", true);
+            int size = limit == null ? 20 : limit;
+            int start = offset == null ? 0 : offset;
+            Application[] applications =
+                    forVacancy
+                            ? ctx.getApi().vacancyApplications(vacancyId, size, start)
+                            : ctx.getApi().myApplications(size, start);
+            if (applications.length == 0) p.println("Откликов нет.");
+            for (Application application : applications) p.println(application.toString());
+        } catch (ApiException error) {
+            p.println("Ошибка: " + error.getMessage());
         } finally {
             p.pause();
         }

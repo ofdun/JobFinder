@@ -8,14 +8,14 @@ import com.ofdun.jobfinder.features.language.domain.service.LanguageService;
 import com.ofdun.jobfinder.features.location.domain.service.LocationService;
 import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
 import com.ofdun.jobfinder.features.skill.domain.service.SkillService;
+import com.ofdun.jobfinder.features.vacancy.api.dto.DraftVacancyResponse;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyRequest;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyResponse;
-import com.ofdun.jobfinder.features.vacancy.api.dto.DraftVacancyResponse;
 import com.ofdun.jobfinder.features.vacancy.api.mapper.DraftVacancyApiMapper;
 import com.ofdun.jobfinder.features.vacancy.api.mapper.VacancyApiMapper;
-import com.ofdun.jobfinder.features.vacancy.domain.service.DraftVacancyService;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
+import com.ofdun.jobfinder.features.vacancy.domain.service.DraftVacancyService;
 import com.ofdun.jobfinder.features.vacancy.domain.service.VacancyService;
 import com.ofdun.jobfinder.features.vacancy.enums.EmploymentType;
 import com.ofdun.jobfinder.features.vacancy.enums.JobFormat;
@@ -35,9 +35,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/vacancies")
+@RequestMapping({"/api/v1/vacancies", "/api/v2/vacancies"})
 @RequiredArgsConstructor
 public class VacancyController {
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.ofdun.jobfinder.features.api.ApiAccess apiAccess;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private jakarta.servlet.http.HttpServletRequest servletRequest;
+
+    private boolean v2() {
+        return servletRequest != null && servletRequest.getRequestURI().startsWith("/api/v2/");
+    }
+
+    private org.springframework.security.core.Authentication actor() {
+        return org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication();
+    }
+
     private final VacancyService vacancyService;
     private final LanguageService languageService;
     private final LocationService locationService;
@@ -65,8 +80,13 @@ public class VacancyController {
     @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
     public ResponseEntity<@NonNull VacancyResponse> updateVacancy(
             @PathVariable Long id, @Valid @RequestBody VacancyRequest request) {
+        var existing = v2() ? apiAccess.ownVacancy(actor(), id) : null;
+        if (existing != null)
+            com.ofdun.jobfinder.features.api.ApiAccess.require(
+                    existing.getEmployerId().equals(request.getEmployerId()));
         VacancyModel model = mapper.toModel(request);
         model.setId(id);
+        if (existing != null) model.setPublicationDate(existing.getPublicationDate());
         return ResponseEntity.ok(mapToResponse(vacancyService.updateVacancy(model)));
     }
 
@@ -80,9 +100,10 @@ public class VacancyController {
     @GetMapping("/{id}/drafts")
     @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
     public ResponseEntity<List<DraftVacancyResponse>> getVacancyDrafts(@PathVariable Long id) {
-        var drafts = draftVacancyService.getDrafts(id).stream()
-                .map(draftVacancyApiMapper::toResponse)
-                .toList();
+        var drafts =
+                draftVacancyService.getDrafts(id).stream()
+                        .map(draftVacancyApiMapper::toResponse)
+                        .toList();
         return ResponseEntity.ok(drafts);
     }
 
@@ -90,10 +111,11 @@ public class VacancyController {
     @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
     public ResponseEntity<DraftVacancyResponse> createVacancyDraft(@PathVariable Long id) {
         var draft = draftVacancyService.createDraft(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(draftVacancyApiMapper.toResponse(draft));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(draftVacancyApiMapper.toResponse(draft));
     }
 
-    @PostMapping("/{id}/drafts/{draftId}/apply")
+    @PostMapping({"/{id}/drafts/{draftId}", "/{id}/drafts/{draftId}/apply"})
     @PreAuthorize("@sec.employerOwnsVacancy(authentication, #id)")
     public ResponseEntity<@NonNull VacancyResponse> applyVacancyDraft(
             @PathVariable Long id, @PathVariable Long draftId) {
@@ -109,7 +131,7 @@ public class VacancyController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
+    @GetMapping({"", "/search"})
     public ResponseEntity<@NonNull PageResponse<@NonNull VacancyResponse>> searchVacancies(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long employerId,

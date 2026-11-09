@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/categories")
+@RequestMapping({"/api/v1/categories", "/api/v2/categories"})
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
@@ -23,4 +23,3 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 }
-

@@ -45,7 +45,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             AccountType accountType = jwtProvider.getAccountType(token);
-            if (!jwtProvider.validateToken(token, accountType)) {
+            boolean v2 =
+                    request.getRequestURI().equals("/api/v2")
+                            || request.getRequestURI().startsWith("/api/v2/");
+            if (!(v2
+                    ? jwtProvider.validateAccessToken(token, accountType)
+                    : jwtProvider.validateToken(token, accountType))) {
                 filterChain.doFilter(request, response);
                 return;
             }

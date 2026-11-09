@@ -11,6 +11,8 @@ public interface ResumeService {
 
     Optional<ResumeModel> getResumeById(Long resumeId);
 
+    Optional<ResumeModel> replaceResume(ResumeModel resume);
+
     Optional<ResumeModel> updateResume(ResumeModel resumeModel);
 
     Boolean deleteResume(Long resumeId);

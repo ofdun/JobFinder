@@ -2,6 +2,14 @@ package com.ofdun.jobfinder.features.application.api;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,18 +26,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.UUID;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
@@ -88,6 +86,7 @@ class ApplicationJourneyE2E {
 
     @Autowired JdbcTemplate jdbc;
     @Autowired Flyway flyway;
+    @Autowired com.zaxxer.hikari.HikariDataSource dataSource;
 
     final JsonMapper json = JsonMapper.builder().build();
     final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
@@ -164,7 +163,13 @@ class ApplicationJourneyE2E {
     JsonNode request(String method, String path, String token, String payload, int expected)
             throws Exception {
         var request =
-                HttpRequest.newBuilder(URI.create(base + path)).timeout(Duration.ofSeconds(15));
+                HttpRequest.newBuilder(
+                                URI.create(
+                                        path.startsWith("/api/")
+                                                ? "http://localhost:18080" + path
+                                                : base + path))
+                        .timeout(Duration.ofSeconds(15));
+        if (path.equals("/api/v2")) request.header("Accept", "application/graphql-response+json");
         if (token != null) request.header("Authorization", "Bearer " + token);
         if (payload != null) request.header("Content-Type", "application/json");
         request.method(
@@ -174,7 +179,22 @@ class ApplicationJourneyE2E {
                         : HttpRequest.BodyPublishers.ofString(payload));
         var response = http.send(request.build(), HttpResponse.BodyHandlers.ofString());
         assertEquals(expected, response.statusCode(), method + " " + path + ": " + response.body());
-        return response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+        if (expected == 204)
+            assertTrue(response.body().isBlank(), "204 must not contain a response body");
+        var result = response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+        if (path.startsWith("/api/v2/") && expected == 201) {
+            long createdId = result.isNumber() ? result.asLong() : result.get("id").asLong();
+            assertEquals(
+                    path + "/" + createdId,
+                    response.headers().firstValue("Location").orElseThrow());
+        }
+        if (path.startsWith("/api/v2/") && expected >= 400) {
+            assertEquals(expected, result.get("code").asInt());
+            assertTrue(result.get("exceptionName").isNull());
+            assertTrue(result.get("exceptionMessage").isNull());
+            assertEquals(0, result.get("stackTrace").size());
+        }
+        return result;
     }
 
     @AfterEach
@@ -182,6 +202,8 @@ class ApplicationJourneyE2E {
         try {
             flyway.clean();
             flyway.migrate();
+            // Recreated PostgreSQL enum types invalidate cached prepared statements.
+            dataSource.getHikariPoolMXBean().softEvictConnections();
             assertEquals(
                     2,
                     jdbc.queryForObject(
@@ -197,5 +219,257 @@ class ApplicationJourneyE2E {
             assertEquals("0", redis.execInContainer("redis-cli", "DBSIZE").getStdout().trim());
             System.out.println("SESSIONS_CLEARED redis_keys=0");
         }
+    }
+
+    @Test
+    void unifiedAuthenticationRotatesRefreshAndRejectsWrongRoleAndReplay() throws Exception {
+        for (String role : new String[] {"APPLICANT", "EMPLOYER"}) {
+            String email = role.equals("APPLICANT") ? "alice@example.com" : "employer@example.com";
+            var tokens = loginV2(role, email);
+            String refresh = tokens.get("refreshToken").asText();
+            String wrongRole = role.equals("APPLICANT") ? "EMPLOYER" : "APPLICANT";
+            request("POST", "/api/v2/auth/refresh", null, refreshBody(wrongRole, refresh), 401);
+            var rotated =
+                    request("POST", "/api/v2/auth/refresh", null, refreshBody(role, refresh), 200);
+            assertNotEquals(refresh, rotated.get("refreshToken").asText());
+            request("POST", "/api/v2/auth/refresh", null, refreshBody(role, refresh), 401);
+            request(
+                    "POST",
+                    "/api/v2/auth/refresh",
+                    null,
+                    refreshBody(role, tokens.get("accessToken").asText()),
+                    401);
+            String profile = role.equals("APPLICANT") ? "/applicants/1" : "/employers/1";
+            request("GET", "/api/v2" + profile, rotated.get("accessToken").asText(), null, 200);
+            request("GET", "/api/v2" + profile, rotated.get("refreshToken").asText(), null, 401);
+        }
+    }
+
+    @Test
+    void v2ApplicationStatusIsIdempotentAndOnlyEmployerCanChangeIt() throws Exception {
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String body = "{\"vacancyId\":1,\"resumeId\":1,\"applicationStatus\":\"NEW\"}";
+        long id = request("POST", "/api/v2/applications", applicant, body, 201).asLong();
+        request("POST", "/api/v2/applications", applicant, body, 409);
+        var before = request("GET", "/api/v2/applications/" + id, applicant, null, 200);
+        String statusPath = "/api/v2/applications/" + id + "/status";
+        String invitation = "{\"applicationStatus\":\"INVITATION\"}";
+        request("PUT", statusPath, applicant, invitation, 403);
+        request("PUT", statusPath, null, invitation, 401);
+        request("PUT", statusPath, employer, "{\"applicationStatus\":\"UNKNOWN\"}", 400);
+        for (int attempt = 0; attempt < 2; attempt++) {
+            var after = request("PUT", statusPath, employer, invitation, 200);
+            assertEquals("INVITATION", after.get("applicationStatus").asText());
+            for (String field : new String[] {"id", "vacancyId", "resumeId", "applicationDate"}) {
+                assertNotNull(before.get(field), field);
+                assertEquals(before.get(field), after.get(field), field);
+            }
+        }
+        assertEquals(
+                "INVITATION",
+                jdbc.queryForObject(
+                        "select status::text from jobfinder.applications where id=?",
+                        String.class,
+                        id));
+        var graphql =
+                request(
+                        "POST",
+                        "/api/v2",
+                        applicant,
+                        "{\"operationName\":\"ReadApplication\",\"query\":\"query"
+                                + " ReadApplication($id: ID!) { application(id: $id) { id"
+                                + " applicationStatus } }\",\"variables\":{\"id\":\""
+                                + id
+                                + "\"}}",
+                        200);
+        assertFalse(graphql.has("errors"), graphql.toString());
+        assertEquals("INVITATION", graphql.at("/data/application/applicationStatus").asText());
+        assertEquals(id, graphql.at("/data/application/id").asLong());
+        request("DELETE", "/api/v2/applications/" + id, applicant, null, 204);
+    }
+
+    @Test
+    void canonicalDraftRestoreRestoresSnapshotAndChecksRole() throws Exception {
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        var original = request("GET", "/api/v2/vacancies/1", null, null, 200);
+        long draft =
+                request("POST", "/api/v2/vacancies/1/drafts", employer, null, 201)
+                        .get("id")
+                        .asLong();
+        jdbc.update(
+                "update jobfinder.vacancies set description='changed', status='INACTIVE' where"
+                        + " id=1");
+        String path = "/api/v2/vacancies/1/drafts/" + draft;
+        request("POST", path, applicant, null, 403);
+        assertEquals(
+                "changed",
+                jdbc.queryForObject(
+                        "select description from jobfinder.vacancies where id=1", String.class));
+        var restored = request("POST", path, employer, null, 200);
+        assertEquals(original.get("description"), restored.get("description"));
+        assertEquals("ACTIVE", restored.get("status").asText());
+        request("DELETE", path, employer, null, 204);
+        request("POST", path, employer, null, 404);
+    }
+
+    JsonNode loginV2(String role, String email) throws Exception {
+        return request(
+                "POST",
+                "/api/v2/auth/login",
+                null,
+                "{\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"userType\":\""
+                        + role
+                        + "\"}",
+                200);
+    }
+
+    String refreshBody(String role, String token) {
+        return "{\"userType\":\"" + role + "\",\"refreshToken\":\"" + token + "\"}";
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"APPLICANT,applicants", "EMPLOYER,employers"})
+    void profileCrudPreservesPasswordAndRejectsOtherOwners(String role, String collection)
+            throws Exception {
+        String email = "crud-" + role.toLowerCase() + "@example.com";
+        String path = "/api/v2/" + collection;
+        String registration =
+                "{\"name\":\"New User\",\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"locationId\":1}";
+        long id = request("POST", path, null, registration, 201).asLong();
+        assertTrue(id > 1);
+        request("POST", path, null, registration, 409);
+        String token = loginV2(role, email).get("accessToken").asText();
+        var profile = request("GET", path + "/" + id, token, null, 200);
+        assertFalse(profile.has("password"));
+        assertFalse(profile.has("passwordHash"));
+        String otherEmail = role.equals("APPLICANT") ? "alice@example.com" : "employer@example.com";
+        String other = loginV2(role, otherEmail).get("accessToken").asText();
+        String update =
+                "{\"name\":\"Changed User\",\"email\":\""
+                        + email
+                        + "\",\"locationId\":2,\"address\":null}";
+        request("PUT", path + "/" + id, other, update, 403);
+        request("DELETE", path + "/" + id, other, null, 403);
+        request("PUT", path + "/" + id, token, update, 200);
+        profile = request("GET", path + "/" + id, token, null, 200);
+        assertEquals("Changed User", profile.get("name").asText());
+        assertEquals(2L, profile.get("location").get("id").asLong());
+        assertTrue(profile.get("address").isNull());
+        loginV2(role, email); // Omitting password on replacement must preserve the existing hash.
+        request("DELETE", path + "/" + id, token, null, 204);
+        request("GET", path + "/" + id, token, null, 404);
+        request(
+                "POST",
+                "/api/v2/auth/login",
+                null,
+                "{\"email\":\""
+                        + email
+                        + "\",\"password\":\"test-password\",\"userType\":\""
+                        + role
+                        + "\"}",
+                401);
+    }
+
+    @Test
+    void vacancyCrudKeepsPublicationDateAndRejectsOwnershipTransfer() throws Exception {
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String input =
+                "{\"employerId\":1,\"locationId\":2,\"salary\":123456.78,\"paymentFrequency\":\"MONTHLY\",\"experience\":\"2"
+                    + " years\",\"jobFormat\":\"REMOTE\",\"employmentType\":\"FULL_TIME\",\"description\":\"contract-crud-vacancy\",\"address\":\"Moscow\",\"skillIds\":[1],\"languageIds\":[1],\"status\":\"ACTIVE\"}";
+        request("POST", "/api/v2/vacancies", applicant, input, 403);
+        long id = request("POST", "/api/v2/vacancies", employer, input, 201).asLong();
+        String path = "/api/v2/vacancies/" + id;
+        var before = request("GET", path, null, null, 200);
+        request("PUT", path, employer, input.replace("\"employerId\":1", "\"employerId\":2"), 403);
+        request("DELETE", path, applicant, null, 403);
+        request(
+                "PUT",
+                path,
+                employer,
+                input.replace("contract-crud-vacancy", "changed-contract-crud"),
+                200);
+        var after = request("GET", path, null, null, 200);
+        assertEquals(before.get("publicationDate"), after.get("publicationDate"));
+        assertEquals("changed-contract-crud", after.get("description").asText());
+        var page =
+                request(
+                        "GET",
+                        "/api/v2/vacancies?q=changed-contract-crud&employerId=1&limit=1&sortBy=salary&sortDesc=true",
+                        null,
+                        null,
+                        200);
+        assertEquals(1L, page.get("totalElements").asLong());
+        assertEquals(id, page.get("items").get(0).get("id").asLong());
+        assertEquals(
+                "changed-contract-crud",
+                request("GET", "/vacancies/" + id, null, null, 200).get("description").asText());
+        request("DELETE", path, employer, null, 204);
+        request("GET", path, null, null, 404);
+    }
+
+    @Test
+    void foreignApplicationCannotBeReadDeletedOrReassigned() throws Exception {
+        String applicant = loginV2("APPLICANT", "alice@example.com").get("accessToken").asText();
+        String employer = loginV2("EMPLOYER", "employer@example.com").get("accessToken").asText();
+        // Seed application 2 belongs to Bob's resume, not Alice's.
+        request("GET", "/api/v2/applications/2", applicant, null, 403);
+        request("DELETE", "/api/v2/applications/2", applicant, null, 403);
+        request(
+                "POST",
+                "/api/v2/applications",
+                applicant,
+                "{\"vacancyId\":1,\"resumeId\":2,\"applicationStatus\":\"NEW\"}",
+                403);
+        request(
+                "PUT",
+                "/api/v2/applications/2",
+                employer,
+                "{\"vacancyId\":1,\"resumeId\":1,\"applicationStatus\":\"REJECTION\"}",
+                409);
+        assertEquals(
+                2L,
+                jdbc.queryForObject(
+                        "select resume_id from jobfinder.applications where id=2", Long.class));
+        assertEquals(
+                "INVITATION",
+                jdbc.queryForObject(
+                        "select status::text from jobfinder.applications where id=2",
+                        String.class));
+    }
+
+    @Test
+    void failedRegistrationDoesNotStoreInvalidOrUnknownFields() throws Exception {
+        long before = jdbc.queryForObject("select count(*) from jobfinder.applicants", Long.class);
+        String body =
+                "{\"name\":\"User"
+                    + " Name\",\"email\":\"valid@example.com\",\"password\":\"password\",\"locationId\":1}";
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("valid@example.com", "invalid-email"),
+                400);
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("\"password\":\"password\"", "\"password\":\"short\""),
+                400);
+        request(
+                "POST",
+                "/api/v2/applicants",
+                null,
+                body.replace("\"locationId\":1", "\"locationId\":1,\"admin\":true"),
+                400);
+        assertEquals(
+                before,
+                jdbc.queryForObject("select count(*) from jobfinder.applicants", Long.class));
     }
 }

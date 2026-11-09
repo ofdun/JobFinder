@@ -1,0 +1,359 @@
+"""
+Дополнительный контракт JobFinder: POST /api/v2.
+Схема загружается сервером; CLI использует этот интерфейс.
+Правила доступа, HTTP и примеры: graphql.md.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Дата календаря в строке YYYY-MM-DD; проверяется существование даты."
+scalar Date
+"RFC 3339 date-time с часовым поясом, например 2026-09-19T09:00:00Z."
+scalar DateTime
+"Email в строке; тот же формат, что в REST."
+scalar Email
+"Абсолютный URI в строке; для websiteLink используются адреса HTTP(S)."
+scalar URL
+"Неотрицательная десятичная сумма в строке без экспоненты, например 150000.00."
+scalar Decimal
+"Неотрицательный Java Long в десятичной строке, максимум 9223372036854775807."
+scalar Long
+
+# Значения совпадают с REST-контрактом.
+enum AccountType { APPLICANT EMPLOYER }
+enum PaymentFrequency { HOURLY WEEKLY MONTHLY PROJECT }
+enum EmploymentType { FULL_TIME PART_TIME FREELANCE }
+enum JobFormat { REMOTE OFFICE HYBRID }
+enum VacancyStatus { INACTIVE ACTIVE }
+enum ApplicationStatus { NEW INVITATION REJECTION }
+enum LanguageLevel { A1 A2 B1 B2 C1 C2 }
+enum EducationDegree { BACHELOR MASTER SPECIALIST PHD }
+enum SortDirection { ASC DESC }
+enum VacancySort { PUBLICATION_DATE SALARY ID }
+enum ResumeSort { DATE ID }
+
+"Публичные поля помечены в описании. Остальные проверяют токен и владельца."
+type Query {
+  "Только владелец профиля. Пароль и его хеш не возвращаются."
+  applicant(id: ID!): Applicant
+  "Только владелец профиля."
+  employer(id: ID!): Employer
+  "Публичное чтение вакансии."
+  vacancy(id: ID!): Vacancy
+  "Публичный поиск вакансий; фильтры комбинируются через AND."
+  vacancies(filter: VacancyFilter, page: PageInput = {}, sort: VacancySort = PUBLICATION_DATE, direction: SortDirection = ASC): VacancyPage
+  "Соискатель-владелец или аутентифицированный работодатель."
+  resume(id: ID!): Resume
+  "Работодатель ищет все резюме; для соискателя applicantId принудительно равен ID из токена. Чужой applicantId — FORBIDDEN."
+  resumes(filter: ResumeFilter, page: PageInput = {}, sort: ResumeSort = DATE, direction: SortDirection = ASC): ResumePage
+  "Автор отклика или работодатель-владелец вакансии."
+  application(id: ID!): Application
+  "Только свои отклики: соискатель определяется по токену, не по аргументу ID."
+  myApplications(page: PageInput = {}): [Application!]
+  "Работодатель-владелец вакансии; только отклики на неё."
+  vacancyApplications(vacancyId: ID!, page: PageInput = {}): [Application!]
+  "Работодатель-владелец вакансии; версии по versionTimestamp, затем id по убыванию."
+  vacancyDrafts(vacancyId: ID!, page: PageInput = {}): [DraftVacancy!]
+  "Работодатель-владелец вакансии; больше score означает более подходящее резюме."
+  matchingCandidates(vacancyId: ID!, limit: Int = 10): [MatchResult!]
+  "Публичный справочник."
+  categories: [Category!]
+  "Публичный справочник."
+  skills: [Skill!]
+  "Публичный справочник."
+  languages: [Language!]
+  "Публичное чтение локации."
+  location(id: ID!): Location
+  "Публичный поиск по городу или стране; непустой q, limit от 1 до 50."
+  locations(q: String!, limit: Int = 20): [Location!]
+}
+
+"Корневые мутации выполняются последовательно; общей транзакции между ними нет."
+type Mutation {
+  "Публичная регистрация; email уникален в выбранном типе аккаунта."
+  registerApplicant(input: ApplicantCreateInput!): Applicant
+  "Публичная регистрация работодателя."
+  registerEmployer(input: EmployerCreateInput!): Employer
+  "Публичный обмен email/пароля на пару токенов выбранного типа аккаунта."
+  login(input: LoginInput!): TokenPair
+  "Публичный обмен действительного refresh-токена; тип аккаунта должен совпадать."
+  refreshTokens(input: RefreshInput!): TokenPair
+  "Владелец профиля; заменяет данные, кроме необязательного нового пароля."
+  replaceApplicant(id: ID!, input: ApplicantReplaceInput!): Applicant
+  "Владелец профиля."
+  deleteApplicant(id: ID!): DeletedResource
+  "Владелец профиля; заменяет данные, кроме необязательного нового пароля."
+  replaceEmployer(id: ID!, input: EmployerReplaceInput!): Employer
+  "Владелец профиля."
+  deleteEmployer(id: ID!): DeletedResource
+  "Работодатель, которому принадлежит input.employerId."
+  createVacancy(input: VacancyInput!): Vacancy
+  "Работодатель-владелец; полная замена, employerId нельзя переназначить."
+  replaceVacancy(id: ID!, input: VacancyInput!): Vacancy
+  "Работодатель-владелец."
+  deleteVacancy(id: ID!): DeletedResource
+  "Работодатель-владелец; сохраняет неизменяемый снимок текущей вакансии."
+  createVacancyDraft(vacancyId: ID!): DraftVacancy
+  "Работодатель-владелец; восстанавливает свою версию и устанавливает ACTIVE."
+  restoreVacancyDraft(vacancyId: ID!, draftId: ID!): Vacancy
+  "Работодатель-владелец; draftId должен принадлежать vacancyId."
+  deleteVacancyDraft(vacancyId: ID!, draftId: ID!): DeletedResource
+  "Соискатель, которому принадлежит input.applicantId."
+  createResume(input: ResumeCreateInput!): Resume
+  "Соискатель-владелец; полная замена, applicantId нельзя переназначить."
+  replaceResume(id: ID!, input: ResumeReplaceInput!): Resume
+  "Соискатель-владелец."
+  deleteResume(id: ID!): DeletedResource
+  "Соискатель-владелец резюме; статус всегда NEW, повторная пара ID — CONFLICT."
+  createApplication(input: ApplicationCreateInput!): Application
+  "Работодатель-владелец вакансии; vacancyId/resumeId должны остаться прежними."
+  replaceApplication(id: ID!, input: ApplicationReplaceInput!): Application
+  "Частичное обновление работодателем-владельцем: меняется только статус."
+  updateApplicationStatus(id: ID!, status: ApplicationStatus!): Application
+  "Только соискатель-автор может отозвать отклик."
+  deleteApplication(id: ID!): DeletedResource
+}
+
+type TokenPair { accessToken: String! refreshToken: String! }
+type DeletedResource { id: ID! }
+type Location { id: ID! city: String! country: String! }
+type Category { id: ID! name: String! }
+type Skill { id: ID! name: String! }
+type Language { id: ID! name: String! proficiencyLevel: LanguageLevel! }
+
+type Applicant {
+  id: ID!
+  name: String!
+  email: Email!
+  address: String
+  phoneNumber: String
+  location: Location!
+}
+
+type Employer {
+  id: ID!
+  name: String!
+  email: Email!
+  description: String
+  address: String
+  websiteLink: URL
+  location: Location!
+}
+
+"Публичные сведения о компании; email, адрес и иные приватные поля сюда не входят."
+type EmployerSummary { id: ID! name: String! description: String websiteLink: URL }
+
+type Vacancy {
+  id: ID!
+  employerId: ID!
+  employer: EmployerSummary!
+  location: Location!
+  salary: Decimal!
+  skills: [Skill!]!
+  languages: [Language!]!
+  paymentFrequency: PaymentFrequency!
+  experience: String!
+  jobFormat: JobFormat!
+  employmentType: EmploymentType!
+  description: String!
+  publicationDate: DateTime!
+  address: String!
+  status: VacancyStatus!
+}
+
+type Resume {
+  id: ID!
+  applicantId: ID!
+  category: Category!
+  description: String
+  skills: [Skill!]!
+  educations: [Education!]!
+  jobExperiences: [JobExperience!]!
+  languages: [Language!]!
+  date: DateTime!
+}
+
+type Education {
+  id: ID!
+  resumeId: ID!
+  educationDegree: EducationDegree
+  institutionName: String
+  faculty: String
+  department: String
+  yearOfGraduation: Int
+}
+
+type JobExperience {
+  id: ID!
+  resumeId: ID!
+  position: String
+  companyName: String
+  description: String
+  startDate: Date
+  "null для текущего места работы."
+  endDate: Date
+}
+
+type Application {
+  id: ID!
+  vacancyId: ID!
+  resumeId: ID!
+  applicationDate: DateTime!
+  applicationStatus: ApplicationStatus!
+  "Повторная проверка доступа к связанному ресурсу обязательна."
+  vacancy: Vacancy!
+  resume: Resume!
+}
+
+type DraftVacancy { id: ID! vacancyId: ID! versionTimestamp: DateTime! }
+"id — идентификатор резюме; resume доступно работодателю, выполняющему подбор."
+type MatchResult { id: ID! score: Float! resume: Resume! }
+
+type VacancyPage {
+  items: [Vacancy!]!
+  page: Int!
+  size: Int!
+  totalElements: Long!
+  totalPages: Int!
+}
+
+type ResumePage {
+  items: [Resume!]!
+  page: Int!
+  size: Int!
+  totalElements: Long!
+  totalPages: Int!
+}
+
+"limit 1..100, offset >= 0. Если PageInput передан как null — используются те же значения по умолчанию."
+input PageInput { limit: Int! = 20 offset: Int! = 0 }
+
+input VacancyFilter {
+  q: String
+  employerId: ID
+  locationId: ID
+  salaryMin: Decimal
+  salaryMax: Decimal
+  paymentFrequency: PaymentFrequency
+  employmentType: EmploymentType
+  workFormat: JobFormat
+  publicationDateFrom: DateTime
+  publicationDateTo: DateTime
+  skillIds: [ID!]
+  languageIds: [ID!]
+  status: VacancyStatus
+}
+
+input ResumeFilter {
+  q: String
+  applicantId: ID
+  categoryId: ID
+  creationDateFrom: DateTime
+  creationDateTo: DateTime
+  skillIds: [ID!]
+  languageIds: [ID!]
+}
+
+input LoginInput { accountType: AccountType! email: Email! password: String! }
+input RefreshInput { accountType: AccountType! refreshToken: String! }
+
+input ApplicantCreateInput {
+  name: String!
+  email: Email!
+  password: String!
+  address: String
+  phoneNumber: String
+  locationId: ID!
+}
+
+input ApplicantReplaceInput {
+  name: String!
+  email: Email!
+  "Если не передан или null, пароль сохраняется. Иначе минимум 8 символов."
+  password: String
+  address: String
+  phoneNumber: String
+  locationId: ID!
+}
+
+input EmployerCreateInput {
+  name: String!
+  email: Email!
+  password: String!
+  description: String
+  address: String
+  websiteLink: URL
+  locationId: ID!
+}
+
+input EmployerReplaceInput {
+  name: String!
+  email: Email!
+  "Если не передан или null, пароль сохраняется. Иначе минимум 8 символов."
+  password: String
+  description: String
+  address: String
+  websiteLink: URL
+  locationId: ID!
+}
+
+input VacancyInput {
+  employerId: ID!
+  locationId: ID!
+  salary: Decimal!
+  skillIds: [ID!]! = []
+  languageIds: [ID!]! = []
+  paymentFrequency: PaymentFrequency!
+  experience: String!
+  jobFormat: JobFormat!
+  employmentType: EmploymentType!
+  description: String!
+  address: String!
+  status: VacancyStatus! = ACTIVE
+}
+
+input ResumeCreateInput {
+  applicantId: ID!
+  categoryId: ID!
+  description: String
+  skillIds: [ID!]! = []
+  educations: [EducationInput!]! = []
+  jobExperiences: [JobExperienceInput!]! = []
+  languageIds: [ID!]! = []
+}
+
+"Полная замена: [] очищает связи; отсутствие или null очищает description."
+input ResumeReplaceInput {
+  applicantId: ID!
+  categoryId: ID!
+  description: String
+  skillIds: [ID!]!
+  educations: [EducationInput!]!
+  jobExperiences: [JobExperienceInput!]!
+  languageIds: [ID!]!
+}
+
+input EducationInput {
+  educationDegree: EducationDegree!
+  institutionName: String!
+  faculty: String!
+  department: String!
+  yearOfGraduation: Int!
+}
+
+input JobExperienceInput {
+  position: String!
+  companyName: String!
+  description: String
+  startDate: Date!
+  endDate: Date
+}
+
+input ApplicationCreateInput { vacancyId: ID! resumeId: ID! }
+input ApplicationReplaceInput {
+  vacancyId: ID!
+  resumeId: ID!
+  applicationStatus: ApplicationStatus!
+}

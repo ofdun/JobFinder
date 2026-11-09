@@ -1,7 +1,5 @@
 package com.ofdun.jobfinder.cli.dto.resumes;
 
-import java.time.LocalDate;
-
 public record Education(
         Long id,
         Long resumeId,
@@ -9,4 +7,4 @@ public record Education(
         String institutionName,
         String faculty,
         String department,
-        LocalDate yearOfGraduation) {}
+        Integer yearOfGraduation) {}

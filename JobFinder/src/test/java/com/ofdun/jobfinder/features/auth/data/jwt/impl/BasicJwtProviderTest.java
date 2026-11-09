@@ -181,4 +181,26 @@ class BasicJwtProviderTest {
 
         assertEquals("JWT role/type claim is missing", error.getMessage());
     }
+
+    @Test
+    void accessAndRefreshPurposesCannotBeInterchanged() {
+        var provider = provider();
+        var access = provider.generateAccessToken(AccountType.APPLICANT, 42L);
+        var refresh = provider.generateRefreshToken(AccountType.APPLICANT, 42L);
+        assertTrue(provider.validateAccessToken(access, AccountType.APPLICANT));
+        assertFalse(provider.validateAccessToken(refresh, AccountType.APPLICANT));
+        assertFalse(provider.validateRefreshToken(access, AccountType.APPLICANT));
+        assertTrue(provider.validateRefreshToken(refresh, AccountType.APPLICANT));
+        assertFalse(provider.validateRefreshToken(refresh, AccountType.EMPLOYER));
+        assertNotEquals(refresh, provider.generateRefreshToken(AccountType.APPLICANT, 42L));
+    }
+
+    @Test
+    void legacySignedTokenRemainsV1CompatibleButCannotAuthorizeV2() {
+        var provider = provider();
+        var legacy = token("42", "APPLICANT", new Date(System.currentTimeMillis() + 60000));
+        assertTrue(provider.validateToken(legacy, AccountType.APPLICANT));
+        assertFalse(provider.validateAccessToken(legacy, AccountType.APPLICANT));
+        assertTrue(provider.validateRefreshToken(legacy, AccountType.APPLICANT));
+    }
 }

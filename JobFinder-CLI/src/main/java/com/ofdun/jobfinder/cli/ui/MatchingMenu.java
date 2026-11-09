@@ -3,8 +3,6 @@ package com.ofdun.jobfinder.cli.ui;
 import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.dto.matching.MatchResult;
 import com.ofdun.jobfinder.cli.http.ApiException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -16,9 +14,7 @@ public final class MatchingMenu {
         while (true) {
             p.println("\n--- Matching (AI) ---");
             p.println("0. Назад");
-            p.println(
-                    "1. Найти кандидатов для вакансии (GET"
-                            + " /matching/vacancies/{vacancyId}/candidates) [auth]");
+            p.println("1. Найти кандидатов для вакансии [auth]");
 
             int c = p.readInt("> ", false);
             switch (c) {
@@ -37,16 +33,7 @@ public final class MatchingMenu {
         Integer max = p.readInt("maxAmount (по умолчанию 10): ", true);
 
         try {
-            Map<String, Object> q = new HashMap<>();
-            if (max != null) q.put("maxAmount", max);
-
-            MatchResult[] res =
-                    ctx.getApi()
-                            .get(
-                                    "/matching/vacancies/" + vacancyId + "/candidates",
-                                    q,
-                                    MatchResult[].class,
-                                    true);
+            MatchResult[] res = ctx.getApi().matchingCandidates(vacancyId, max);
             if (res == null || res.length == 0) {
                 p.println("Ничего не найдено.");
             } else {

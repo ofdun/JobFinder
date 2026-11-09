@@ -24,7 +24,7 @@ public final class SettingsMenu {
                 case 1 -> {
                     String url =
                             p.readNonBlank(
-                                    "Введите baseUrl (например http://localhost:8080/api/v1): ");
+                                    "Введите baseUrl (например http://localhost:8080/api/v2): ");
                     var newSession = ctx.getSession().withBaseUrl(url);
                     ctx.setSession(newSession);
                     p.println("Сохранено.");

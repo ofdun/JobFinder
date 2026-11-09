@@ -11,11 +11,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document(collection = "applications")
+@org.springframework.data.mongodb.core.index.CompoundIndex(
+        name = "applications_vacancy_resume_unique",
+        def = "{'vacancyId':1,'resumeId':1}",
+        unique = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicationDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long vacancyId;
 
@@ -25,4 +28,3 @@ public class ApplicationDocument {
 
     @NotNull private ApplicationStatus applicationStatus;
 }
-

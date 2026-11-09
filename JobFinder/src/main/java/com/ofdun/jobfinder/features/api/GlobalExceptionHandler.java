@@ -36,6 +36,53 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(com.ofdun.jobfinder.features.vacancy.exception.DraftNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiErrorResponse handleDraftNotFound(Exception ex) {
+        return createErrorResponse("Draft not found", HttpStatus.NOT_FOUND, "NOT_FOUND", ex);
+    }
+
+    @ExceptionHandler({
+        org.springframework.web.servlet.resource.NoResourceFoundException.class,
+        org.springframework.web.HttpRequestMethodNotSupportedException.class,
+        org.springframework.web.HttpMediaTypeNotSupportedException.class,
+        org.springframework.web.HttpMediaTypeNotAcceptableException.class
+    })
+    public org.springframework.http.ResponseEntity<ApiErrorResponse> handleHttpProtocolException(
+            Exception ex) {
+        var error = (org.springframework.web.ErrorResponse) ex;
+        int status = error.getStatusCode().value();
+        return org.springframework.http.ResponseEntity.status(status)
+                .headers(error.getHeaders())
+                .body(new ApiErrorResponse("Invalid HTTP request", status, null, null, List.of()));
+    }
+
+    @ExceptionHandler(ApiFailure.class)
+    public org.springframework.http.ResponseEntity<ApiErrorResponse> handleApiFailure(
+            ApiFailure ex) {
+        var response = org.springframework.http.ResponseEntity.status(ex.getStatus());
+        if (ex.getStatus() == 401) response.header("WWW-Authenticate", "Bearer");
+        return response.body(
+                new ApiErrorResponse(ex.getMessage(), ex.getStatus(), null, null, List.of()));
+    }
+
+    @ExceptionHandler({
+        org.springframework.http.converter.HttpMessageNotReadableException.class,
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+        org.springframework.web.bind.MissingServletRequestParameterException.class,
+        org.springframework.web.method.annotation.HandlerMethodValidationException.class
+    })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handleMalformedRequest(Exception ex) {
+        return createErrorResponse("Invalid request", HttpStatus.BAD_REQUEST, "BAD_USER_INPUT", ex);
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiErrorResponse handleDataConflict(Exception ex) {
+        return createErrorResponse("Resource conflict", HttpStatus.CONFLICT, "CONFLICT", ex);
+    }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiErrorResponse handleAuthorizationDenied(AuthorizationDeniedException ex) {

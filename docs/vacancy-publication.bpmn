@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_bpmn_publication" targetNamespace="https://jobfinder.local/processes">
+  <bpmn:process id="Process_bpmn_publication" name="BP-01 / Публикация вакансии" isExecutable="false">
+    <bpmn:startEvent id="start" name="Начало">
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="fill" name="Работодатель: заполнить форму">
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="check" name="Система: проверить данные">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="valid" name="Данные верны?">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="save" name="Система: сохранить вакансию">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end" name="Опубликована">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="error" name="Система: показать ошибки">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="fix" name="Работодатель: исправить поля">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="start" targetRef="fill" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="fill" targetRef="check" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="check" targetRef="valid" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="valid" targetRef="save" name="Да" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="save" targetRef="end" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="valid" targetRef="error" name="Нет" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="error" targetRef="fix" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="fix" targetRef="fill" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_bpmn-publication">
+    <bpmndi:BPMNPlane id="Plane_bpmn-publication" bpmnElement="Process_bpmn_publication">
+      <bpmndi:BPMNShape id="Shape_start" bpmnElement="start">
+        <dc:Bounds x="42.0" y="122.0" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-5" y="167" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_fill" bpmnElement="fill">
+        <dc:Bounds x="127.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_check" bpmnElement="check">
+        <dc:Bounds x="357.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_valid" bpmnElement="valid" isMarkerVisible="true">
+        <dc:Bounds x="625.0" y="115.0" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="585" y="76" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_save" bpmnElement="save">
+        <dc:Bounds x="777.0" y="106.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end" bpmnElement="end">
+        <dc:Bounds x="1062.0" y="122.0" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1015" y="167" width="130" height="38" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_error" bpmnElement="error">
+        <dc:Bounds x="567.0" y="266.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_fix" bpmnElement="fix">
+        <dc:Bounds x="317.0" y="266.0" width="166" height="68" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_0" bpmnElement="Flow_0">
+        <di:waypoint x="78" y="140" />
+        <di:waypoint x="127" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="293" y="140" />
+        <di:waypoint x="357" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="523" y="140" />
+        <di:waypoint x="625" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_3" bpmnElement="Flow_3">
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="777" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="710.0" y="121.0" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_4" bpmnElement="Flow_4">
+        <di:waypoint x="943" y="140" />
+        <di:waypoint x="1062" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5" bpmnElement="Flow_5">
+        <di:waypoint x="650" y="165" />
+        <di:waypoint x="650" y="266" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="634.0" y="196.5" width="60" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_6" bpmnElement="Flow_6">
+        <di:waypoint x="567" y="300" />
+        <di:waypoint x="483" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_7" bpmnElement="Flow_7">
+        <di:waypoint x="317" y="300" />
+        <di:waypoint x="210" y="300" />
+        <di:waypoint x="210" y="174" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

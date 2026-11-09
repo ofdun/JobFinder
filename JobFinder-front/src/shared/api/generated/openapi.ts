@@ -4,647 +4,7 @@
  */
 
 export interface paths {
-    "/auth/applicant/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Вход соискателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["LoginRequest"];
-                };
-            };
-            responses: {
-                /** @description Успешная авторизация */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TokenPair"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/employer/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Вход работодателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["LoginRequest"];
-                };
-            };
-            responses: {
-                /** @description Успешная авторизация */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TokenPair"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/applicant/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Обновление токенов соискателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["RefreshRequest"];
-                };
-            };
-            responses: {
-                /** @description Новая пара токенов */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TokenPair"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/employer/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Обновление токенов работодателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["RefreshRequest"];
-                };
-            };
-            responses: {
-                /** @description Новая пара токенов */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TokenPair"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/categories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить список всех категорий */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Список категорий */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Category"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/skills": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить список всех навыков */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Список навыков */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Skill"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/languages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить список всех языков */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Список языков */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Language"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/applicants": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Регистрация нового соискателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ApplicantRequest"];
-                };
-            };
-            responses: {
-                /** @description Соискатель создан */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number;
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/applicants/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить профиль соискателя */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Профиль соискателя */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Applicant"];
-                    };
-                };
-            };
-        };
-        /** Обновить профиль соискателя */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ApplicantRequest"];
-                };
-            };
-            responses: {
-                /** @description Профиль обновлен */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Applicant"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Удалить профиль соискателя */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Профиль успешно удален */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/employers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Регистрация нового работодателя */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["EmployerRequest"];
-                };
-            };
-            responses: {
-                /** @description Работодатель создан */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number;
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/employers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить профиль работодателя */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Профиль работодателя */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Employer"];
-                    };
-                };
-            };
-        };
-        /** Обновить профиль работодателя */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["EmployerRequest"];
-                };
-            };
-            responses: {
-                /** @description Профиль обновлен */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Employer"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Удалить профиль работодателя */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Профиль успешно удален */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/vacancies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Создать вакансию */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["VacancyRequest"];
-                };
-            };
-            responses: {
-                /** @description Вакансия создана */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number;
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/vacancies/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить вакансию по ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Данные вакансии */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Vacancy"];
-                    };
-                };
-            };
-        };
-        /** Обновить вакансию */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["VacancyRequest"];
-                };
-            };
-            responses: {
-                /** @description Вакансия обновлена */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Vacancy"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Удалить вакансию */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Вакансия удалена */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/resumes": {
+    "/api/v2/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -654,124 +14,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Создать резюме
-         * @description Также асинхронно/синхронно генерирует векторные эмбеддинги (AI) и сохраняет в Qdrant.
+         * Вход пользователя
+         * @description Единая операция входа по email, паролю и типу пользователя.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ResumeRequest"];
-                };
-            };
-            responses: {
-                /** @description Резюме создано */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number;
-                    };
-                };
-            };
-        };
+        post: operations["postAuthLogin"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/resumes/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить резюме */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Данные резюме */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Resume"];
-                    };
-                };
-            };
-        };
-        /** Обновить резюме */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ResumeUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description Резюме обновлено */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Resume"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Удалить резюме */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Резюме удалено */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/applications": {
+    "/api/v2/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -780,154 +33,26 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Оставить отклик на вакансию */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ApplicationRequest"];
-                };
-            };
-            responses: {
-                /** @description Отклик создан */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number;
-                    };
-                };
-            };
-        };
+        /**
+         * Обновление токенов пользователя
+         * @description Тип пользователя должен соответствовать владельцу refreshToken; несовпадение даёт 401.
+         */
+        post: operations["postAuthRefresh"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/applications/{id}": {
+    "/api/v2/categories": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Получить статус отклика */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Данные отклика */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Application"];
-                    };
-                };
-            };
-        };
-        /** Обновить статус отклика (например, INVITATION или REJECTION) */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ApplicationRequest"];
-                };
-            };
-            responses: {
-                /** @description Отклик обновлен */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Application"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Отозвать/удалить отклик */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Отклик удален */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/matching/vacancies/{vacancyId}/candidates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Поиск подходящих кандидатов для вакансии (поиск по векторам) */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Максимальное количество кандидатов */
-                    maxAmount?: number;
-                };
-                header?: never;
-                path: {
-                    vacancyId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Список наиболее подходящих резюме с их скором */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["MatchResult"][];
-                    };
-                };
-            };
-        };
+        /** Получить список всех категорий */
+        get: operations["getCategories"];
         put?: never;
         post?: never;
         delete?: never;
@@ -936,7 +61,165 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/vacancies/search": {
+    "/api/v2/skills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить список всех навыков */
+        get: operations["getSkills"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/languages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить список всех языков */
+        get: operations["getLanguages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить локацию по ID */
+        get: operations["getLocationsId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Поиск локаций по городу или стране */
+        get: operations["getLocations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/applicants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Регистрация нового соискателя */
+        post: operations["postApplicants"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/applicants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить профиль соискателя
+         * @description Доступно только владельцу профиля.
+         */
+        get: operations["getApplicantsId"];
+        /**
+         * Обновить профиль соискателя
+         * @description Доступно только владельцу профиля.
+         */
+        put: operations["putApplicantsId"];
+        post?: never;
+        /**
+         * Удалить профиль соискателя
+         * @description Доступно только владельцу профиля.
+         */
+        delete: operations["deleteApplicantsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/employers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Регистрация нового работодателя */
+        post: operations["postEmployers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/employers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить профиль работодателя
+         * @description Доступно только владельцу профиля.
+         */
+        get: operations["getEmployersId"];
+        /**
+         * Обновить профиль работодателя
+         * @description Доступно только владельцу профиля.
+         */
+        put: operations["putEmployersId"];
+        post?: never;
+        /**
+         * Удалить профиль работодателя
+         * @description Доступно только владельцу профиля.
+         */
+        delete: operations["deleteEmployersId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/vacancies": {
         parameters: {
             query?: never;
             header?: never;
@@ -947,59 +230,45 @@ export interface paths {
          * Поиск вакансий по фильтрам с пагинацией
          * @description Параметры limit/offset/sortBy/sortDesc соответствуют модели OffsetPaginationParams.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Подстрока для поиска по описанию вакансии */
-                    q?: string;
-                    employerId?: number;
-                    locationId?: number;
-                    salaryMin?: number;
-                    salaryMax?: number;
-                    paymentFrequency?: components["schemas"]["PaymentFrequency"];
-                    employmentType?: components["schemas"]["EmploymentType"];
-                    workFormat?: components["schemas"]["JobFormat"];
-                    publicationDateFrom?: string;
-                    publicationDateTo?: string;
-                    /** @description Фильтр по навыкам (AND). Вакансия должна содержать ВСЕ переданные skillIds. */
-                    skillIds?: number[];
-                    /** @description Фильтр по языкам (AND). Вакансия должна содержать ВСЕ переданные languageIds. */
-                    languageIds?: number[];
-                    /** @description Количество элементов на странице */
-                    limit?: number;
-                    /** @description Смещение от начала выборки */
-                    offset?: number;
-                    /** @description Поле сортировки (например publicationDate) */
-                    sortBy?: string;
-                    /** @description Сортировка по убыванию */
-                    sortDesc?: boolean;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Страница вакансий */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["VacancyPageResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getVacancies"];
         put?: never;
-        post?: never;
+        /**
+         * Создать вакансию
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        post: operations["postVacancies"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/resumes/search": {
+    "/api/v2/vacancies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить вакансию по ID */
+        get: operations["getVacanciesId"];
+        /**
+         * Обновить вакансию
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        put: operations["putVacanciesId"];
+        post?: never;
+        /**
+         * Удалить вакансию
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        delete: operations["deleteVacanciesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resumes": {
         parameters: {
             query?: never;
             header?: never;
@@ -1010,44 +279,202 @@ export interface paths {
          * Поиск резюме по фильтрам с пагинацией
          * @description Параметры limit/offset/sortBy/sortDesc соответствуют модели OffsetPaginationParams.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Подстрока для поиска по описанию резюме */
-                    q?: string;
-                    applicantId?: number;
-                    categoryId?: number;
-                    creationDateFrom?: string;
-                    creationDateTo?: string;
-                    /** @description Фильтр по навыкам (AND). Резюме должно содержать ВСЕ переданные skillIds. */
-                    skillIds?: number[];
-                    /** @description Фильтр по языкам (AND). Резюме должно содержать ВСЕ переданные languageIds. */
-                    languageIds?: number[];
-                    limit?: number;
-                    offset?: number;
-                    sortBy?: string;
-                    sortDesc?: boolean;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Страница резюме */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ResumePageResponse"];
-                    };
-                };
-            };
+        get: operations["getResumes"];
+        put?: never;
+        /**
+         * Создать резюме
+         * @description Создаёт резюме и подготавливает данные для подбора кандидатов до успешного ответа. Ошибка внешнего сервиса возвращается как 503.
+         */
+        post: operations["postResumes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resumes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
+        /**
+         * Получить резюме
+         * @description Доступно соискателю-владельцу резюме и аутентифицированным работодателям.
+         */
+        get: operations["getResumesId"];
+        /**
+         * Обновить резюме
+         * @description Изменение доступно соискателю-владельцу; поиск — аутентифицированным пользователям.
+         */
+        put: operations["putResumesId"];
+        post?: never;
+        /**
+         * Удалить резюме
+         * @description Изменение доступно соискателю-владельцу; поиск — аутентифицированным пользователям.
+         */
+        delete: operations["deleteResumesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить собственные отклики
+         * @description Целевая операция: соискатель определяется по токену. Возвращает только его отклики, включая созданные с другого устройства. Сортировка по applicationDate, затем id по убыванию.
+         */
+        get: operations["getApplications"];
+        put?: never;
+        /**
+         * Оставить отклик на вакансию
+         * @description Доступно соискателю-владельцу resumeId. Новый отклик создаётся только со статусом NEW; другая попытка — 400, повтор пары vacancyId/resumeId — 409.
+         */
+        post: operations["postApplications"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/applications/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить статус отклика
+         * @description Доступно автору отклика или работодателю-владельцу вакансии.
+         */
+        get: operations["getApplicationsId"];
+        /**
+         * Заменить редактируемые данные отклика
+         * @description Целевое ограничение: только работодатель-владелец вакансии меняет решение. vacancyId и resumeId должны совпадать с текущими значениями, иначе 409. Для смены одного статуса предпочтителен PUT /api/v2/applications/{id}/status.
+         */
+        put: operations["putApplicationsId"];
+        post?: never;
+        /**
+         * Отозвать/удалить отклик
+         * @description Целевое ограничение: только автор отклика может отозвать его.
+         */
+        delete: operations["deleteApplicationsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/vacancies/{vacancyId}/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить все отклики на вакансию работодателя
+         * @description Доступно только работодателю-владельцу вакансии.
+         */
+        get: operations["getVacanciesVacancyIdApplications"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/applications/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Заменить статус отклика
+         * @description Доступно работодателю-владельцу вакансии, на которую оставлен отклик. Меняется только applicationStatus; vacancyId, resumeId и applicationDate сохраняются. Повтор того же статуса не меняет результат. NEW — новый отклик; INVITATION — приглашение; REJECTION — отказ.
+         */
+        put: operations["putApplicationsIdStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/matching/vacancies/{vacancyId}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Поиск подходящих кандидатов для вакансии (поиск по векторам)
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        get: operations["getMatchingVacanciesVacancyIdCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/vacancies/{id}/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить сохранённые версии вакансии
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        get: operations["getVacanciesIdDrafts"];
+        put?: never;
+        /**
+         * Сохранить текущую версию вакансии
+         * @description Создаёт неизменяемый снимок текущих данных вакансии. Доступен владельцу вакансии.
+         */
+        post: operations["postVacanciesIdDrafts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/vacancies/{id}/drafts/{draftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Восстановить сохранённую версию вакансии
+         * @description Восстанавливает вакансию из сохранённого снимка и устанавливает ACTIVE. Доступна владельцу вакансии. Сам снимок не изменяется.
+         */
+        post: operations["postVacanciesIdDraftsDraftId"];
+        /**
+         * Удалить сохранённую версию вакансии
+         * @description Доступно работодателю-владельцу вакансии.
+         */
+        delete: operations["deleteVacanciesIdDraftsDraftId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1057,37 +484,58 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description Ссылка на ресурс или действие. Тело запроса задаётся схемой соответствующей операции; наличие ссылки не отменяет авторизацию и проверку текущего состояния. */
+        HypermediaLink: {
+            /**
+             * Format: uri-reference
+             * @description Готовый URI без шаблонов. Сервер сохраняет внешний префикс развёртывания, включая /mirror.
+             */
+            href: string;
+            /** @enum {string} */
+            method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+        };
+        /** @description Отношение → ссылка: self, collection, vacancy, resume, update, delete, apply, applications, candidates, drafts, restore; для страниц — first, prev, next, last. Недоступные для текущего пользователя действия отсутствуют. */
+        HypermediaLinks: {
+            [key: string]: components["schemas"]["HypermediaLink"];
+        };
+        /**
+         * @description Тип учётной записи для входа и обновления токенов.
+         * @enum {string}
+         */
+        UserType: "APPLICANT" | "EMPLOYER";
         LoginRequest: {
+            userType: components["schemas"]["UserType"];
             /** Format: email */
             email: string;
             /** Format: password */
             password: string;
         };
         RefreshRequest: {
+            userType: components["schemas"]["UserType"];
             refreshToken: string;
         };
         TokenPair: {
-            accessToken?: string;
-            refreshToken?: string;
+            accessToken: string;
+            refreshToken: string;
         };
         Location: {
-            id?: number;
-            city?: string;
-            country?: string;
+            id: number;
+            city: string;
+            country: string;
         };
         Skill: {
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         Language: {
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
             /** @enum {string} */
-            proficiencyLevel?: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+            proficiencyLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
         };
         Category: {
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         Education: {
             /** @description ID записи об образовании (не передаётся при создании внутри POST /resumes) */
@@ -1099,18 +547,16 @@ export interface components {
             institutionName?: string;
             faculty?: string;
             department?: string;
-            /** Format: date */
-            yearOfGraduation?: string;
+            yearOfGraduation?: number;
         };
         /** @description Образование для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются) */
         EducationCreate: {
             /** @enum {string} */
-            educationDegree?: "BACHELOR" | "MASTER" | "SPECIALIST" | "PHD";
-            institutionName?: string;
-            faculty?: string;
-            department?: string;
-            /** Format: date */
-            yearOfGraduation?: string;
+            educationDegree: "BACHELOR" | "MASTER" | "SPECIALIST" | "PHD";
+            institutionName: string;
+            faculty: string;
+            department: string;
+            yearOfGraduation: number;
         };
         JobExperience: {
             /** @description ID записи опыта работы (не передаётся при создании внутри POST /resumes) */
@@ -1119,50 +565,56 @@ export interface components {
             resumeId?: number;
             position?: string;
             companyName?: string;
-            description?: string;
+            description?: string | null;
             /** Format: date */
             startDate?: string;
-            /** Format: date */
-            endDate?: string;
+            /**
+             * Format: date
+             * @description null, если работа продолжается.
+             */
+            endDate?: string | null;
         };
         /** @description Опыт работы для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются) */
         JobExperienceCreate: {
-            position?: string;
-            companyName?: string;
+            position: string;
+            companyName: string;
             description?: string;
             /** Format: date */
-            startDate?: string;
-            /** Format: date */
-            endDate?: string;
+            startDate: string;
+            /**
+             * Format: date
+             * @description null, если работа продолжается.
+             */
+            endDate?: string | null;
         };
         Applicant: {
-            readonly id?: number;
-            name?: string;
+            _links?: components["schemas"]["HypermediaLinks"];
+            readonly id: number;
+            name: string;
             /** Format: email */
-            email?: string;
-            /** @description Пароль для создания/обновления. Хэшируется на сервере. */
-            password?: string;
-            address?: string;
-            phoneNumber?: string;
-            location?: components["schemas"]["Location"];
+            email: string;
+            address?: string | null;
+            phoneNumber?: string | null;
+            location: components["schemas"]["Location"];
         };
         Employer: {
-            readonly id?: number;
-            name?: string;
+            _links?: components["schemas"]["HypermediaLinks"];
+            readonly id: number;
+            name: string;
             /** Format: email */
-            email?: string;
-            password?: string;
-            description?: string;
-            address?: string;
+            email: string;
+            description?: string | null;
+            address?: string | null;
             /** Format: uri */
-            websiteLink?: string;
-            location?: components["schemas"]["Location"];
+            websiteLink?: string | null;
+            location: components["schemas"]["Location"];
         };
         Vacancy: {
-            readonly id?: number;
-            employerId?: number;
-            location?: components["schemas"]["Location"];
-            salary?: number;
+            _links?: components["schemas"]["HypermediaLinks"];
+            readonly id: number;
+            employerId: number;
+            location: components["schemas"]["Location"];
+            salary: number;
             skills?: components["schemas"]["Skill"][];
             languages?: components["schemas"]["Language"][];
             /** @enum {string} */
@@ -1172,117 +624,151 @@ export interface components {
             jobFormat?: "REMOTE" | "OFFICE" | "HYBRID";
             /** @enum {string} */
             employmentType?: "FULL_TIME" | "PART_TIME" | "FREELANCE";
-            description?: string;
+            description: string;
             /** Format: date-time */
-            readonly publicationDate?: string;
+            readonly publicationDate: string;
             address?: string;
+            status: components["schemas"]["VacancyStatus"];
         };
         Resume: {
-            readonly id?: number;
-            applicantId?: number;
-            category?: components["schemas"]["Category"];
-            description?: string;
+            _links?: components["schemas"]["HypermediaLinks"];
+            readonly id: number;
+            applicantId: number;
+            category: components["schemas"]["Category"];
+            description?: string | null;
             skills?: components["schemas"]["Skill"][];
             educations?: components["schemas"]["Education"][];
             jobExperiences?: components["schemas"]["JobExperience"][];
             languages?: components["schemas"]["Language"][];
             /** Format: date-time */
-            readonly date?: string;
+            readonly date: string;
         };
         Application: {
-            readonly id?: number;
-            vacancyId?: number;
-            resumeId?: number;
+            _links?: components["schemas"]["HypermediaLinks"];
+            readonly id: number;
+            vacancyId: number;
+            resumeId: number;
             /** Format: date-time */
-            readonly applicationDate?: string;
+            readonly applicationDate: string;
             /** @enum {string} */
-            applicationStatus?: "NEW" | "INVITATION" | "REJECTION";
+            applicationStatus: "NEW" | "INVITATION" | "REJECTION";
         };
         MatchResult: {
+            _links?: components["schemas"]["HypermediaLinks"];
             /** @description ID резюме */
-            id?: number;
+            id: number;
             /**
              * Format: float
-             * @description Метрика похожести (Cosine distance)
+             * @description Косинусная близость; большее значение означает более близкое соответствие.
              */
-            score?: number;
+            score: number;
         };
         ApplicantRequest: {
-            name?: string;
+            name: string;
             /** Format: email */
-            email?: string;
-            password?: string;
-            address?: string;
-            phoneNumber?: string;
-            locationId?: number;
+            email: string;
+            password: string;
+            address?: string | null;
+            phoneNumber?: string | null;
+            locationId: number;
+        };
+        ApplicantUpdateRequest: {
+            name: string;
+            /** Format: email */
+            email: string;
+            /** @description Необязательный новый пароль; если не передан, текущий пароль сохраняется */
+            password?: string | null;
+            address?: string | null;
+            phoneNumber?: string | null;
+            locationId: number;
         };
         EmployerRequest: {
-            name?: string;
+            name: string;
             /** Format: email */
-            email?: string;
-            password?: string;
-            description?: string;
-            address?: string;
+            email: string;
+            password: string;
+            description?: string | null;
+            address?: string | null;
             /** Format: uri */
-            websiteLink?: string;
-            locationId?: number;
+            websiteLink?: string | null;
+            locationId: number;
+        };
+        EmployerUpdateRequest: {
+            name: string;
+            /** Format: email */
+            email: string;
+            /** @description Необязательный новый пароль; если не передан, текущий пароль сохраняется */
+            password?: string | null;
+            description?: string | null;
+            address?: string | null;
+            /** Format: uri */
+            websiteLink?: string | null;
+            locationId: number;
         };
         VacancyRequest: {
-            employerId?: number;
-            locationId?: number;
-            salary?: number;
+            employerId: number;
+            locationId: number;
+            salary: number;
             skillIds?: number[];
             languageIds?: number[];
             /** @enum {string} */
-            paymentFrequency?: "HOURLY" | "WEEKLY" | "MONTHLY" | "PROJECT";
-            experience?: string;
+            paymentFrequency: "HOURLY" | "WEEKLY" | "MONTHLY" | "PROJECT";
+            experience: string;
             /** @enum {string} */
-            jobFormat?: "REMOTE" | "OFFICE" | "HYBRID";
+            jobFormat: "REMOTE" | "OFFICE" | "HYBRID";
             /** @enum {string} */
-            employmentType?: "FULL_TIME" | "PART_TIME" | "FREELANCE";
-            description?: string;
-            address?: string;
+            employmentType: "FULL_TIME" | "PART_TIME" | "FREELANCE";
+            description: string;
+            address: string;
+            /** @default ACTIVE */
+            status: components["schemas"]["VacancyStatus"];
         };
         ResumeRequest: {
-            applicantId?: number;
-            categoryId?: number;
+            applicantId: number;
+            categoryId: number;
             description?: string;
             skillIds?: number[];
             educations?: components["schemas"]["EducationCreate"][];
             jobExperiences?: components["schemas"]["JobExperienceCreate"][];
             languageIds?: number[];
         };
-        /** @description Запрос на обновление резюме. Поля опциональны. */
+        /** @description Полная замена редактируемых данных резюме. Пустые массивы очищают связанные списки; applicantId должен совпадать с владельцем. PUT заменяет все редактируемые поля; прежний API /api/v1 сохраняет частичное обновление. */
         ResumeUpdateRequest: {
-            applicantId?: number;
-            categoryId?: number;
-            description?: string;
-            skillIds?: number[];
-            educations?: components["schemas"]["EducationCreate"][];
-            jobExperiences?: components["schemas"]["JobExperienceCreate"][];
-            languageIds?: number[];
+            applicantId: number;
+            categoryId: number;
+            description: string;
+            skillIds: number[];
+            educations: components["schemas"]["EducationCreate"][];
+            jobExperiences: components["schemas"]["JobExperienceCreate"][];
+            languageIds: number[];
         };
         ApplicationRequest: {
-            vacancyId?: number;
-            resumeId?: number;
+            vacancyId: number;
+            resumeId: number;
             /** @enum {string} */
-            applicationStatus?: "NEW" | "INVITATION" | "REJECTION";
+            applicationStatus: "NEW" | "INVITATION" | "REJECTION";
+        };
+        ApplicationStatusUpdateRequest: {
+            /** @enum {string} */
+            applicationStatus: "NEW" | "INVITATION" | "REJECTION";
         };
         VacancyPageResponse: {
-            items?: components["schemas"]["Vacancy"][];
-            page?: number;
-            size?: number;
+            _links?: components["schemas"]["HypermediaLinks"];
+            items: components["schemas"]["Vacancy"][];
+            page: number;
+            size: number;
             /** Format: int64 */
-            totalElements?: number;
-            totalPages?: number;
+            totalElements: number;
+            totalPages: number;
         };
         ResumePageResponse: {
-            items?: components["schemas"]["Resume"][];
-            page?: number;
-            size?: number;
+            _links?: components["schemas"]["HypermediaLinks"];
+            items: components["schemas"]["Resume"][];
+            page: number;
+            size: number;
             /** Format: int64 */
-            totalElements?: number;
-            totalPages?: number;
+            totalElements: number;
+            totalPages: number;
         };
         OffsetPaginationParams: {
             /** @default 20 */
@@ -1296,12 +782,1379 @@ export interface components {
         EmploymentType: "FULL_TIME" | "PART_TIME" | "FREELANCE";
         /** @enum {string} */
         JobFormat: "REMOTE" | "OFFICE" | "HYBRID";
+        ApiErrorResponse: {
+            description: string;
+            code: number;
+            exceptionName?: string | null;
+            exceptionMessage?: string | null;
+            /** @description Всегда пустой массив в публичном API. */
+            stackTrace?: string[];
+        };
+        DraftVacancy: {
+            _links?: components["schemas"]["HypermediaLinks"];
+            id: number;
+            vacancyId: number;
+            /** Format: date-time */
+            versionTimestamp: string;
+        };
+        /** @enum {string} */
+        VacancyStatus: "INACTIVE" | "ACTIVE";
     };
-    responses: never;
+    responses: {
+        /** @description Некорректные данные запроса */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Некорректные данные запроса",
+                 *       "code": 400
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+        /** @description Требуется действительный токен */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Требуется действительный токен",
+                 *       "code": 401
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+        /** @description Нет прав на ресурс */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Нет прав на ресурс",
+                 *       "code": 403
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+        /** @description Ресурс не найден */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Ресурс не найден",
+                 *       "code": 404
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+        /** @description Конфликт состояния ресурса */
+        Conflict: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Конфликт состояния ресурса",
+                 *       "code": 409
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+        /** @description Сервис временно недоступен */
+        Unavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "description": "Сервис временно недоступен",
+                 *       "code": 503
+                 *     }
+                 */
+                "application/json": components["schemas"]["ApiErrorResponse"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    postAuthLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Успешная авторизация */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenPair"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postAuthRefresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+            };
+        };
+        responses: {
+            /** @description Новая пара токенов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenPair"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список категорий */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 1,
+                     *         "name": "Разработка"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getSkills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список навыков */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 1,
+                     *         "name": "Java"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Skill"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getLanguages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список языков */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 1,
+                     *         "name": "English",
+                     *         "proficiencyLevel": "B2"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Language"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getLocationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Локация */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Location"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getLocations: {
+        parameters: {
+            query: {
+                q: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Найденные локации */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 1,
+                     *         "city": "Москва",
+                     *         "country": "Россия"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Location"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postApplicants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicantRequest"];
+            };
+        };
+        responses: {
+            /** @description Соискатель создан */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/applicants/1
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getApplicantsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль соискателя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Applicant"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putApplicantsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicantUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Профиль обновлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Applicant"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteApplicantsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль успешно удален */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postEmployers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployerRequest"];
+            };
+        };
+        responses: {
+            /** @description Работодатель создан */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/employers/1
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example 1 */
+                    "application/json": number;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getEmployersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль работодателя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Employer"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putEmployersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployerUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Профиль обновлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Employer"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteEmployersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль успешно удален */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getVacancies: {
+        parameters: {
+            query?: {
+                /** @description Подстрока для поиска по описанию вакансии */
+                q?: string;
+                employerId?: number;
+                locationId?: number;
+                salaryMin?: number;
+                salaryMax?: number;
+                paymentFrequency?: components["schemas"]["PaymentFrequency"];
+                employmentType?: components["schemas"]["EmploymentType"];
+                workFormat?: components["schemas"]["JobFormat"];
+                publicationDateFrom?: string;
+                publicationDateTo?: string;
+                /** @description Фильтр по навыкам (AND). Вакансия должна содержать ВСЕ переданные skillIds. */
+                skillIds?: number[];
+                /** @description Фильтр по языкам (AND). Вакансия должна содержать ВСЕ переданные languageIds. */
+                languageIds?: number[];
+                /** @description Количество элементов на странице */
+                limit?: number;
+                /** @description Смещение от начала выборки */
+                offset?: number;
+                /** @description Поле сортировки (например publicationDate) */
+                sortBy?: "publicationDate" | "salary" | "id";
+                /** @description Сортировка по убыванию */
+                sortDesc?: boolean;
+                /** @description Состояние публикации вакансии. */
+                status?: components["schemas"]["VacancyStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница вакансий */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VacancyPageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postVacancies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VacancyRequest"];
+            };
+        };
+        responses: {
+            /** @description Вакансия создана */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/vacancies/1
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example 1 */
+                    "application/json": number;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getVacanciesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Данные вакансии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Vacancy"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putVacanciesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VacancyRequest"];
+            };
+        };
+        responses: {
+            /** @description Вакансия обновлена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Vacancy"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteVacanciesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Вакансия удалена */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getResumes: {
+        parameters: {
+            query?: {
+                /** @description Подстрока для поиска по описанию резюме */
+                q?: string;
+                applicantId?: number;
+                categoryId?: number;
+                creationDateFrom?: string;
+                creationDateTo?: string;
+                /** @description Фильтр по навыкам (AND). Резюме должно содержать ВСЕ переданные skillIds. */
+                skillIds?: number[];
+                /** @description Фильтр по языкам (AND). Резюме должно содержать ВСЕ переданные languageIds. */
+                languageIds?: number[];
+                limit?: number;
+                offset?: number;
+                sortBy?: "date" | "id";
+                sortDesc?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница резюме */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumePageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postResumes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResumeRequest"];
+            };
+        };
+        responses: {
+            /** @description Резюме создано */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/resumes/1
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example 1 */
+                    "application/json": number;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getResumesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Данные резюме */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Resume"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putResumesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResumeUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Резюме обновлено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Resume"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteResumesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Резюме удалено */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getApplications: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отклики текущего соискателя; пустой массив, если откликов нет. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 40,
+                     *         "vacancyId": 10,
+                     *         "resumeId": 20,
+                     *         "applicationStatus": "NEW",
+                     *         "applicationDate": "2026-09-19T10:00:00Z"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Application"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postApplications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationRequest"];
+            };
+        };
+        responses: {
+            /** @description Отклик создан */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/applications/1
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example 1 */
+                    "application/json": number;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getApplicationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Данные отклика */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putApplicationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationRequest"];
+            };
+        };
+        responses: {
+            /** @description Отклик обновлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteApplicationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отклик удален */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getVacanciesVacancyIdApplications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vacancyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список откликов по вакансии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 40,
+                     *         "vacancyId": 10,
+                     *         "resumeId": 20,
+                     *         "applicationStatus": "NEW",
+                     *         "applicationDate": "2026-09-19T10:00:00Z"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["Application"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description Нет доступа к вакансии */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "description": "Нет доступа к вакансии",
+                     *       "code": 403
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description Вакансия не найдена */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "description": "Вакансия не найдена",
+                     *       "code": 404
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    putApplicationsIdStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationStatusUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Статус отклика обновлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "id": 40,
+                     *       "vacancyId": 10,
+                     *       "resumeId": 20,
+                     *       "applicationStatus": "INVITATION",
+                     *       "applicationDate": "2026-09-19T10:00:00Z",
+                     *       "_links": {
+                     *         "self": {
+                     *           "href": "/api/v2/applications/40",
+                     *           "method": "GET"
+                     *         },
+                     *         "vacancy": {
+                     *           "href": "/api/v2/vacancies/10",
+                     *           "method": "GET"
+                     *         },
+                     *         "resume": {
+                     *           "href": "/api/v2/resumes/20",
+                     *           "method": "GET"
+                     *         },
+                     *         "change-status": {
+                     *           "href": "/api/v2/applications/40/status",
+                     *           "method": "PUT"
+                     *         }
+                     *       }
+                     *     }
+                     */
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            /** @description Невалидный статус */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "description": "Невалидный статус",
+                     *       "code": 400
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Нет доступа к отклику */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "description": "Нет доступа к отклику",
+                     *       "code": 403
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description Отклик не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "description": "Отклик не найден",
+                     *       "code": 404
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getMatchingVacanciesVacancyIdCandidates: {
+        parameters: {
+            query?: {
+                /** @description Максимальное количество кандидатов */
+                maxAmount?: number;
+            };
+            header?: never;
+            path: {
+                vacancyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список наиболее подходящих резюме с их скором */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 20,
+                     *         "score": 0.91,
+                     *         "_links": {
+                     *           "resume": {
+                     *             "href": "/api/v2/resumes/20",
+                     *             "method": "GET"
+                     *           }
+                     *         }
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["MatchResult"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    getVacanciesIdDrafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сохранённые версии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example [
+                     *       {
+                     *         "id": 30,
+                     *         "vacancyId": 10,
+                     *         "versionTimestamp": "2026-09-19T09:00:00Z"
+                     *       }
+                     *     ]
+                     */
+                    "application/json": components["schemas"]["DraftVacancy"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postVacanciesIdDrafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сохранённая версия */
+            201: {
+                headers: {
+                    /**
+                     * @description URI созданного ресурса
+                     * @example /api/v2/vacancies/10/drafts/30
+                     */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftVacancy"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    postVacanciesIdDraftsDraftId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Восстановленная вакансия */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Vacancy"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+    deleteVacanciesIdDraftsDraftId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Версия удалена */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["Unavailable"];
+        };
+    };
+}

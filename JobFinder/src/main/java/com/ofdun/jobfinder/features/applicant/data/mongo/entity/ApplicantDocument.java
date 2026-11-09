@@ -15,17 +15,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicantDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull
-    @Size(min = 1, max = 50)
+    @Size(min = 2, max = 100)
     @Pattern(regexp = ".*\\S.*", message = "Name cannot be only whitespace")
     private String name;
 
     @NotNull
     @Email
-    @Size(min = 1, max = 50)
+    @Size(min = 1, max = 320)
     private String email;
 
     @NotNull
@@ -34,7 +33,7 @@ public class ApplicantDocument {
 
     private String address;
 
-    @NotNull private String phoneNumber;
+    private String phoneNumber;
 
     @NotNull private Long locationId;
 }

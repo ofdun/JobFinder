@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/locations")
+@RequestMapping({"/api/v1/locations", "/api/v2/locations"})
 @RequiredArgsConstructor
 public class LocationController {
     private final LocationService locationService;
@@ -23,7 +23,7 @@ public class LocationController {
         return ResponseEntity.ok(LocationApiMapper.toDto(locationService.getLocationById(id)));
     }
 
-    @GetMapping("/search")
+    @GetMapping({"", "/search"})
     public ResponseEntity<List<LocationDto>> searchLocations(
             @RequestParam String q, @RequestParam(defaultValue = "20") int limit) {
         var items =
@@ -33,4 +33,3 @@ public class LocationController {
         return ResponseEntity.ok(items);
     }
 }
-

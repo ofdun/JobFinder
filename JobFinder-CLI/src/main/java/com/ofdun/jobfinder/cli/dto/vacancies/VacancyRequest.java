@@ -1,11 +1,12 @@
 package com.ofdun.jobfinder.cli.dto.vacancies;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record VacancyRequest(
         Long employerId,
         Long locationId,
-        Double salary,
+        BigDecimal salary,
         List<Long> skillIds,
         List<Long> languageIds,
         PaymentFrequency paymentFrequency,

@@ -65,7 +65,7 @@ def generate(inputs, output, history_path, statuses):
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
         with open(summary_path, "a") as stream:
-            stream.write("[Open the test-history dashboard](https://ofdun.github.io/JobFinder/)\n")
+            stream.write("HTML-отчёт сохранён в артефакте test-report. Прямая ссылка появится после шага pages.\n")
     return record
 
 

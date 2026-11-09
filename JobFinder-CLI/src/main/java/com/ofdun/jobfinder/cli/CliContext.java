@@ -8,7 +8,11 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public final class CliContext {
-    @Getter private Session session;
+    private Session session;
+
+    public Session getSession() {
+        return api.getSession();
+    }
 
     @Getter private final ApiClient api;
 

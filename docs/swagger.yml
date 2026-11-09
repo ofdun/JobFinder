@@ -1,12 +1,14 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: JobFinder API
-  description: API для платформы поиска работы с поддержкой векторного AI-мэтчинга резюме и вакансий.
-  version: 1.0.0
+  description: |-
+    API для платформы поиска работы с поддержкой векторного AI-мэтчинга резюме и вакансий.
+    Контракт описывает REST API v2. Существующие адреса /api/v1 сохранены для веб-клиента.
+  version: 2.0.0
 
 servers:
-  - url: http://localhost:8080/api/v1
-    description: Локальный сервер разработки
+  - url: /
+    description: Текущий сервер API (прямое подключение или NGINX)
 
 tags:
   - name: Auth
@@ -33,16 +35,22 @@ tags:
     description: Справочник локаций
 
 paths:
-  /auth/applicant/login:
+  /api/v2/auth/login:
     post:
       tags: [Auth]
-      summary: Вход соискателя
+      summary: Вход пользователя
+      description: Единая операция входа по email, паролю и типу пользователя.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
+            examples:
+              applicant:
+                $ref: '#/components/examples/LoginRequest'
+              employer:
+                $ref: '#/components/examples/EmployerLoginRequest'
       responses:
         '200':
           description: Успешная авторизация
@@ -51,34 +59,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenPair'
 
-  /auth/employer/login:
+              examples:
+                default:
+                  $ref: '#/components/examples/TokenPair'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: postAuthLogin
+      security: []
+  /api/v2/auth/refresh:
     post:
       tags: [Auth]
-      summary: Вход работодателя
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-      responses:
-        '200':
-          description: Успешная авторизация
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenPair'
-
-  /auth/applicant/refresh:
-    post:
-      tags: [Auth]
-      summary: Обновление токенов соискателя
+      summary: Обновление токенов пользователя
+      description: Тип пользователя должен соответствовать владельцу refreshToken; несовпадение даёт 401.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshRequest'
+            examples:
+              applicant:
+                $ref: '#/components/examples/RefreshRequest'
+              employer:
+                $ref: '#/components/examples/EmployerRefreshRequest'
       responses:
         '200':
           description: Новая пара токенов
@@ -87,25 +94,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenPair'
 
-  /auth/employer/refresh:
-    post:
-      tags: [Auth]
-      summary: Обновление токенов работодателя
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RefreshRequest'
-      responses:
-        '200':
-          description: Новая пара токенов
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenPair'
-
-  /categories:
+              examples:
+                default:
+                  $ref: '#/components/examples/TokenPair'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: postAuthRefresh
+      security: []
+  /api/v2/categories:
     get:
       tags: [Categories]
       summary: Получить список всех категорий
@@ -119,7 +119,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/Category'
 
-  /skills:
+              example:
+                - id: 1
+                  name: Разработка
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      operationId: getCategories
+      security: []
+  /api/v2/skills:
     get:
       tags: [Skills]
       summary: Получить список всех навыков
@@ -133,7 +142,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/Skill'
 
-  /languages:
+              example:
+                - id: 1
+                  name: Java
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      operationId: getSkills
+      security: []
+  /api/v2/languages:
     get:
       tags: [Languages]
       summary: Получить список всех языков
@@ -147,7 +165,17 @@ paths:
                 items:
                   $ref: '#/components/schemas/Language'
 
-  /locations/{id}:
+              example:
+                - id: 1
+                  name: English
+                  proficiencyLevel: B2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      operationId: getLanguages
+      security: []
+  /api/v2/locations/{id}:
     get:
       tags: [Locations]
       summary: Получить локацию по ID
@@ -157,6 +185,7 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       responses:
         '200':
           description: Локация
@@ -165,7 +194,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
 
-  /locations/search:
+              examples:
+                default:
+                  $ref: '#/components/examples/Location'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getLocationsId
+      security: []
+  /api/v2/locations:
     get:
       tags: [Locations]
       summary: Поиск локаций по городу или стране
@@ -181,7 +221,7 @@ paths:
           schema:
             type: integer
             minimum: 1
-            maximum: 50
+            maximum: 100
             default: 20
       responses:
         '200':
@@ -193,7 +233,17 @@ paths:
                 items:
                   $ref: '#/components/schemas/Location'
 
-  /applicants:
+              example:
+                - id: 1
+                  city: Москва
+                  country: Россия
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      operationId: getLocations
+      security: []
+  /api/v2/applicants:
     post:
       tags: [Applicants]
       summary: Регистрация нового соискателя
@@ -203,6 +253,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicantRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ApplicantRequest'
       responses:
         '201':
           description: Соискатель создан
@@ -210,9 +263,30 @@ paths:
             application/json:
               schema:
                 type: integer
+                format: int64
+                minimum: 1
                 description: ID созданного соискателя
-
-  /applicants/{id}:
+                examples: [1]
+              examples:
+                createdApplicantId:
+                  summary: ID созданного соискателя
+                  value: 1
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/applicants/1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postApplicants
+      security: []
+  /api/v2/applicants/{id}:
     get:
       tags: [Applicants]
       summary: Получить профиль соискателя
@@ -224,6 +298,7 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       responses:
         '200':
           description: Профиль соискателя
@@ -231,6 +306,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Applicant'
+              examples:
+                default:
+                  $ref: '#/components/examples/Applicant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getApplicantsId
+      description: Доступно только владельцу профиля.
     put:
       tags: [Applicants]
       summary: Обновить профиль соискателя
@@ -242,12 +332,16 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicantUpdateRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ApplicantUpdateRequest'
       responses:
         '200':
           description: Профиль обновлен
@@ -255,6 +349,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Applicant'
+              examples:
+                default:
+                  $ref: '#/components/examples/Applicant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: putApplicantsId
+      description: Доступно только владельцу профиля.
     delete:
       tags: [Applicants]
       summary: Удалить профиль соискателя
@@ -266,11 +377,26 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       responses:
         '204':
           description: Профиль успешно удален
 
-  /employers:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: deleteApplicantsId
+      description: Доступно только владельцу профиля.
+  /api/v2/employers:
     post:
       tags: [Employers]
       summary: Регистрация нового работодателя
@@ -280,6 +406,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EmployerRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/EmployerRequest'
       responses:
         '201':
           description: Работодатель создан
@@ -288,7 +417,23 @@ paths:
               schema:
                 type: integer
 
-  /employers/{id}:
+              example: 1
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/employers/1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postEmployers
+      security: []
+  /api/v2/employers/{id}:
     get:
       tags: [Employers]
       summary: Получить профиль работодателя
@@ -300,6 +445,7 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       responses:
         '200':
           description: Профиль работодателя
@@ -307,6 +453,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Employer'
+              examples:
+                default:
+                  $ref: '#/components/examples/Employer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getEmployersId
+      description: Доступно только владельцу профиля.
     put:
       tags: [Employers]
       summary: Обновить профиль работодателя
@@ -318,12 +479,16 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/EmployerUpdateRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/EmployerUpdateRequest'
       responses:
         '200':
           description: Профиль обновлен
@@ -331,6 +496,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Employer'
+              examples:
+                default:
+                  $ref: '#/components/examples/Employer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: putEmployersId
+      description: Доступно только владельцу профиля.
     delete:
       tags: [Employers]
       summary: Удалить профиль работодателя
@@ -342,350 +524,26 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: 1
       responses:
         '204':
           description: Профиль успешно удален
 
-  /vacancies:
-    post:
-      tags: [Vacancies]
-      summary: Создать вакансию
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VacancyRequest'
-      responses:
-        '201':
-          description: Вакансия создана
-          content:
-            application/json:
-              schema:
-                type: integer
-
-  /vacancies/{id}:
-    get:
-      tags: [Vacancies]
-      summary: Получить вакансию по ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Данные вакансии
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vacancy'
-    put:
-      tags: [Vacancies]
-      summary: Обновить вакансию
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VacancyRequest'
-      responses:
-        '200':
-          description: Вакансия обновлена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vacancy'
-    delete:
-      tags: [Vacancies]
-      summary: Удалить вакансию
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Вакансия удалена
-
-  /resumes:
-    post:
-      tags: [Resumes]
-      summary: Создать резюме
-      description: Также асинхронно/синхронно генерирует векторные эмбеддинги (AI) и сохраняет в Qdrant.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResumeRequest'
-      responses:
-        '201':
-          description: Резюме создано
-          content:
-            application/json:
-              schema:
-                type: integer
-
-  /resumes/{id}:
-    get:
-      tags: [Resumes]
-      summary: Получить резюме
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Данные резюме
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Resume'
-    put:
-      tags: [Resumes]
-      summary: Обновить резюме
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResumeUpdateRequest'
-      responses:
-        '200':
-          description: Резюме обновлено
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Resume'
-    delete:
-      tags: [Resumes]
-      summary: Удалить резюме
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Резюме удалено
-
-  /applications:
-    post:
-      tags: [Applications]
-      summary: Оставить отклик на вакансию
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApplicationRequest'
-      responses:
-        '201':
-          description: Отклик создан
-          content:
-            application/json:
-              schema:
-                type: integer
-
-  /applications/{id}:
-    get:
-      tags: [Applications]
-      summary: Получить статус отклика
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Данные отклика
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Application'
-    put:
-      tags: [Applications]
-      summary: Обновить статус отклика (например, INVITATION или REJECTION)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApplicationRequest'
-      responses:
-        '200':
-          description: Отклик обновлен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Application'
-    delete:
-      tags: [Applications]
-      summary: Отозвать/удалить отклик
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Отклик удален
-
-  /vacancies/{vacancyId}/applications:
-    get:
-      tags: [Applications]
-      summary: Получить все отклики на вакансию работодателя
-      description: Доступно только работодателю-владельцу вакансии.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: vacancyId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Список откликов по вакансии
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Application'
-        '403':
-          description: Нет доступа к вакансии
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-        '404':
-          description: Вакансия не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-
-  /applications/{id}/status:
-    patch:
-      tags: [Applications]
-      summary: Изменить статус отклика
-      description: Доступно работодателю-владельцу вакансии, на которую оставлен отклик.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApplicationStatusUpdateRequest'
-      responses:
-        '200':
-          description: Статус отклика обновлен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Application'
         '400':
-          description: Невалидный статус
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Нет доступа к отклику
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+          $ref: '#/components/responses/Forbidden'
         '404':
-          description: Отклик не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-
-  /matching/vacancies/{vacancyId}/candidates:
-    get:
-      tags: [Matching]
-      summary: Поиск подходящих кандидатов для вакансии (поиск по векторам)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: vacancyId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: maxAmount
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 10
-          description: Максимальное количество кандидатов
-      responses:
-        '200':
-          description: Список наиболее подходящих резюме с их скором
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MatchResult'
-  /vacancies/search:
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: deleteEmployersId
+      description: Доступно только владельцу профиля.
+  /api/v2/vacancies:
     get:
       tags: [Vacancies]
       summary: Поиск вакансий по фильтрам с пагинацией
@@ -775,6 +633,7 @@ paths:
             type: integer
             minimum: 1
             default: 20
+            maximum: 100
           description: Количество элементов на странице
         - name: offset
           in: query
@@ -789,6 +648,10 @@ paths:
           required: false
           schema:
             type: string
+            enum:
+              - publicationDate
+              - salary
+              - id
           description: Поле сортировки (например publicationDate)
         - name: sortDesc
           in: query
@@ -797,6 +660,11 @@ paths:
             type: boolean
             default: false
           description: Сортировка по убыванию
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/VacancyStatus'
+          description: Состояние публикации вакансии.
       responses:
         '200':
           description: Страница вакансий
@@ -805,7 +673,170 @@ paths:
               schema:
                 $ref: '#/components/schemas/VacancyPageResponse'
 
-  /resumes/search:
+              examples:
+                default:
+                  $ref: '#/components/examples/VacancyPageResponse'
+                middlePage:
+                  $ref: '#/components/examples/VacancyPageMiddle'
+                emptyPage:
+                  $ref: '#/components/examples/VacancyPageEmpty'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      operationId: getVacancies
+      security: []
+    post:
+      tags: [Vacancies]
+      summary: Создать вакансию
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/VacancyRequest'
+      responses:
+        '201':
+          description: Вакансия создана
+          content:
+            application/json:
+              schema:
+                type: integer
+
+              example: 1
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/vacancies/1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postVacancies
+      description: Доступно работодателю-владельцу вакансии.
+  /api/v2/vacancies/{id}:
+    get:
+      tags: [Vacancies]
+      summary: Получить вакансию по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Данные вакансии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacancy'
+              examples:
+                default:
+                  $ref: '#/components/examples/Vacancy'
+                applicant:
+                  $ref: '#/components/examples/VacancyForApplicant'
+                owner:
+                  $ref: '#/components/examples/VacancyForOwner'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getVacanciesId
+      security: []
+    put:
+      tags: [Vacancies]
+      summary: Обновить вакансию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/VacancyRequest'
+      responses:
+        '200':
+          description: Вакансия обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacancy'
+              examples:
+                default:
+                  $ref: '#/components/examples/Vacancy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: putVacanciesId
+      description: Доступно работодателю-владельцу вакансии.
+    delete:
+      tags: [Vacancies]
+      summary: Удалить вакансию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Вакансия удалена
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: deleteVacanciesId
+      description: Доступно работодателю-владельцу вакансии.
+  /api/v2/resumes:
     get:
       tags: [Resumes]
       summary: Поиск резюме по фильтрам с пагинацией
@@ -872,6 +903,7 @@ paths:
             type: integer
             minimum: 1
             default: 20
+            maximum: 100
         - name: offset
           in: query
           required: false
@@ -884,6 +916,9 @@ paths:
           required: false
           schema:
             type: string
+            enum:
+              - date
+              - id
         - name: sortDesc
           in: query
           required: false
@@ -898,6 +933,740 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResumePageResponse'
 
+              examples:
+                default:
+                  $ref: '#/components/examples/ResumePageResponse'
+                middlePage:
+                  $ref: '#/components/examples/ResumePageMiddle'
+                emptyPage:
+                  $ref: '#/components/examples/ResumePageEmpty'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      operationId: getResumes
+    post:
+      tags: [Resumes]
+      summary: Создать резюме
+      description: Создаёт резюме и подготавливает данные для подбора кандидатов до успешного ответа. Ошибка внешнего
+        сервиса возвращается как 503.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ResumeRequest'
+      responses:
+        '201':
+          description: Резюме создано
+          content:
+            application/json:
+              schema:
+                type: integer
+
+              example: 1
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/resumes/1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postResumes
+  /api/v2/resumes/{id}:
+    get:
+      tags: [Resumes]
+      summary: Получить резюме
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Данные резюме
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+              examples:
+                default:
+                  $ref: '#/components/examples/Resume'
+                owner:
+                  $ref: '#/components/examples/ResumeForOwner'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+      description: Доступно соискателю-владельцу резюме и аутентифицированным работодателям.
+      operationId: getResumesId
+    put:
+      tags: [Resumes]
+      summary: Обновить резюме
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeUpdateRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ResumeUpdateRequest'
+      responses:
+        '200':
+          description: Резюме обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+              examples:
+                default:
+                  $ref: '#/components/examples/Resume'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: putResumesId
+      description: Изменение доступно соискателю-владельцу; поиск — аутентифицированным пользователям.
+    delete:
+      tags: [Resumes]
+      summary: Удалить резюме
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Резюме удалено
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: deleteResumesId
+      description: Изменение доступно соискателю-владельцу; поиск — аутентифицированным пользователям.
+  /api/v2/applications:
+    post:
+      tags: [Applications]
+      summary: Оставить отклик на вакансию
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+              properties:
+                applicationStatus:
+                  const: NEW
+            examples:
+              default:
+                $ref: '#/components/examples/ApplicationRequest'
+      responses:
+        '201':
+          description: Отклик создан
+          content:
+            application/json:
+              schema:
+                type: integer
+
+              example: 1
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/applications/1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      description: Доступно соискателю-владельцу resumeId. Новый отклик создаётся только со статусом NEW; другая попытка
+        — 400, повтор пары vacancyId/resumeId — 409.
+      operationId: postApplications
+    get:
+      tags:
+        - Applications
+      summary: Получить собственные отклики
+      description: 'Целевая операция: соискатель определяется по токену. Возвращает только его отклики, включая созданные
+        с другого устройства. Сортировка по applicationDate, затем id по убыванию.'
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Отклики текущего соискателя; пустой массив, если откликов нет.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+              example:
+                - id: 40
+                  vacancyId: 10
+                  resumeId: 20
+                  applicationStatus: NEW
+                  applicationDate: '2026-09-19T10:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      operationId: getApplications
+  /api/v2/applications/{id}:
+    get:
+      tags: [Applications]
+      summary: Получить статус отклика
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Данные отклика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              examples:
+                default:
+                  $ref: '#/components/examples/Application'
+                applicant:
+                  $ref: '#/components/examples/ApplicationForApplicant'
+                employer:
+                  $ref: '#/components/examples/ApplicationForEmployer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      description: Доступно автору отклика или работодателю-владельцу вакансии.
+      operationId: getApplicationsId
+    put:
+      tags: [Applications]
+      summary: Заменить редактируемые данные отклика
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ApplicationRequest'
+      responses:
+        '200':
+          description: Отклик обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              examples:
+                default:
+                  $ref: '#/components/examples/ApplicationForEmployer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      description: 'Целевое ограничение: только работодатель-владелец вакансии меняет решение. vacancyId и resumeId должны
+        совпадать с текущими значениями, иначе 409. Для смены одного статуса предпочтителен PUT /api/v2/applications/{id}/status.'
+      operationId: putApplicationsId
+    delete:
+      tags: [Applications]
+      summary: Отозвать/удалить отклик
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Отклик удален
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      description: 'Целевое ограничение: только автор отклика может отозвать его.'
+      operationId: deleteApplicationsId
+  /api/v2/vacancies/{vacancyId}/applications:
+    get:
+      tags: [Applications]
+      summary: Получить все отклики на вакансию работодателя
+      description: Доступно только работодателю-владельцу вакансии.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vacancyId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Список откликов по вакансии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+              example:
+                - id: 40
+                  vacancyId: 10
+                  resumeId: 20
+                  applicationStatus: NEW
+                  applicationDate: '2026-09-19T10:00:00Z'
+        '403':
+          description: Нет доступа к вакансии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                description: Нет доступа к вакансии
+                code: 403
+        '404':
+          description: Вакансия не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+              example:
+                description: Вакансия не найдена
+                code: 404
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: getVacanciesVacancyIdApplications
+  /api/v2/applications/{id}/status:
+    put:
+      tags: [Applications]
+      summary: Заменить статус отклика
+      description: Доступно работодателю-владельцу вакансии, на которую оставлен отклик. Меняется только
+        applicationStatus; vacancyId, resumeId и applicationDate сохраняются. Повтор того же статуса не меняет
+        результат. NEW — новый отклик; INVITATION — приглашение; REJECTION — отказ.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStatusUpdateRequest'
+            examples:
+              default:
+                $ref: '#/components/examples/ApplicationStatusUpdateRequest'
+      responses:
+        '200':
+          description: Статус отклика обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              example:
+                id: 40
+                vacancyId: 10
+                resumeId: 20
+                applicationStatus: INVITATION
+                applicationDate: '2026-09-19T10:00:00Z'
+                _links:
+                  self:
+                    href: /api/v2/applications/40
+                    method: GET
+                  vacancy:
+                    href: /api/v2/vacancies/10
+                    method: GET
+                  resume:
+                    href: /api/v2/resumes/20
+                    method: GET
+                  change-status:
+                    href: /api/v2/applications/40/status
+                    method: PUT
+        '400':
+          description: Невалидный статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                description: Невалидный статус
+                code: 400
+        '403':
+          description: Нет доступа к отклику
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                description: Нет доступа к отклику
+                code: 403
+        '404':
+          description: Отклик не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+              example:
+                description: Отклик не найден
+                code: 404
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: putApplicationsIdStatus
+  /api/v2/matching/vacancies/{vacancyId}/candidates:
+    get:
+      tags: [Matching]
+      summary: Поиск подходящих кандидатов для вакансии (поиск по векторам)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vacancyId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: maxAmount
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Максимальное количество кандидатов
+      responses:
+        '200':
+          description: Список наиболее подходящих резюме с их скором
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchResult'
+              example:
+                - id: 20
+                  score: 0.91
+                  _links:
+                    resume:
+                      href: /api/v2/resumes/20
+                      method: GET
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getMatchingVacanciesVacancyIdCandidates
+      description: Доступно работодателю-владельцу вакансии.
+  /api/v2/vacancies/{id}/drafts:
+    get:
+      tags:
+        - Vacancies
+      summary: Получить сохранённые версии вакансии
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Сохранённые версии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DraftVacancy'
+              example:
+                - id: 30
+                  vacancyId: 10
+                  versionTimestamp: '2026-09-19T09:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: getVacanciesIdDrafts
+      description: Доступно работодателю-владельцу вакансии.
+    post:
+      tags:
+        - Vacancies
+      summary: Сохранить текущую версию вакансии
+      description: Создаёт неизменяемый снимок текущих данных вакансии. Доступен владельцу вакансии.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '201':
+          description: Сохранённая версия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftVacancy'
+              examples:
+                default:
+                  $ref: '#/components/examples/DraftVacancy'
+          headers:
+            Location:
+              description: URI созданного ресурса
+              schema:
+                type: string
+                format: uri-reference
+              example: /api/v2/vacancies/10/drafts/30
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postVacanciesIdDrafts
+  /api/v2/vacancies/{id}/drafts/{draftId}:
+    delete:
+      tags:
+        - Vacancies
+      summary: Удалить сохранённую версию вакансии
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: draftId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Версия удалена
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: deleteVacanciesIdDraftsDraftId
+      description: Доступно работодателю-владельцу вакансии.
+    post:
+      tags:
+        - Vacancies
+      summary: Восстановить сохранённую версию вакансии
+      description: Восстанавливает вакансию из сохранённого снимка и устанавливает ACTIVE.
+        Доступна владельцу вакансии. Сам снимок не изменяется.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: draftId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Восстановленная вакансия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacancy'
+              examples:
+                default:
+                  $ref: '#/components/examples/Vacancy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      operationId: postVacanciesIdDraftsDraftId
 components:
   securitySchemes:
     bearerAuth:
@@ -906,24 +1675,69 @@ components:
       bearerFormat: JWT
 
   schemas:
+    HypermediaLink:
+      type: object
+      additionalProperties: false
+      description: >-
+        Ссылка на ресурс или действие. Тело запроса задаётся схемой соответствующей операции; наличие ссылки не отменяет
+        авторизацию и проверку текущего состояния.
+      required:
+        - href
+        - method
+      properties:
+        href:
+          type: string
+          format: uri-reference
+          description: Готовый URI без шаблонов. Сервер сохраняет внешний префикс развёртывания, включая /mirror.
+        method:
+          type: string
+          enum:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+    HypermediaLinks:
+      type: object
+      readOnly: true
+      minProperties: 1
+      description: >-
+        Отношение → ссылка: self, collection, vacancy, resume, update, delete, apply, applications, candidates,
+        drafts, restore; для страниц — first, prev, next, last. Недоступные для текущего пользователя действия
+        отсутствуют.
+      additionalProperties:
+        $ref: '#/components/schemas/HypermediaLink'
+    UserType:
+      type: string
+      description: Тип учётной записи для входа и обновления токенов.
+      enum: [APPLICANT, EMPLOYER]
     LoginRequest:
       type: object
-      required: [email, password]
+      required: [email, password, userType]
       properties:
+        userType:
+          $ref: '#/components/schemas/UserType'
         email:
           type: string
           format: email
+          minLength: 1
         password:
           type: string
           format: password
 
+          minLength: 1
+      additionalProperties: false
     RefreshRequest:
       type: object
-      required: [refreshToken]
+      required: [refreshToken, userType]
       properties:
+        userType:
+          $ref: '#/components/schemas/UserType'
         refreshToken:
           type: string
 
+          minLength: 1
+      additionalProperties: false
     TokenPair:
       type: object
       properties:
@@ -932,52 +1746,75 @@ components:
         refreshToken:
           type: string
 
+      required:
+        - accessToken
+        - refreshToken
     Location:
       type: object
       properties:
         id:
           type: integer
+          minimum: 1
         city:
           type: string
         country:
           type: string
 
+      required:
+        - id
+        - city
+        - country
     Skill:
       type: object
       properties:
         id:
           type: integer
+          minimum: 1
         name:
           type: string
 
+      required:
+        - id
+        - name
     Language:
       type: object
       properties:
         id:
           type: integer
+          minimum: 1
         name:
           type: string
         proficiencyLevel:
           type: string
           enum: [A1, A2, B1, B2, C1, C2]
+      required:
+        - id
+        - name
+        - proficiencyLevel
 
     Category:
       type: object
       properties:
         id:
           type: integer
+          minimum: 1
         name:
           type: string
 
+      required:
+        - id
+        - name
     Education:
       type: object
       properties:
         id:
           type: integer
           description: ID записи об образовании (не передаётся при создании внутри POST /resumes)
+          minimum: 1
         resumeId:
           type: integer
           description: ID резюме (не передаётся при создании внутри POST /resumes, проставляется сервером)
+          minimum: 1
         educationDegree:
           type: string
           enum: [BACHELOR, MASTER, SPECIALIST, PHD]
@@ -992,6 +1829,8 @@ components:
 
     EducationCreate:
       type: object
+      required: [educationDegree, institutionName, faculty, department, yearOfGraduation]
+      additionalProperties: false
       description: Образование для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются)
       properties:
         educationDegree:
@@ -1012,24 +1851,31 @@ components:
         id:
           type: integer
           description: ID записи опыта работы (не передаётся при создании внутри POST /resumes)
+          minimum: 1
         resumeId:
           type: integer
           description: ID резюме (не передаётся при создании внутри POST /resumes, проставляется сервером)
+          minimum: 1
         position:
           type: string
         companyName:
           type: string
         description:
-          type: string
+          type: [string, 'null']
         startDate:
           type: string
           format: date
         endDate:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date
 
+          description: null, если работа продолжается.
     JobExperienceCreate:
       type: object
+      required: [position, companyName, startDate]
+      additionalProperties: false
       description: Опыт работы для создания вместе с резюме (в POST /resumes поля id и resumeId не передаются)
       properties:
         position:
@@ -1042,67 +1888,94 @@ components:
           type: string
           format: date
         endDate:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date
 
+          description: null, если работа продолжается.
     Applicant:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           readOnly: true
+          minimum: 1
         name:
           type: string
         email:
           type: string
           format: email
-        password:
-          type: string
-          writeOnly: true
-          description: Пароль для создания/обновления. Хэшируется на сервере.
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         phoneNumber:
-          type: string
+          type:
+            - string
+            - 'null'
         location:
           $ref: '#/components/schemas/Location'
 
+      required:
+        - id
+        - name
+        - email
+        - location
     Employer:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           readOnly: true
+          minimum: 1
         name:
           type: string
         email:
           type: string
           format: email
-        password:
-          type: string
-          writeOnly: true
         description:
-          type: string
+          type:
+            - string
+            - 'null'
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         websiteLink:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
         location:
           $ref: '#/components/schemas/Location'
 
+      required:
+        - id
+        - name
+        - email
+        - location
     Vacancy:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           readOnly: true
+          minimum: 1
         employerId:
           type: integer
+          minimum: 1
         location:
           $ref: '#/components/schemas/Location'
         salary:
           type: number
+          minimum: 0
         skills:
           type: array
           items:
@@ -1131,18 +2004,32 @@ components:
         address:
           type: string
 
+        status:
+          $ref: '#/components/schemas/VacancyStatus'
+      required:
+        - id
+        - employerId
+        - location
+        - salary
+        - description
+        - publicationDate
+        - status
     Resume:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           readOnly: true
+          minimum: 1
         applicantId:
           type: integer
+          minimum: 1
         category:
           $ref: '#/components/schemas/Category'
         description:
-          type: string
+          type: [string, 'null']
         skills:
           type: array
           items:
@@ -1164,16 +2051,26 @@ components:
           format: date-time
           readOnly: true
 
+      required:
+        - id
+        - applicantId
+        - category
+        - date
     Application:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           readOnly: true
+          minimum: 1
         vacancyId:
           type: integer
+          minimum: 1
         resumeId:
           type: integer
+          minimum: 1
         applicationDate:
           type: string
           format: date-time
@@ -1181,107 +2078,188 @@ components:
         applicationStatus:
           type: string
           enum: [NEW, INVITATION, REJECTION]
+      required:
+        - id
+        - vacancyId
+        - resumeId
+        - applicationDate
+        - applicationStatus
 
     MatchResult:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         id:
           type: integer
           description: ID резюме
+          minimum: 1
         score:
           type: number
           format: float
-          description: Метрика похожести (Cosine distance)
+          description: Косинусная близость; большее значение означает более близкое соответствие.
 
+      required:
+        - id
+        - score
     ApplicantRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 2
+          maxLength: 100
         email:
           type: string
           format: email
+          minLength: 1
         password:
           type: string
           writeOnly: true
+          minLength: 8
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         phoneNumber:
-          type: string
+          type:
+            - string
+            - 'null'
         locationId:
           type: integer
 
+          minimum: 1
+      required:
+        - name
+        - email
+        - password
+        - locationId
+      additionalProperties: false
     ApplicantUpdateRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 2
+          maxLength: 100
         email:
           type: string
           format: email
+          minLength: 1
         password:
-          type: string
+          type:
+            - string
+            - 'null'
           writeOnly: true
           description: Необязательный новый пароль; если не передан, текущий пароль сохраняется
+          minLength: 8
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         phoneNumber:
-          type: string
+          type:
+            - string
+            - 'null'
         locationId:
           type: integer
 
+          minimum: 1
+      required:
+        - name
+        - email
+        - locationId
+      additionalProperties: false
     EmployerRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 2
+          maxLength: 100
         email:
           type: string
           format: email
+          minLength: 1
         password:
           type: string
           writeOnly: true
+          minLength: 8
         description:
-          type: string
+          type:
+            - string
+            - 'null'
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         websiteLink:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
         locationId:
           type: integer
 
+          minimum: 1
+      required:
+        - name
+        - email
+        - password
+        - locationId
+      additionalProperties: false
     EmployerUpdateRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 2
+          maxLength: 100
         email:
           type: string
           format: email
+          minLength: 1
         password:
-          type: string
+          type:
+            - string
+            - 'null'
           writeOnly: true
           description: Необязательный новый пароль; если не передан, текущий пароль сохраняется
+          minLength: 8
         description:
-          type: string
+          type:
+            - string
+            - 'null'
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         websiteLink:
-          type: string
+          type:
+            - string
+            - 'null'
           format: uri
         locationId:
           type: integer
 
+          minimum: 1
+      required:
+        - name
+        - email
+        - locationId
+      additionalProperties: false
     VacancyRequest:
       type: object
       properties:
         employerId:
           type: integer
+          minimum: 1
         locationId:
           type: integer
+          minimum: 1
         salary:
           type: number
+          minimum: 0
         skillIds:
           type: array
           items:
@@ -1306,13 +2284,29 @@ components:
         address:
           type: string
 
+        status:
+          $ref: '#/components/schemas/VacancyStatus'
+          default: ACTIVE
+      required:
+        - employerId
+        - locationId
+        - salary
+        - paymentFrequency
+        - experience
+        - jobFormat
+        - employmentType
+        - description
+        - address
+      additionalProperties: false
     ResumeRequest:
       type: object
       properties:
         applicantId:
           type: integer
+          minimum: 1
         categoryId:
           type: integer
+          minimum: 1
         description:
           type: string
         skillIds:
@@ -1332,14 +2326,21 @@ components:
           items:
             type: integer
 
+      required:
+        - applicantId
+        - categoryId
+      additionalProperties: false
     ResumeUpdateRequest:
       type: object
-      description: Запрос на обновление резюме. Поля опциональны.
+      description: Полная замена редактируемых данных резюме. Пустые массивы очищают связанные списки; applicantId
+        должен совпадать с владельцем. PUT заменяет все редактируемые поля; прежний API /api/v1 сохраняет частичное обновление.
       properties:
         applicantId:
           type: integer
+          minimum: 1
         categoryId:
           type: integer
+          minimum: 1
         description:
           type: string
         skillIds:
@@ -1359,16 +2360,32 @@ components:
           items:
             type: integer
 
+      required:
+        - applicantId
+        - categoryId
+        - description
+        - skillIds
+        - educations
+        - jobExperiences
+        - languageIds
+      additionalProperties: false
     ApplicationRequest:
       type: object
       properties:
         vacancyId:
           type: integer
+          minimum: 1
         resumeId:
           type: integer
+          minimum: 1
         applicationStatus:
           type: string
           enum: [NEW, INVITATION, REJECTION]
+      required:
+        - vacancyId
+        - resumeId
+        - applicationStatus
+      additionalProperties: false
 
     ApplicationStatusUpdateRequest:
       type: object
@@ -1377,41 +2394,66 @@ components:
         applicationStatus:
           type: string
           enum: [NEW, INVITATION, REJECTION]
+      additionalProperties: false
 
     VacancyPageResponse:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         items:
           type: array
           items:
             $ref: '#/components/schemas/Vacancy'
         page:
           type: integer
+          minimum: 0
         size:
           type: integer
+          minimum: 0
         totalElements:
           type: integer
           format: int64
+          minimum: 0
         totalPages:
           type: integer
 
+          minimum: 0
+      required:
+        - items
+        - page
+        - size
+        - totalElements
+        - totalPages
     ResumePageResponse:
       type: object
       properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
         items:
           type: array
           items:
             $ref: '#/components/schemas/Resume'
         page:
           type: integer
+          minimum: 0
         size:
           type: integer
+          minimum: 0
         totalElements:
           type: integer
           format: int64
+          minimum: 0
         totalPages:
           type: integer
 
+          minimum: 0
+      required:
+        - items
+        - page
+        - size
+        - totalElements
+        - totalPages
     OffsetPaginationParams:
       type: object
       properties:
@@ -1435,3 +2477,714 @@ components:
     JobFormat:
       type: string
       enum: [REMOTE, OFFICE, HYBRID]
+    ApiErrorResponse:
+      type: object
+      required:
+        - description
+        - code
+      properties:
+        description:
+          type: string
+        code:
+          type: integer
+          minimum: 400
+          maximum: 599
+        exceptionName:
+          type:
+            - string
+            - 'null'
+        exceptionMessage:
+          type:
+            - string
+            - 'null'
+        stackTrace:
+          type: array
+          maxItems: 0
+          items:
+            type: string
+          description: Всегда пустой массив в публичном API.
+    DraftVacancy:
+      type: object
+      required:
+        - id
+        - vacancyId
+        - versionTimestamp
+      properties:
+        _links:
+          $ref: '#/components/schemas/HypermediaLinks'
+        id:
+          type: integer
+          minimum: 1
+        vacancyId:
+          type: integer
+          minimum: 1
+        versionTimestamp:
+          type: string
+          format: date-time
+    VacancyStatus:
+      type: string
+      enum:
+        - INACTIVE
+        - ACTIVE
+  examples:
+    LoginRequest:
+      summary: Вход соискателя
+      value:
+        email: anna@example.com
+        password: ExamplePass123!
+        userType: APPLICANT
+    EmployerLoginRequest:
+      summary: Вход работодателя
+      value:
+        email: hr@example.com
+        password: ExamplePass123!
+        userType: EMPLOYER
+    RefreshRequest:
+      summary: Обновление токенов соискателя
+      value:
+        refreshToken: example-refresh-token
+        userType: APPLICANT
+    EmployerRefreshRequest:
+      summary: Обновление токенов работодателя
+      value:
+        refreshToken: example-refresh-token
+        userType: EMPLOYER
+    TokenPair:
+      value:
+        accessToken: example-access-token
+        refreshToken: example-refresh-token
+    Location:
+      value: &id001
+        id: 1
+        city: Москва
+        country: Россия
+    ApplicantRequest:
+      value:
+        name: Анна Иванова
+        email: anna@example.com
+        password: ExamplePass123!
+        address: Москва
+        phoneNumber: '+79990000000'
+        locationId: 1
+    EmployerRequest:
+      value:
+        name: Example
+        email: hr@example.com
+        password: ExamplePass123!
+        description:
+        address:
+        websiteLink: https://example.com
+        locationId: 1
+    VacancyRequest:
+      value:
+        employerId: 2
+        locationId: 1
+        salary: 150000
+        skillIds:
+          - 1
+        languageIds:
+          - 1
+        paymentFrequency: MONTHLY
+        experience: От одного года
+        jobFormat: REMOTE
+        employmentType: FULL_TIME
+        description: Java разработчик
+        address: Москва
+        status: ACTIVE
+    ResumeRequest:
+      value:
+        applicantId: 1
+        categoryId: 1
+        description: Java разработчик
+        skillIds:
+          - 1
+        educations: []
+        jobExperiences: []
+        languageIds:
+          - 1
+    ApplicationRequest:
+      value:
+        vacancyId: 10
+        resumeId: 20
+        applicationStatus: NEW
+    ApplicationStatusUpdateRequest:
+      value:
+        applicationStatus: INVITATION
+    DraftVacancy:
+      value:
+        id: 30
+        vacancyId: 10
+        versionTimestamp: '2026-09-19T09:00:00Z'
+        _links:
+          vacancy:
+            href: /api/v2/vacancies/10
+            method: GET
+          collection:
+            href: /api/v2/vacancies/10/drafts
+            method: GET
+          restore:
+            href: /api/v2/vacancies/10/drafts/30
+            method: POST
+          delete:
+            href: /api/v2/vacancies/10/drafts/30
+            method: DELETE
+    ApplicantUpdateRequest:
+      value:
+        name: Анна Иванова
+        email: anna@example.com
+        address: Москва
+        phoneNumber: '+79990000000'
+        locationId: 1
+    Applicant:
+      value:
+        name: Анна Иванова
+        email: anna@example.com
+        address: Москва
+        phoneNumber: '+79990000000'
+        id: 1
+        location: *id001
+        _links:
+          self:
+            href: /api/v2/applicants/1
+            method: GET
+          update:
+            href: /api/v2/applicants/1
+            method: PUT
+          delete:
+            href: /api/v2/applicants/1
+            method: DELETE
+          resumes:
+            href: /api/v2/resumes?applicantId=1
+            method: GET
+          applications:
+            href: /api/v2/applications
+            method: GET
+    EmployerUpdateRequest:
+      value:
+        name: Example
+        email: hr@example.com
+        description:
+        address:
+        websiteLink: https://example.com
+        locationId: 1
+    Employer:
+      value:
+        name: Example
+        email: hr@example.com
+        description:
+        address:
+        websiteLink: https://example.com
+        id: 2
+        location: *id001
+        _links:
+          self:
+            href: /api/v2/employers/2
+            method: GET
+          update:
+            href: /api/v2/employers/2
+            method: PUT
+          delete:
+            href: /api/v2/employers/2
+            method: DELETE
+          vacancies:
+            href: /api/v2/vacancies?employerId=2
+            method: GET
+    ResumeUpdateRequest:
+      value:
+        applicantId: 1
+        categoryId: 1
+        description: Java разработчик
+        skillIds:
+          - 1
+        educations: []
+        jobExperiences: []
+        languageIds:
+          - 1
+    Vacancy:
+      value: &id004
+        employerId: 2
+        salary: 150000
+        paymentFrequency: MONTHLY
+        experience: От одного года
+        jobFormat: REMOTE
+        employmentType: FULL_TIME
+        description: Java разработчик
+        address: Москва
+        status: ACTIVE
+        id: 10
+        location: *id001
+        skills:
+          - &id002
+            id: 1
+            name: Java
+        languages:
+          - &id003
+            id: 1
+            name: English
+            proficiencyLevel: B2
+        publicationDate: '2026-09-19T09:00:00Z'
+        _links:
+          self:
+            href: /api/v2/vacancies/10
+            method: GET
+          collection:
+            href: /api/v2/vacancies
+            method: GET
+    Resume:
+      value: &id005
+        id: 20
+        applicantId: 1
+        category:
+          id: 1
+          name: Разработка
+        description: Java разработчик
+        skills:
+          - *id002
+        educations:
+          - id: 1
+            resumeId: 20
+            educationDegree: BACHELOR
+            institutionName: МГТУ
+            faculty: ИУ
+            department: ИУ7
+            yearOfGraduation: 2026
+        jobExperiences:
+          - id: 1
+            resumeId: 20
+            position: Разработчик
+            companyName: Example
+            description: Разработка API
+            startDate: '2025-06-01'
+            endDate:
+        languages:
+          - *id003
+        date: '2026-09-19T09:00:00Z'
+        _links:
+          self:
+            href: /api/v2/resumes/20
+            method: GET
+          collection:
+            href: /api/v2/resumes
+            method: GET
+    Application:
+      value:
+        id: 40
+        vacancyId: 10
+        resumeId: 20
+        applicationStatus: NEW
+        applicationDate: '2026-09-19T10:00:00Z'
+        _links:
+          self:
+            href: /api/v2/applications/40
+            method: GET
+          vacancy:
+            href: /api/v2/vacancies/10
+            method: GET
+          resume:
+            href: /api/v2/resumes/20
+            method: GET
+    VacancyPageResponse:
+      value:
+        items:
+          - *id004
+        page: 0
+        size: 20
+        totalElements: 1
+        totalPages: 1
+        _links:
+          self:
+            href: /api/v2/vacancies?limit=20&offset=0
+            method: GET
+          first:
+            href: /api/v2/vacancies?limit=20&offset=0
+            method: GET
+          last:
+            href: /api/v2/vacancies?limit=20&offset=0
+            method: GET
+    ResumePageResponse:
+      value:
+        items:
+          - *id005
+        page: 0
+        size: 20
+        totalElements: 1
+        totalPages: 1
+        _links:
+          self:
+            href: /api/v2/resumes?limit=20&offset=0
+            method: GET
+          first:
+            href: /api/v2/resumes?limit=20&offset=0
+            method: GET
+          last:
+            href: /api/v2/resumes?limit=20&offset=0
+            method: GET
+    ApplicationForApplicant:
+      summary: Отклик для соискателя-автора.
+      value:
+        id: 40
+        vacancyId: 10
+        resumeId: 20
+        applicationStatus: NEW
+        applicationDate: '2026-09-19T10:00:00Z'
+        _links:
+          self:
+            href: /api/v2/applications/40
+            method: GET
+          vacancy:
+            href: /api/v2/vacancies/10
+            method: GET
+          resume:
+            href: /api/v2/resumes/20
+            method: GET
+          delete:
+            href: /api/v2/applications/40
+            method: DELETE
+    VacancyForApplicant:
+      summary: Активная вакансия для соискателя; apply требует выбора собственного resumeId.
+      value:
+        employerId: 2
+        salary: 150000
+        paymentFrequency: MONTHLY
+        experience: От одного года
+        jobFormat: REMOTE
+        employmentType: FULL_TIME
+        description: Java разработчик
+        address: Москва
+        status: ACTIVE
+        id: 10
+        location:
+          id: 1
+          city: Москва
+          country: Россия
+        skills:
+          - id: 1
+            name: Java
+        languages:
+          - id: 1
+            name: English
+            proficiencyLevel: B2
+        publicationDate: '2026-09-19T09:00:00Z'
+        _links:
+          self:
+            href: /api/v2/vacancies/10
+            method: GET
+          collection:
+            href: /api/v2/vacancies
+            method: GET
+          apply:
+            href: /api/v2/applications
+            method: POST
+    VacancyForOwner:
+      summary: Вакансия для работодателя-владельца.
+      value:
+        employerId: 2
+        salary: 150000
+        paymentFrequency: MONTHLY
+        experience: От одного года
+        jobFormat: REMOTE
+        employmentType: FULL_TIME
+        description: Java разработчик
+        address: Москва
+        status: ACTIVE
+        id: 10
+        location:
+          id: 1
+          city: Москва
+          country: Россия
+        skills:
+          - id: 1
+            name: Java
+        languages:
+          - id: 1
+            name: English
+            proficiencyLevel: B2
+        publicationDate: '2026-09-19T09:00:00Z'
+        _links:
+          self:
+            href: /api/v2/vacancies/10
+            method: GET
+          collection:
+            href: /api/v2/vacancies
+            method: GET
+          update:
+            href: /api/v2/vacancies/10
+            method: PUT
+          delete:
+            href: /api/v2/vacancies/10
+            method: DELETE
+          applications:
+            href: /api/v2/vacancies/10/applications
+            method: GET
+          candidates:
+            href: /api/v2/matching/vacancies/10/candidates
+            method: GET
+          drafts:
+            href: /api/v2/vacancies/10/drafts
+            method: GET
+    ResumeForOwner:
+      summary: Резюме для соискателя-владельца.
+      value:
+        id: 20
+        applicantId: 1
+        category:
+          id: 1
+          name: Разработка
+        description: Java разработчик
+        skills:
+          - id: 1
+            name: Java
+        educations:
+          - id: 1
+            resumeId: 20
+            educationDegree: BACHELOR
+            institutionName: МГТУ
+            faculty: ИУ
+            department: ИУ7
+            yearOfGraduation: 2026
+        jobExperiences:
+          - id: 1
+            resumeId: 20
+            position: Разработчик
+            companyName: Example
+            description: Разработка API
+            startDate: '2025-06-01'
+            endDate: null
+        languages:
+          - id: 1
+            name: English
+            proficiencyLevel: B2
+        date: '2026-09-19T09:00:00Z'
+        _links:
+          self:
+            href: /api/v2/resumes/20
+            method: GET
+          collection:
+            href: /api/v2/resumes
+            method: GET
+          update:
+            href: /api/v2/resumes/20
+            method: PUT
+          delete:
+            href: /api/v2/resumes/20
+            method: DELETE
+    ApplicationForEmployer:
+      summary: Отклик для работодателя-владельца вакансии; change-status требует нового applicationStatus.
+      value:
+        id: 40
+        vacancyId: 10
+        resumeId: 20
+        applicationStatus: NEW
+        applicationDate: '2026-09-19T10:00:00Z'
+        _links:
+          self:
+            href: /api/v2/applications/40
+            method: GET
+          vacancy:
+            href: /api/v2/vacancies/10
+            method: GET
+          resume:
+            href: /api/v2/resumes/20
+            method: GET
+          change-status:
+            href: /api/v2/applications/40/status
+            method: PUT
+    VacancyPageMiddle:
+      summary: Средняя страница; ссылки сохраняют фильтр q и размер страницы.
+      value:
+        items:
+          - employerId: 2
+            salary: 150000
+            paymentFrequency: MONTHLY
+            experience: От одного года
+            jobFormat: REMOTE
+            employmentType: FULL_TIME
+            description: Java разработчик
+            address: Москва
+            status: ACTIVE
+            id: 10
+            location:
+              id: 1
+              city: Москва
+              country: Россия
+            skills:
+              - id: 1
+                name: Java
+            languages:
+              - id: 1
+                name: English
+                proficiencyLevel: B2
+            publicationDate: '2026-09-19T09:00:00Z'
+            _links:
+              self:
+                href: /api/v2/vacancies/10
+                method: GET
+              collection:
+                href: /api/v2/vacancies
+                method: GET
+        page: 1
+        size: 1
+        totalElements: 3
+        totalPages: 3
+        _links:
+          self:
+            href: /api/v2/vacancies?q=Java&limit=1&offset=1
+            method: GET
+          first:
+            href: /api/v2/vacancies?q=Java&limit=1&offset=0
+            method: GET
+          prev:
+            href: /api/v2/vacancies?q=Java&limit=1&offset=0
+            method: GET
+          next:
+            href: /api/v2/vacancies?q=Java&limit=1&offset=2
+            method: GET
+          last:
+            href: /api/v2/vacancies?q=Java&limit=1&offset=2
+            method: GET
+    VacancyPageEmpty:
+      summary: 'Пустая первая страница: переходы prev и next отсутствуют.'
+      value:
+        items: []
+        page: 0
+        size: 20
+        totalElements: 0
+        totalPages: 0
+        _links:
+          self:
+            href: /api/v2/vacancies?limit=20&offset=0
+            method: GET
+          first:
+            href: /api/v2/vacancies?limit=20&offset=0
+            method: GET
+    ResumePageMiddle:
+      summary: Средняя страница; ссылки сохраняют фильтр q и размер страницы.
+      value:
+        items:
+          - id: 20
+            applicantId: 1
+            category:
+              id: 1
+              name: Разработка
+            description: Java разработчик
+            skills:
+              - id: 1
+                name: Java
+            educations:
+              - id: 1
+                resumeId: 20
+                educationDegree: BACHELOR
+                institutionName: МГТУ
+                faculty: ИУ
+                department: ИУ7
+                yearOfGraduation: 2026
+            jobExperiences:
+              - id: 1
+                resumeId: 20
+                position: Разработчик
+                companyName: Example
+                description: Разработка API
+                startDate: '2025-06-01'
+                endDate: null
+            languages:
+              - id: 1
+                name: English
+                proficiencyLevel: B2
+            date: '2026-09-19T09:00:00Z'
+            _links:
+              self:
+                href: /api/v2/resumes/20
+                method: GET
+              collection:
+                href: /api/v2/resumes
+                method: GET
+        page: 1
+        size: 1
+        totalElements: 3
+        totalPages: 3
+        _links:
+          self:
+            href: /api/v2/resumes?q=Java&limit=1&offset=1
+            method: GET
+          first:
+            href: /api/v2/resumes?q=Java&limit=1&offset=0
+            method: GET
+          prev:
+            href: /api/v2/resumes?q=Java&limit=1&offset=0
+            method: GET
+          next:
+            href: /api/v2/resumes?q=Java&limit=1&offset=2
+            method: GET
+          last:
+            href: /api/v2/resumes?q=Java&limit=1&offset=2
+            method: GET
+    ResumePageEmpty:
+      summary: 'Пустая первая страница: переходы prev и next отсутствуют.'
+      value:
+        items: []
+        page: 0
+        size: 20
+        totalElements: 0
+        totalPages: 0
+        _links:
+          self:
+            href: /api/v2/resumes?limit=20&offset=0
+            method: GET
+          first:
+            href: /api/v2/resumes?limit=20&offset=0
+            method: GET
+  responses:
+    BadRequest:
+      description: Некорректные данные запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Некорректные данные запроса
+            code: 400
+    Unauthorized:
+      description: Требуется действительный токен
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Требуется действительный токен
+            code: 401
+    Forbidden:
+      description: Нет прав на ресурс
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Нет прав на ресурс
+            code: 403
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Ресурс не найден
+            code: 404
+    Conflict:
+      description: Конфликт состояния ресурса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Конфликт состояния ресурса
+            code: 409
+    Unavailable:
+      description: Сервис временно недоступен
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          example:
+            description: Сервис временно недоступен
+            code: 503

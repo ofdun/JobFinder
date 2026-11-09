@@ -159,7 +159,10 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
         }
 
         if (sortBy != null && !sortBy.isBlank()) {
-            cq.orderBy(sortDesc ? cb.desc(root.get(sortBy)) : cb.asc(root.get(sortBy)));
+            String field = sortBy.equals("date") ? "creationDate" : sortBy;
+            cq.orderBy(
+                    sortDesc ? cb.desc(root.get(field)) : cb.asc(root.get(field)),
+                    sortDesc ? cb.desc(root.get("id")) : cb.asc(root.get("id")));
         }
 
         var typed = entityManager.createQuery(cq);

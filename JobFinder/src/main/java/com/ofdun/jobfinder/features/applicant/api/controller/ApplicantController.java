@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/applicants")
+@RequestMapping({"/api/v1/applicants", "/api/v2/applicants"})
 @RequiredArgsConstructor
 public class ApplicantController {
     private final ApplicantService applicantService;
