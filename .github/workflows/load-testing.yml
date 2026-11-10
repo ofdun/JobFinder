@@ -32,6 +32,16 @@ on:
         type: choice
         default: '600'
         options: ['600', '900', '1800']
+      repeats:
+        description: Повторы каждого режима
+        type: choice
+        default: '1'
+        options: ['1', '2', '3', '4']
+      warmup_seconds:
+        description: Прогрев, секунды
+        type: choice
+        default: '60'
+        options: ['60', '120', '300']
       report_run_id:
         description: ID запуска для повторной публикации результатов
         type: string
@@ -59,6 +69,8 @@ jobs:
       - name: Нагрузочное тестирование
         timeout-minutes: 300
         env:
+          LOAD_REPEATS: ${{ inputs.repeats || '1' }}
+          LOAD_WARMUP_SECONDS: ${{ inputs.warmup_seconds || '60' }}
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
           LOAD_SMOKE: ${{ inputs.smoke || false }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
@@ -68,6 +80,8 @@ jobs:
         run: |
           args=(
             --profile "$LOAD_PROFILE"
+            --repeat "$LOAD_REPEATS"
+            --warmup-seconds "$LOAD_WARMUP_SECONDS"
             --peak-vus "$LOAD_PEAK_VUS"
             --soak-seconds "$LOAD_SOAK_SECONDS"
             --recovery-seconds "$LOAD_RECOVERY_SECONDS"
@@ -85,11 +99,12 @@ jobs:
 
           profiles = PROFILES if os.environ['LOAD_PROFILE'] == 'all' else [os.environ['LOAD_PROFILE']]
           smoke = os.environ['LOAD_SMOKE'] == 'true'
+          extra_warmup = 0 if smoke else int(os.environ['LOAD_WARMUP_SECONDS']) - 60
           duration = sum(make_plan(p, smoke, 4, 128, int(os.environ['LOAD_SOAK_SECONDS']),
-                                  int(os.environ['LOAD_RECOVERY_SECONDS']))['duration_seconds'] + 180
-                         for p in profiles) * 4 + 900
+                                  int(os.environ['LOAD_RECOVERY_SECONDS']))['duration_seconds'] + extra_warmup + 180
+                         for p in profiles) * 4 * int(os.environ['LOAD_REPEATS']) + 900
           if duration > 18000:
-              raise SystemExit('Выберите отдельный сценарий или меньшую длительность: четыре режима превышают лимит job.')
+              raise SystemExit('Выберите отдельный сценарий или меньшую длительность: выбранные повторы превышают лимит job.')
           PY
           python3 -u load-testing/observability.py "${args[@]}"
 

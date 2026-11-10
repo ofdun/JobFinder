@@ -227,6 +227,7 @@ def main():
     parser.add_argument('--smoke', action='store_true')
     parser.add_argument('--skip-build', action='store_true')
     parser.add_argument('--repeat', type=int, default=1)
+    parser.add_argument('--warmup-seconds', type=int, default=60)
     parser.add_argument('--stable-vus', type=int, default=4)
     parser.add_argument('--peak-vus', type=int, default=128)
     parser.add_argument('--soak-seconds', type=int, default=600)
@@ -237,10 +238,16 @@ def main():
     args = parser.parse_args()
     if args.repeat < 1:
         parser.error('repeat must be positive')
+    if not args.smoke and args.warmup_seconds < 60:
+        parser.error('warmup must be at least 60 seconds')
     cpus = cpu_layout(args.application_cpus, args.generator_cpus, args.monitor_cpus)
     profiles = PROFILES if args.profile == 'all' else (args.profile,)
     plans = [make_plan(p, args.smoke, args.stable_vus, min(8, args.peak_vus) if args.smoke else args.peak_vus,
                        args.soak_seconds, args.recovery_seconds) for p in profiles]
+    if not args.smoke:
+        for plan in plans:
+            plan['phases'][0]['seconds'] = args.warmup_seconds
+            plan['duration_seconds'] = sum(phase['seconds'] for phase in plan['phases'])
     info = json.loads(docker('info', '--format', '{{json .}}', capture_output=True).stdout)
     if max(int(n) for group in cpus.values() for n in group.split(',')) >= info['NCPU']:
         parser.error('Not enough Docker CPUs')

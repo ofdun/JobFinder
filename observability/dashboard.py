@@ -5,6 +5,9 @@ def panel(number, title, sql, kind='timeseries', unit='short', width=12):
     names = {'mean': 'Средняя', 'peak': 'Пиковая', 'cpu_ms': 'CPU, мс',
              'cpu_percent': 'CPU, %', 'ram_mean_mb': 'RAM средняя, МБ',
              'ram_peak_mb': 'RAM пик, МБ', 'sampled_seconds': 'Измерено, с',
+             'attempts': 'Повторов', 'min_mean_mb': 'Мин. средней RAM, МБ',
+             'max_mean_mb': 'Макс. средней RAM, МБ', 'ram_stddev_mb': 'σ средней RAM, МБ',
+             'cpu_stddev_ms': 'σ CPU, мс', 'configuration': 'Настройки',
              'component': 'Компонент', 'requests_per_second': 'Запросов/с',
              'successful_rps': 'Успешные запросы/с', 'unexpected_rate': 'Ошибки',
              'ram_mb': 'RAM', 'users': 'Пользователи', 'latency_ms': 'Задержка',
@@ -49,6 +52,14 @@ def definitions():
         panel(6, 'Память мониторинга и Collector', "SELECT r.mode || ' · ' || s.component AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE s.component IN ('monitor','collector') GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component", 'barchart', 'megabytes'),
         panel(7, 'Объём логов', 'SELECT mode AS configuration, avg(log_bytes) / 1000000.0 AS bytes FROM runs GROUP BY profile,mode ORDER BY profile,mode', 'barchart', 'megabytes'),
         panel(8, 'Ошибки запросов', 'SELECT mode AS configuration, sum(unexpected_errors)::double precision / NULLIF(sum(requests),0) AS error_rate FROM runs GROUP BY profile,mode ORDER BY profile,mode', 'barchart', 'percentunit')]
+    comparison.append(panel(9, 'Разброс между повторами',
+        "SELECT r.mode AS configuration, count(*) AS attempts, "
+        "avg(s.ram_mean_mib) * 1.048576 AS ram_mean_mb, "
+        "min(s.ram_mean_mib) * 1.048576 AS min_mean_mb, "
+        "max(s.ram_mean_mib) * 1.048576 AS max_mean_mb, "
+        "stddev_samp(s.ram_mean_mib) * 1.048576 AS ram_stddev_mb, "
+        "avg(s.cpu_seconds) * 1000 AS cpu_ms, "
+        "stddev_samp(s.cpu_seconds) * 1000 AS cpu_stddev_ms " + grouped, 'table', width=24))
     selected = 'WHERE run_id=${run:sqlstring}'
     load = [
         panel(1, 'Задержка запросов', f'SELECT at AS time,p50_ms AS p50,p90_ms AS p90,p95_ms AS p95,p99_ms AS p99 FROM windows {selected} ORDER BY at', unit='ms'),

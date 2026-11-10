@@ -137,6 +137,78 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "component"
             },
             "properties": [
@@ -390,6 +462,78 @@
               {
                 "id": "displayName",
                 "value": "Измерено, с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
               }
             ]
           },
@@ -655,6 +799,78 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "component"
             },
             "properties": [
@@ -908,6 +1124,78 @@
               {
                 "id": "displayName",
                 "value": "Измерено, с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
               }
             ]
           },
@@ -1173,6 +1461,78 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "component"
             },
             "properties": [
@@ -1426,6 +1786,78 @@
               {
                 "id": "displayName",
                 "value": "Измерено, с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
               }
             ]
           },
@@ -1691,6 +2123,78 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "component"
             },
             "properties": [
@@ -1944,6 +2448,409 @@
               {
                 "id": "displayName",
                 "value": "Измерено, с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "component"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Компонент"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "requests_per_second"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Запросов/с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "successful_rps"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Успешные запросы/с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unexpected_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Ошибки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "RAM"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "users"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Пользователи"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latency_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Задержка"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Объём"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error_rate"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Ошибки"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "operation"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Операция"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "groupWidth": 0.7,
+        "barWidth": 0.85
+      }
+    },
+    {
+      "id": 9,
+      "title": "Разброс между повторами",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "measurements"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "measurements"
+          },
+          "rawSql": "SELECT r.mode AS configuration, count(*) AS attempts, avg(s.ram_mean_mib) * 1.048576 AS ram_mean_mb, min(s.ram_mean_mib) * 1.048576 AS min_mean_mb, max(s.ram_mean_mib) * 1.048576 AS max_mean_mb, stddev_samp(s.ram_mean_mib) * 1.048576 AS ram_stddev_mb, avg(s.cpu_seconds) * 1000 AS cpu_ms, stddev_samp(s.cpu_seconds) * 1000 AS cpu_stddev_ms FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE r.suite=${suite:sqlstring} AND r.profile=${profile:sqlstring} AND s.component='backend' GROUP BY r.profile, r.mode ORDER BY r.profile, r.mode",
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mean"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Средняя"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Пиковая"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "CPU, %"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "RAM средняя, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_peak_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "RAM пик, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sampled_seconds"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Измерено, с"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "attempts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Повторов"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "min_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Мин. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max_mean_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Макс. средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ram_stddev_mb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ средней RAM, МБ"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu_stddev_ms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "σ CPU, мс"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "configuration"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Настройки"
               }
             ]
           },

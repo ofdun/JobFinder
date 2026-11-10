@@ -50,19 +50,19 @@ async function capture(page, dashboard, variables, filename, from, to, expectedP
     await page.waitForTimeout(1000);
     const height=await page.locator('section[data-testid^="data-testid Panel header"]').evaluateAll(
       panels=>Math.ceil(Math.max(...panels.map(panel=>panel.getBoundingClientRect().bottom))+12));
-    await page.screenshot({path:path.join(charts,filename),clip:{x:0,y:0,width:1600,height:Math.min(1600,height)}});
+    await page.screenshot({path:path.join(charts,filename),clip:{x:0,y:0,width:1600,height:Math.min(2000,height)}});
   } finally {
     page.off('response',handler);
   }
 }
 
 try {
-  const page = await browser.newPage({ viewport: { width:1600, height:1600 } });
+  const page = await browser.newPage({ viewport: { width:1600, height:2000 } });
   let overview = `<p>${data.runs[0].smoke ? 'SMOKE' : 'Полный прогон'}</p><nav><a href="dashboards/comparison.json" download>Дашборд сравнения</a><a href="dashboards/load.json" download>Дашборд нагрузки</a><a href="dashboards/resources.json" download>Дашборд ресурсов</a></nav>`;
   for (const profile of profiles) {
     const runs = data.runs.filter(r => r.profile === profile);
     const summaries = await Promise.all(runs.map(async r => JSON.parse(await readFile(path.join(root,r.run,'summary.json'),'utf8'))));
-    await capture(page,'comparison',{suite,profile},`${profile}.png`,Math.min(...summaries.map(s=>s.measurement_start)),Math.max(...summaries.map(s=>s.measurement_stop)),8);
+    await capture(page,'comparison',{suite,profile},`${profile}.png`,Math.min(...summaries.map(s=>s.measurement_start)),Math.max(...summaries.map(s=>s.measurement_stop)),9);
     overview += `<h2>${escape(profile)}</h2><img src="grafana/${profile}.png" alt="${escape(profile)} — Grafana">`;
   }
   overview += '<h2>Прогоны</h2><div class="table"><table><tr><th>Сценарий</th><th>Настройки</th><th>Запросы</th><th>Ошибки</th></tr>';
