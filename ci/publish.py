@@ -71,7 +71,9 @@ def copy_report(source, destination):
     for path in source.rglob('*'):
         if path.is_symlink():
             raise ValueError('Report must not contain symbolic links')
-        if path.is_file() and path.name in ('index.html', 'history.json', 'summary.json', 'manifest.json'):
+        if path.is_file() and (path.name in ('index.html', 'history.json', 'summary.json', 'manifest.json')
+                              or (path.suffix == '.png' and 'grafana' in path.relative_to(source).parts)
+                              or (path.suffix == '.json' and 'dashboards' in path.relative_to(source).parts)):
             target = destination / path.relative_to(source)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, target)

@@ -25,6 +25,13 @@ def bundle(output):
 
 
 def collect(source, output, profiles):
+    paths = list(source.rglob('manifest.json'))
+    if paths and 'observation' in json.loads(paths[0].read_text()):
+        from observability import collect as collect_observations
+        found_profiles = {json.loads(path.read_text())['plan']['profile'] for path in paths}
+        if found_profiles != set(profiles):
+            raise ValueError('Comparison profiles do not match requested profiles')
+        return collect_observations(source, output)
     found = {}
     manifests = []
     for path in sorted(source.rglob('manifest.json')):

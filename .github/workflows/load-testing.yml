@@ -32,6 +32,16 @@ on:
         type: choice
         default: '600'
         options: ['600', '900', '1800']
+      repeats:
+        description: Повторы каждого режима
+        type: choice
+        default: '1'
+        options: ['1', '2', '3', '4']
+      warmup_seconds:
+        description: Прогрев, секунды
+        type: choice
+        default: '60'
+        options: ['60', '120', '300']
       report_run_id:
         description: ID запуска для повторной публикации результатов
         type: string
@@ -59,6 +69,8 @@ jobs:
       - name: Нагрузочное тестирование
         timeout-minutes: 300
         env:
+          LOAD_REPEATS: ${{ inputs.repeats || '1' }}
+          LOAD_WARMUP_SECONDS: ${{ inputs.warmup_seconds || '60' }}
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
           LOAD_SMOKE: ${{ inputs.smoke || false }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
@@ -68,6 +80,8 @@ jobs:
         run: |
           args=(
             --profile "$LOAD_PROFILE"
+            --repeat "$LOAD_REPEATS"
+            --warmup-seconds "$LOAD_WARMUP_SECONDS"
             --peak-vus "$LOAD_PEAK_VUS"
             --soak-seconds "$LOAD_SOAK_SECONDS"
             --recovery-seconds "$LOAD_RECOVERY_SECONDS"
@@ -79,7 +93,20 @@ jobs:
           if [[ "$LOAD_SMOKE" == "true" ]]; then
             args+=(--smoke)
           fi
-          python3 -u load-testing/run.py "${args[@]}"
+          PYTHONPATH=load-testing python3 - <<'PY'
+          import os
+          from plan import PROFILES, make_plan
+
+          profiles = PROFILES if os.environ['LOAD_PROFILE'] == 'all' else [os.environ['LOAD_PROFILE']]
+          smoke = os.environ['LOAD_SMOKE'] == 'true'
+          extra_warmup = 0 if smoke else int(os.environ['LOAD_WARMUP_SECONDS']) - 60
+          duration = sum(make_plan(p, smoke, 4, 128, int(os.environ['LOAD_SOAK_SECONDS']),
+                                  int(os.environ['LOAD_RECOVERY_SECONDS']))['duration_seconds'] + extra_warmup + 180
+                         for p in profiles) * 4 * int(os.environ['LOAD_REPEATS']) + 900
+          if duration > 18000:
+              raise SystemExit('Выберите отдельный сценарий или меньшую длительность: выбранные повторы превышают лимит job.')
+          PY
+          python3 -u load-testing/observability.py "${args[@]}"
 
       - name: Сохранение результатов
         id: results
@@ -99,11 +126,11 @@ jobs:
         run: printf '[Скачать отчёт и логи](%s)\n' "$RESULTS_URL" >> "$GITHUB_STEP_SUMMARY"
 
   report:
-    name: Report
+    name: Grafana
     if: ${{ !cancelled() && (needs.load.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.report_run_id != '')) }}
     needs: load
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       contents: read
       actions: read
@@ -127,6 +154,34 @@ jobs:
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
         run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE"
+      - name: Подготовка Grafana
+        if: hashFiles('.ci-load-report/suite/comparison.json') != ''
+        run: docker compose -p load-report -f observability/compose.yml up -d --wait
+      - name: Загрузка измерений
+        if: hashFiles('.ci-load-report/suite/comparison.json') != ''
+        env:
+          SUITE: ${{ github.run_id }}
+        run: python3 observability/import_results.py .ci-load-report/suite --suite "$SUITE" --project load-report
+      - uses: actions/setup-node@v4
+        if: hashFiles('.ci-load-report/suite/comparison.json') != ''
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: observability/package-lock.json
+      - name: Подготовка рендера
+        if: hashFiles('.ci-load-report/suite/comparison.json') != ''
+        working-directory: observability
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Графики Grafana
+        if: hashFiles('.ci-load-report/suite/comparison.json') != ''
+        env:
+          SUITE: ${{ github.run_id }}
+        run: node observability/render.mjs .ci-load-report/suite "$SUITE"
+      - name: Остановка Grafana
+        if: always() && hashFiles('.ci-load-report/suite/comparison.json') != ''
+        run: docker compose -p load-report -f observability/compose.yml down -v
       - name: Сохранение отчёта
         uses: actions/upload-artifact@v4
         id: results
@@ -156,12 +211,16 @@ jobs:
           rows = []
           for path in sorted(Path('.ci-load-report').glob('*/*/summary.json')):
               result = json.loads(path.read_text())
+              manifest = json.loads(path.with_name('manifest.json').read_text())
+              settings = manifest.get('observation', {})
+              tracing = 'Вкл' if settings.get('tracing') else 'Выкл'
+              logging = 'Расширенные' if settings.get('extended_logging') else 'Обычные'
               latency = result.get('latency_ms')
               p95 = f"{latency['percentiles']['0.95']:.2f}" if latency else '—'
-              rows.append(f"| {result['profile']} | {'SMOKE' if result['smoke'] else 'Полный'} | {result['requests']} | {p95} | {result['rps']['mean']:.2f} | {result['unexpected_errors']} |")
+              rows.append(f"| {result['profile']} | {tracing} | {logging} | {'SMOKE' if result['smoke'] else 'Полный'} | {result['requests']} | {p95} | {result['rps']['mean']:.2f} | {result['unexpected_errors']} |")
           if rows:
-              print('\n| Сценарий | Режим | Запросы | p95, мс | RPS | Неожиданные ошибки |')
-              print('|---|---|---:|---:|---:|---:|')
+              print('\n| Сценарий | Трейсы | Логи | Режим | Запросы | p95, мс | RPS | Неожиданные ошибки |')
+              print('|---|---|---|---|---:|---:|---:|---:|')
               print('\n'.join(rows))
           PY
 

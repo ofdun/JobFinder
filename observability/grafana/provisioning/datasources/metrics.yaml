@@ -1,0 +1,17 @@
+apiVersion: 1
+datasources:
+- name: Нагрузочные измерения
+  uid: measurements
+  type: grafana-postgresql-datasource
+  access: proxy
+  url: metrics-db:5432
+  user: grafana
+  isDefault: true
+  editable: false
+  jsonData:
+    database: metrics
+    sslmode: disable
+    postgresVersion: 1500
+    timescaledb: false
+  secureJsonData:
+    password: grafana
