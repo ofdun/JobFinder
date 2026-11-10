@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { registerEmployer } from '../../shared/api/authApi';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
+import { PasswordInput } from '../../shared/ui/PasswordInput';
 
 export function RegisterEmployerForm() {
   const [name, setName] = useState('');
@@ -37,8 +38,8 @@ export function RegisterEmployerForm() {
     <form className="card" onSubmit={onSubmit}>
       <h2>Регистрация работодателя</h2>
       <label>Название<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
-      <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-      <label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+      <label>Email<input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
+      <PasswordInput label="Пароль" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
       <label>Описание<input value={description} onChange={(event) => setDescription(event.target.value)} /></label>
       <label>Адрес<input value={address} onChange={(event) => setAddress(event.target.value)} /></label>
       <label>Сайт<input type="url" value={websiteLink} onChange={(event) => setWebsiteLink(event.target.value)} /></label>

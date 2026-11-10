@@ -32,16 +32,35 @@ import com.ofdun.jobfinder.features.vacancy.api.dto.*;
 import com.ofdun.jobfinder.features.vacancy.api.mapper.*;
 import com.ofdun.jobfinder.features.vacancy.domain.model.*;
 import com.ofdun.jobfinder.features.vacancy.domain.service.*;
+
 import graphql.schema.DataFetchingEnvironment;
+
 import jakarta.validation.Validator;
-import java.util.*;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 public class GraphQlOperations {
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.ofdun.jobfinder.features.auth.mfa.AuthenticationProtection protection;
+
+    private Map<String, String> authenticationResult(
+            java.util.function.Supplier<com.ofdun.jobfinder.features.auth.domain.model.TokenPair>
+                    action) {
+        try {
+            var pair = action.get();
+            return Map.of("accessToken", pair.accessToken(), "refreshToken", pair.refreshToken());
+        } catch (com.ofdun.jobfinder.features.auth.mfa.AuthenticationChallenge ex) {
+            return Map.of("challengeToken", ex.getChallengeToken(), "nextStep", ex.getNextStep());
+        }
+    }
+
     private final ApiAccess access;
     private final ApplicantService applicants;
     private final EmployerService employers;
@@ -186,12 +205,22 @@ public class GraphQlOperations {
                 var email = (String) input.get("email");
                 var password = (String) input.get("password");
                 if (password.isBlank()) throw new IllegalArgumentException("Password is required");
-                var pair =
-                        type == AccountType.APPLICANT
-                                ? applicantAuth.login(email, password)
-                                : employerAuth.login(email, password);
-                yield Map.of(
-                        "accessToken", pair.accessToken(), "refreshToken", pair.refreshToken());
+                yield authenticationResult(
+                        () ->
+                                type == AccountType.APPLICANT
+                                        ? applicantAuth.login(email, password)
+                                        : employerAuth.login(email, password));
+            }
+            case "verifyTotp" ->
+                    authenticationResult(
+                            () ->
+                                    protection.verify(
+                                            (String) a.get("challengeToken"),
+                                            (String) a.get("code")));
+            case "renewPassword" -> {
+                protection.renewPassword(
+                        (String) a.get("challengeToken"), (String) a.get("newPassword"));
+                yield true;
             }
             case "refreshTokens" -> {
                 AccountType type = AccountType.valueOf((String) input.get("accountType"));

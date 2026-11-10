@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { registerApplicant } from '../../shared/api/authApi';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
+import { PasswordInput } from '../../shared/ui/PasswordInput';
 
 export function RegisterApplicantForm() {
   const [name, setName] = useState('');
@@ -35,8 +36,8 @@ export function RegisterApplicantForm() {
     <form className="card" onSubmit={onSubmit}>
       <h2>Регистрация соискателя</h2>
       <label>Имя<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
-      <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-      <label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+      <label>Email<input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
+      <PasswordInput label="Пароль" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
       <label>Адрес<input value={address} onChange={(event) => setAddress(event.target.value)} /></label>
       <label>Телефон<input value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} /></label>
       <LocationTypeahead

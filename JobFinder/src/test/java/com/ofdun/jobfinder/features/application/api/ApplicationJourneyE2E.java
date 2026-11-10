@@ -86,6 +86,38 @@ class ApplicationJourneyE2E {
 
     @Autowired JdbcTemplate jdbc;
     @Autowired Flyway flyway;
+    @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
+    @Autowired com.ofdun.jobfinder.features.auth.mfa.SecurityStateStore securityStates;
+
+    @Test
+    void securityStateUsesConnectionAlreadyHeldByJpa() {
+        int maximum = dataSource.getMaximumPoolSize();
+        int minimum = dataSource.getMinimumIdle();
+        long timeout = dataSource.getConnectionTimeout();
+        var entityManager = entityManagerFactory.createEntityManager();
+        try {
+            dataSource.setMinimumIdle(0);
+            dataSource.setMaximumPoolSize(1);
+            dataSource.setConnectionTimeout(500);
+            dataSource.getHikariPoolMXBean().softEvictConnections();
+            org.springframework.transaction.support.TransactionSynchronizationManager.bindResource(
+                    entityManagerFactory,
+                    new org.springframework.orm.jpa.EntityManagerHolder(entityManager));
+            entityManager.createNativeQuery("SELECT 1", Integer.class).getSingleResult();
+            assertEquals(1, dataSource.getHikariPoolMXBean().getActiveConnections());
+            assertNotNull(
+                    securityStates.get(
+                            com.ofdun.jobfinder.features.auth.enums.AccountType.APPLICANT, 531));
+        } finally {
+            org.springframework.transaction.support.TransactionSynchronizationManager
+                    .unbindResourceIfPossible(entityManagerFactory);
+            entityManager.close();
+            dataSource.setMaximumPoolSize(maximum);
+            dataSource.setMinimumIdle(minimum);
+            dataSource.setConnectionTimeout(timeout);
+        }
+    }
+
     @Autowired com.zaxxer.hikari.HikariDataSource dataSource;
 
     final JsonMapper json = JsonMapper.builder().build();
@@ -363,7 +395,16 @@ class ApplicationJourneyE2E {
         assertTrue(profile.get("address").isNull());
         loginV2(role, email); // Omitting password on replacement must preserve the existing hash.
         request("DELETE", path + "/" + id, token, null, 204);
-        request("GET", path + "/" + id, token, null, 404);
+        request("GET", path + "/" + id, token, null, 401);
+        String readerRole = role.equals("APPLICANT") ? "EMPLOYER" : "APPLICANT";
+        String readerEmail =
+                role.equals("APPLICANT") ? "employer@example.com" : "alice@example.com";
+        request(
+                "GET",
+                path + "/" + id,
+                loginV2(readerRole, readerEmail).get("accessToken").asText(),
+                null,
+                404);
         request(
                 "POST",
                 "/api/v2/auth/login",

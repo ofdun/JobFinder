@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { deleteApplicantById, getApplicantById, updateApplicantById } from '../../shared/api/applicantApi';
 import { clearSession, getCurrentUserId } from '../../shared/session/sessionStore';
 import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
+import { AccountSecurityPanel } from '../../features/auth/AccountSecurityPanel';
 
 export function ApplicantProfilePage() {
   const userId = getCurrentUserId();
@@ -17,7 +18,6 @@ export function ApplicantProfilePage() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [address, setAddress] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [locationId, setLocationId] = useState<number | undefined>(1);
@@ -39,13 +39,11 @@ export function ApplicantProfilePage() {
       updateApplicantById(userId as number, {
         name,
         email,
-        password: password || undefined,
         address,
         phoneNumber,
         locationId: locationId as number,
       }),
     onSuccess: () => {
-      setPassword('');
       query.refetch();
     },
   });
@@ -77,12 +75,12 @@ export function ApplicantProfilePage() {
       >
         <label>Имя<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
         <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-        <label>Новый пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         <label>Адрес<input value={address} onChange={(event) => setAddress(event.target.value)} /></label>
         <label>Телефон<input value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} /></label>
         <LocationTypeahead label="Локация" value={locationId} onChange={setLocationId} />
         <button type="submit" disabled={updateMutation.isPending || !locationId}>{updateMutation.isPending ? 'Сохранение...' : 'Сохранить профиль'}</button>
       </form>
+      <AccountSecurityPanel />
 
       <button type="button" className="danger profile-delete-action" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
         {deleteMutation.isPending ? 'Удаление...' : 'Удалить профиль'}

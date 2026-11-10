@@ -7,6 +7,8 @@ import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
+import com.ofdun.jobfinder.support.TestDataMother;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,7 @@ class BasicApplicantServiceTest {
     @Test
     @org.junit.jupiter.api.Tag("equivalence")
     void createApplicant_whenValidationFails_skipsStorage() {
-        var input = com.ofdun.jobfinder.support.TestDataMother.applicant();
+        var input = TestDataMother.applicant();
         doThrow(new IllegalArgumentException("invalid"))
                 .when(applicantValidator)
                 .validateApplicantForCreate(input);
@@ -54,6 +56,8 @@ class BasicApplicantServiceTest {
     @Mock private ApplicantRepository applicantRepository;
 
     @Mock private ApplicantValidator applicantValidator;
+
+    @Mock private AccountSecurity protection;
 
     @InjectMocks private BasicApplicantService applicantService;
 

@@ -5,7 +5,16 @@ public enum GraphqlOperation {
     LOGIN(
             false,
             "mutation LOGIN($input: LoginInput!) { result: login(input: $input) { accessToken"
-                    + " refreshToken } }"),
+                    + " refreshToken challengeToken nextStep } }"),
+    VERIFY_TOTP(
+            false,
+            "mutation VERIFY_TOTP($challengeToken: String!, $code: String!) { result:"
+                + " verifyTotp(challengeToken: $challengeToken, code: $code) { accessToken"
+                + " refreshToken challengeToken nextStep } }"),
+    RENEW_PASSWORD(
+            false,
+            "mutation RENEW_PASSWORD($challengeToken: String!, $newPassword: String!) { result:"
+                + " renewPassword(challengeToken: $challengeToken, newPassword: $newPassword) }"),
     REFRESH(
             false,
             "mutation REFRESH($input: RefreshInput!) { result: refreshTokens(input: $input) {"

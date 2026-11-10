@@ -8,7 +8,6 @@ info:
 
 servers:
   - url: /
-    description: Текущий сервер API (прямое подключение или NGINX)
 
 tags:
   - name: Auth
@@ -35,11 +34,271 @@ tags:
     description: Справочник локаций
 
 paths:
+  /api/v2/auth/security:
+    get:
+      tags: [Auth]
+      summary: Состояние безопасности аккаунта
+      operationId: security_status
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Успешное выполнение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/totp/setup:
+    post:
+      tags: [Auth]
+      summary: Подключение приложения-аутентификатора
+      operationId: security_totp_setup
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityPassword'
+      responses:
+        '200':
+          description: Успешное выполнение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotpSetup'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/totp/enable:
+    post:
+      tags: [Auth]
+      summary: Подтверждение подключения TOTP
+      operationId: security_totp_enable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityCode'
+      responses:
+        '200':
+          description: Успешное выполнение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryCodes'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/totp/verify:
+    post:
+      tags: [Auth]
+      summary: Подтверждение второго фактора
+      operationId: security_totp_verify
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpVerification'
+      responses:
+        '200':
+          description: Успешное выполнение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '202':
+          description: Требуется смена пароля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationChallenge'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/totp/disable:
+    post:
+      tags: [Auth]
+      summary: Отключение TOTP
+      operationId: security_totp_disable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpDisable'
+      responses:
+        '204':
+          description: Успешное выполнение
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/password:
+    post:
+      tags: [Auth]
+      summary: Плановая смена пароля
+      operationId: security_password
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+      responses:
+        '204':
+          description: Успешное выполнение
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/password/renew:
+    post:
+      tags: [Auth]
+      summary: Обновление просроченного пароля
+      operationId: security_password_renew
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRenewal'
+      responses:
+        '204':
+          description: Успешное выполнение
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/recover:
+    post:
+      tags: [Auth]
+      summary: Восстановление доступа резервным кодом
+      operationId: security_recover
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRecovery'
+      responses:
+        '204':
+          description: Успешное выполнение
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
+  /api/v2/auth/security/logout:
+    post:
+      tags: [Auth]
+      summary: Завершение сессии
+      operationId: security_logout
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionLogout'
+      responses:
+        '204':
+          description: Успешное выполнение
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+        '423':
+          description: Аккаунт заблокирован
+        '409':
+          description: Конфликт состояния аккаунта
+        '429':
+          description: Превышен лимит восстановления
   /api/v2/auth/login:
     post:
       tags: [Auth]
       summary: Вход пользователя
       description: Единая операция входа по email, паролю и типу пользователя.
+      x-authentication-flow: password -> TOTP -> password renewal when expired -> session
       requestBody:
         required: true
         content:
@@ -68,6 +327,14 @@ paths:
           $ref: '#/components/responses/Unavailable'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '202':
+          description: Требуется второй фактор или смена пароля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationChallenge'
+        '423':
+          description: Аккаунт заблокирован
       operationId: postAuthLogin
       security: []
   /api/v2/auth/refresh:
@@ -1675,6 +1942,148 @@ components:
       bearerFormat: JWT
 
   schemas:
+    AuthenticationChallenge:
+      type: object
+      additionalProperties: false
+      required: [challengeToken, nextStep]
+      properties:
+        challengeToken:
+          type: string
+          minLength: 1
+        nextStep:
+          type: string
+          minLength: 1
+          enum: [TOTP, PASSWORD_CHANGE]
+    SecurityPassword:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 1
+    SecurityCode:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          minLength: 1
+    TotpVerification:
+      type: object
+      additionalProperties: false
+      required: [challengeToken, code]
+      properties:
+        challengeToken:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          minLength: 1
+    TotpDisable:
+      type: object
+      additionalProperties: false
+      required: [password, code]
+      properties:
+        password:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          minLength: 1
+    PasswordChange:
+      type: object
+      additionalProperties: false
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 72
+        code:
+          type: string
+          minLength: 1
+    PasswordRenewal:
+      type: object
+      additionalProperties: false
+      required: [challengeToken, newPassword]
+      properties:
+        challengeToken:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 72
+    AccountRecovery:
+      type: object
+      additionalProperties: false
+      required: [userType, email, password, recoveryCode, newPassword]
+      properties:
+        resetAuthenticator:
+          type: boolean
+          default: false
+        userType:
+          type: string
+          minLength: 1
+          enum: [APPLICANT, EMPLOYER]
+        email:
+          type: string
+          minLength: 1
+          format: email
+        password:
+          type: string
+          minLength: 1
+        recoveryCode:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 72
+    SessionLogout:
+      type: object
+      additionalProperties: false
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+    TotpSetup:
+      type: object
+      additionalProperties: false
+      required: [secret, qrCode]
+      properties:
+        secret:
+          type: string
+          minLength: 1
+        qrCode:
+          type: string
+          minLength: 1
+    SecurityStatus:
+      type: object
+      additionalProperties: false
+      required: [enabled, recoveryCodesRemaining, passwordExpiresAt]
+      properties:
+        enabled:
+          type: boolean
+        recoveryCodesRemaining:
+          type: integer
+        passwordExpiresAt:
+          type: integer
+    RecoveryCodes:
+      type: object
+      additionalProperties: false
+      required: [recoveryCodes]
+      properties:
+        recoveryCodes:
+          type: array
+          items:
+            type: string
     HypermediaLink:
       type: object
       additionalProperties: false
@@ -1688,7 +2097,7 @@ components:
         href:
           type: string
           format: uri-reference
-          description: Готовый URI без шаблонов. Сервер сохраняет внешний префикс развёртывания, включая /mirror.
+          description: Готовый URI без шаблонов. Сервер сохраняет внешний префикс развёртывания.
         method:
           type: string
           enum:

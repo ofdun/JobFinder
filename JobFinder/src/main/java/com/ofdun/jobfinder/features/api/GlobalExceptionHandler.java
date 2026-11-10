@@ -18,9 +18,9 @@ import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
 import com.ofdun.jobfinder.features.skill.exception.SkillNotFoundException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyAlreadyExistsException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+
 import jakarta.validation.ConstraintViolationException;
-import java.util.Arrays;
-import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -32,8 +32,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.ofdun.jobfinder.features.auth.mfa.AuthenticationChallenge.class)
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> handleChallenge(
+            com.ofdun.jobfinder.features.auth.mfa.AuthenticationChallenge ex) {
+        return org.springframework.http.ResponseEntity.status(202)
+                .header("Cache-Control", "no-store")
+                .body(
+                        java.util.Map.of(
+                                "challengeToken",
+                                ex.getChallengeToken(),
+                                "nextStep",
+                                ex.getNextStep()));
+    }
+
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(com.ofdun.jobfinder.features.vacancy.exception.DraftNotFoundException.class)

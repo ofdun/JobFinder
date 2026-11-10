@@ -71,6 +71,27 @@ describe('httpClient refresh flow', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  it('does not repeat a rejected second-factor request or clear its session', async () => {
+    const sessionStore = await import('../session/sessionStore');
+    const httpClient = await import('./httpClient');
+    sessionStore.setSession({
+      role: 'applicant', userId: 11, accessToken: 'access', refreshToken: 'refresh',
+    });
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    }));
+    Object.defineProperty(globalThis, 'fetch', { value: fetchMock, configurable: true });
+
+    await expect(httpClient.request('/auth/security/totp/enable', {
+      method: 'POST', auth: true, manageAuthErrors: false,
+      body: JSON.stringify({ code: 'invalid' }),
+    })).rejects.toBeInstanceOf(httpClient.ApiError);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(sessionStore.getSession()?.accessToken).toBe('access');
+    expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
   it('throws ApiError when refresh request fails', async () => {
     const sessionStore = await import('../session/sessionStore');
     const queryClientModule = await import('../lib/queryClient');

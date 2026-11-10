@@ -15,7 +15,7 @@ export function LoginPage() {
           Работодатель
         </button>
       </div>
-      <LoginForm role={role} />
+      <LoginForm role={role} key={role} />
     </main>
   );
 }

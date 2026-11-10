@@ -2,6 +2,7 @@ package com.ofdun.jobfinder.features.auth.data.jwt.impl;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -11,12 +12,18 @@ import javax.crypto.SecretKey;
 import lombok.NonNull;
 
 public class BasicJwtProvider implements JwtProvider {
+    private final AccountSecurity accounts;
+
     private final SecretKey secret;
     private final Long accessExpirationTimeMs;
     private final Long refreshExpirationTimeMs;
 
     public BasicJwtProvider(
-            String secret, Long accessExpirationTimeMs, Long refreshExpirationTimeMs) {
+            String secret,
+            Long accessExpirationTimeMs,
+            Long refreshExpirationTimeMs,
+            AccountSecurity accounts) {
+        this.accounts = accounts;
         this.secret = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpirationTimeMs = accessExpirationTimeMs;
         this.refreshExpirationTimeMs = refreshExpirationTimeMs;
@@ -33,6 +40,7 @@ public class BasicJwtProvider implements JwtProvider {
                 .subject(userId.toString())
                 .claim("role", type.name())
                 .claim("token_use", "access")
+                .claim("auth_stamp", accounts.sessionStamp(type, userId))
                 .id(java.util.UUID.randomUUID().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + this.accessExpirationTimeMs))
@@ -46,6 +54,7 @@ public class BasicJwtProvider implements JwtProvider {
                 .subject(userId.toString())
                 .claim("role", type.name())
                 .claim("token_use", "refresh")
+                .claim("auth_stamp", accounts.sessionStamp(type, userId))
                 .id(java.util.UUID.randomUUID().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + this.refreshExpirationTimeMs))
@@ -56,7 +65,11 @@ public class BasicJwtProvider implements JwtProvider {
     @Override
     public Boolean validateToken(@NonNull String token, AccountType type) {
         try {
-            return getAccountType(token) == type;
+            var claims =
+                    Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
+            return getAccountType(token) == type
+                    && accounts.sessionAllowed(
+                            type, getUserId(token), claims.get("auth_stamp", String.class));
         } catch (Exception e) {
             return false;
         }

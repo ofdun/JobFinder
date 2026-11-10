@@ -4,6 +4,8 @@ import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantRepository;
 import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidator;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
+import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BasicApplicantService implements ApplicantService {
+    private final AccountSecurity protection;
+
     private final ApplicantRepository applicantRepository;
     private final ApplicantValidator applicantValidator;
 
@@ -30,6 +34,8 @@ public class BasicApplicantService implements ApplicantService {
 
     @Override
     public ApplicantModel updateApplicant(@NonNull @Valid ApplicantModel applicantModel) {
+        protection.checkProfilePasswordChange(
+                AccountType.APPLICANT, applicantModel.getId(), applicantModel.getPasswordHash());
         applicantValidator.validateApplicantForUpdate(applicantModel);
         return applicantRepository.updateApplicant(applicantModel);
     }
@@ -37,6 +43,8 @@ public class BasicApplicantService implements ApplicantService {
     @Override
     public Boolean deleteApplicant(@NonNull Long id) {
         applicantValidator.validateApplicantForDelete(id);
-        return applicantRepository.deleteApplicant(id);
+        var deleted = applicantRepository.deleteApplicant(id);
+        if (Boolean.TRUE.equals(deleted)) protection.remove(AccountType.APPLICANT, id);
+        return deleted;
     }
 }
