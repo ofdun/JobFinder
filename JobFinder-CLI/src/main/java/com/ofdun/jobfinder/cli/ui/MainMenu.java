@@ -46,23 +46,26 @@ public final class MainMenu {
         while (true) {
             Integer choice = p.readInt("> ", false);
             if (choice == null) continue;
-            Action a =
-                    switch (choice) {
-                        case 0 -> Action.EXIT;
-                        case 1 -> Action.AUTH;
-                        case 2 -> Action.APPLICANTS;
-                        case 3 -> Action.EMPLOYERS;
-                        case 4 -> Action.RESUMES;
-                        case 5 -> Action.VACANCIES;
-                        case 6 -> Action.APPLICATIONS;
-                        case 7 -> Action.MATCHING;
-                        default -> null;
-                    };
+            Action a = action(choice);
             if (a == null) {
                 p.println("Нет такого пункта.");
                 continue;
             }
             return a;
         }
+    }
+
+    private Action action(int choice) {
+        return switch (choice) {
+            case 0 -> Action.EXIT;
+            case 1 -> Action.AUTH;
+            case 2 -> Action.APPLICANTS;
+            case 3 -> Action.EMPLOYERS;
+            case 4 -> Action.RESUMES;
+            case 5 -> Action.VACANCIES;
+            case 6 -> Action.APPLICATIONS;
+            case 7 -> Action.MATCHING;
+            default -> null;
+        };
     }
 }

@@ -11,4 +11,3 @@ public interface MongoJobExperienceCRUDRepository
 
     void deleteAllByResumeId(Long resumeId);
 }
-

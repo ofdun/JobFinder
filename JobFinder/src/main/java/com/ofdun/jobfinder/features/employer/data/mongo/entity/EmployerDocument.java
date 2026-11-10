@@ -16,8 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmployerDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotBlank
     @Size(min = 2, max = 100)
@@ -39,4 +38,3 @@ public class EmployerDocument {
 
     @NotNull private Long locationId;
 }
-

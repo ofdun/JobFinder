@@ -13,8 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DraftVacancyDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long vacancyId;
 

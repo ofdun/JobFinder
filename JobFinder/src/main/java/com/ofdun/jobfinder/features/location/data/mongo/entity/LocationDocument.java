@@ -13,8 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull
     @Size(min = 1, max = 55)
@@ -24,4 +23,3 @@ public class LocationDocument {
     @Size(min = 1, max = 55)
     private String country;
 }
-

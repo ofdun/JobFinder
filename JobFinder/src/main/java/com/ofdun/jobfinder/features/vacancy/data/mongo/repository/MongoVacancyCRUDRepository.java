@@ -6,4 +6,3 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface MongoVacancyCRUDRepository
         extends MongoRepository<@NonNull VacancyDocument, @NonNull Long> {}
-

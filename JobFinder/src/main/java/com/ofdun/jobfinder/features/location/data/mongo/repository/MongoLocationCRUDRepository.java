@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface MongoLocationCRUDRepository
         extends MongoRepository<@NonNull LocationDocument, @NonNull Long> {
-    List<LocationDocument> findByCityContainingIgnoreCaseOrCountryContainingIgnoreCaseOrderByCityAsc(
-            String cityQuery, String countryQuery, Pageable pageable);
+    List<LocationDocument>
+            findByCityContainingIgnoreCaseOrCountryContainingIgnoreCaseOrderByCityAsc(
+                    String cityQuery, String countryQuery, Pageable pageable);
 }
-

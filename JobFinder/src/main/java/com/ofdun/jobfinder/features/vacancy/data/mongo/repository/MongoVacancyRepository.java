@@ -142,6 +142,30 @@ public class MongoVacancyRepository implements VacancyRepository {
             return true;
         }
 
+        if (!matchesOwnerAndLocation(vacancy, filter)) return false;
+
+        if (!matchesConditions(vacancy, filter)) return false;
+
+        if (!isSalaryGte(vacancy.getSalary(), filter.getSalaryMin())) {
+            return false;
+        }
+
+        if (!isSalaryLte(vacancy.getSalary(), filter.getSalaryMax())) {
+            return false;
+        }
+
+        if (!matchesDates(vacancy, filter)) return false;
+
+        if (!matchesDescription(vacancy, filter)) return false;
+
+        if (!containsAll(vacancy.getSkillIds(), filter.getSkillIds())) {
+            return false;
+        }
+
+        return containsAll(vacancy.getLanguageIds(), filter.getLanguageIds());
+    }
+
+    private boolean matchesOwnerAndLocation(VacancyModel vacancy, VacancySearchFilter filter) {
         if (filter.getEmployerId() != null
                 && !Objects.equals(vacancy.getEmployerId(), filter.getEmployerId())) {
             return false;
@@ -152,6 +176,10 @@ public class MongoVacancyRepository implements VacancyRepository {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean matchesConditions(VacancyModel vacancy, VacancySearchFilter filter) {
         if (filter.getPaymentFrequency() != null
                 && !Objects.equals(vacancy.getPaymentFrequency(), filter.getPaymentFrequency())) {
             return false;
@@ -172,14 +200,10 @@ public class MongoVacancyRepository implements VacancyRepository {
             return false;
         }
 
-        if (!isSalaryGte(vacancy.getSalary(), filter.getSalaryMin())) {
-            return false;
-        }
+        return true;
+    }
 
-        if (!isSalaryLte(vacancy.getSalary(), filter.getSalaryMax())) {
-            return false;
-        }
-
+    private boolean matchesDates(VacancyModel vacancy, VacancySearchFilter filter) {
         if (filter.getPublicationDateFrom() != null
                 && !isAfterOrEqual(vacancy.getPublicationDate(), filter.getPublicationDateFrom())) {
             return false;
@@ -190,6 +214,10 @@ public class MongoVacancyRepository implements VacancyRepository {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean matchesDescription(VacancyModel vacancy, VacancySearchFilter filter) {
         if (filter.getQ() != null && !filter.getQ().isBlank()) {
             var query = filter.getQ().trim().toLowerCase();
             var description =
@@ -199,11 +227,7 @@ public class MongoVacancyRepository implements VacancyRepository {
             }
         }
 
-        if (!containsAll(vacancy.getSkillIds(), filter.getSkillIds())) {
-            return false;
-        }
-
-        return containsAll(vacancy.getLanguageIds(), filter.getLanguageIds());
+        return true;
     }
 
     private boolean containsAll(List<Long> source, List<Long> required) {

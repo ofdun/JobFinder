@@ -91,6 +91,21 @@ public class GraphQlOperations {
         Authentication auth = env.getGraphQlContext().get("authentication");
         Map<String, Object> a = env.getArguments();
         return switch (env.getField().getName()) {
+            case "applicant", "employer" -> accountQueries(env.getField().getName(), auth, a);
+            case "vacancy", "vacancies", "resume", "resumes" ->
+                    searchQueries(env.getField().getName(), auth, a);
+            case "application", "myApplications", "vacancyApplications" ->
+                    applicationQueries(env.getField().getName(), auth, a);
+            case "vacancyDrafts", "matchingCandidates" ->
+                    vacancyQueries(env.getField().getName(), auth, a);
+            case "categories", "skills", "languages", "location", "locations" ->
+                    dictionaryQueries(env.getField().getName(), auth, a);
+            default -> throw new IllegalStateException("Unmapped query");
+        };
+    }
+
+    private Object accountQueries(String field, Authentication auth, Map<String, Object> a) {
+        return switch (field) {
             case "applicant" -> {
                 Long id = id(a, "id");
                 access.self(auth, AccountType.APPLICANT, id);
@@ -101,10 +116,22 @@ public class GraphQlOperations {
                 access.self(auth, AccountType.EMPLOYER, id);
                 yield employer(id);
             }
+            default -> throw new IllegalStateException("Unmapped query");
+        };
+    }
+
+    private Object searchQueries(String field, Authentication auth, Map<String, Object> a) {
+        return switch (field) {
             case "vacancy" -> vacancy(id(a, "id"));
             case "vacancies" -> searchVacancies(a);
             case "resume" -> resume(auth, id(a, "id"));
             case "resumes" -> searchResumes(auth, a);
+            default -> throw new IllegalStateException("Unmapped query");
+        };
+    }
+
+    private Object applicationQueries(String field, Authentication auth, Map<String, Object> a) {
+        return switch (field) {
             case "application" ->
                     applicationMapper.toResponse(access.application(auth, id(a, "id")));
             case "myApplications" -> {
@@ -130,6 +157,12 @@ public class GraphQlOperations {
                 result.forEach(x -> access.employerApplication(auth, x.getId()));
                 yield result.stream().map(applicationMapper::toResponse).toList();
             }
+            default -> throw new IllegalStateException("Unmapped query");
+        };
+    }
+
+    private Object vacancyQueries(String field, Authentication auth, Map<String, Object> a) {
+        return switch (field) {
             case "vacancyDrafts" -> {
                 Long id = id(a, "vacancyId");
                 access.ownVacancy(auth, id);
@@ -149,6 +182,12 @@ public class GraphQlOperations {
                 yield new com.ofdun.jobfinder.features.matching.api.mapper.MatchingApiMapper()
                         .toResponseList(matching.findSuitableCandidates(id, limit));
             }
+            default -> throw new IllegalStateException("Unmapped query");
+        };
+    }
+
+    private Object dictionaryQueries(String field, Authentication auth, Map<String, Object> a) {
+        return switch (field) {
             case "categories" ->
                     categories.getAllCategories().stream()
                             .map(
@@ -196,6 +235,43 @@ public class GraphQlOperations {
         Map<String, Object> a = env.getArguments();
         var input = input(a);
         return switch (env.getField().getName()) {
+            case "registerApplicant",
+                    "registerEmployer",
+                    "login",
+                    "verifyTotp",
+                    "renewPassword",
+                    "refreshTokens" ->
+                    authenticationMutations(env.getField().getName(), auth, a, input);
+            case "replaceApplicant", "replaceEmployer", "deleteApplicant", "deleteEmployer" ->
+                    accountMutations(env.getField().getName(), auth, a, input);
+            case "createVacancy",
+                    "replaceVacancy",
+                    "deleteVacancy",
+                    "createVacancyDraft",
+                    "restoreVacancyDraft",
+                    "deleteVacancyDraft" ->
+                    vacancyMutations(env.getField().getName(), auth, a, input);
+            case "createResume", "replaceResume", "deleteResume" ->
+                    resumeMutations(env.getField().getName(), auth, a, input);
+            case "createApplication",
+                    "replaceApplication",
+                    "updateApplicationStatus",
+                    "deleteApplication" ->
+                    applicationMutations(env.getField().getName(), auth, a, input);
+            default -> throw new IllegalStateException("Unmapped mutation");
+        };
+    }
+
+    private com.ofdun.jobfinder.features.auth.domain.model.TokenPair login(
+            AccountType type, String email, String password) {
+        return type == AccountType.APPLICANT
+                ? applicantAuth.login(email, password)
+                : employerAuth.login(email, password);
+    }
+
+    private Object authenticationMutations(
+            String field, Authentication auth, Map<String, Object> a, Map<String, Object> input) {
+        return switch (field) {
             case "registerApplicant" ->
                     applicant(
                             applicants.createApplicant(
@@ -209,11 +285,7 @@ public class GraphQlOperations {
                 var email = (String) input.get("email");
                 var password = (String) input.get("password");
                 if (password.isBlank()) throw new IllegalArgumentException("Password is required");
-                yield authenticationResult(
-                        () ->
-                                type == AccountType.APPLICANT
-                                        ? applicantAuth.login(email, password)
-                                        : employerAuth.login(email, password));
+                yield authenticationResult(() -> login(type, email, password));
             }
             case "verifyTotp" ->
                     authenticationResult(
@@ -237,6 +309,13 @@ public class GraphQlOperations {
                 yield Map.of(
                         "accessToken", pair.accessToken(), "refreshToken", pair.refreshToken());
             }
+            default -> throw new IllegalStateException("Unmapped mutation");
+        };
+    }
+
+    private Object accountMutations(
+            String field, Authentication auth, Map<String, Object> a, Map<String, Object> input) {
+        return switch (field) {
             case "replaceApplicant" -> {
                 Long id = id(a, "id");
                 access.self(auth, AccountType.APPLICANT, id);
@@ -273,6 +352,13 @@ public class GraphQlOperations {
                 employers.deleteEmployer(id);
                 yield deleted(id);
             }
+            default -> throw new IllegalStateException("Unmapped mutation");
+        };
+    }
+
+    private Object vacancyMutations(
+            String field, Authentication auth, Map<String, Object> a, Map<String, Object> input) {
+        return switch (field) {
             case "createVacancy" -> {
                 var request = dto(input, VacancyRequest.class);
                 access.self(auth, AccountType.EMPLOYER, request.getEmployerId());
@@ -313,6 +399,13 @@ public class GraphQlOperations {
                 drafts.deleteDraft(id, draftId);
                 yield deleted(draftId);
             }
+            default -> throw new IllegalStateException("Unmapped mutation");
+        };
+    }
+
+    private Object resumeMutations(
+            String field, Authentication auth, Map<String, Object> a, Map<String, Object> input) {
+        return switch (field) {
             case "createResume" -> {
                 var request = dto(input, ResumeRequest.class);
                 access.self(auth, AccountType.APPLICANT, request.getApplicantId());
@@ -335,6 +428,13 @@ public class GraphQlOperations {
                 resumes.deleteResume(id);
                 yield deleted(id);
             }
+            default -> throw new IllegalStateException("Unmapped mutation");
+        };
+    }
+
+    private Object applicationMutations(
+            String field, Authentication auth, Map<String, Object> a, Map<String, Object> input) {
+        return switch (field) {
             case "createApplication" -> {
                 Long vacancyId = id(input, "vacancyId"), resumeId = id(input, "resumeId");
                 access.newApplication(auth, vacancyId, resumeId);

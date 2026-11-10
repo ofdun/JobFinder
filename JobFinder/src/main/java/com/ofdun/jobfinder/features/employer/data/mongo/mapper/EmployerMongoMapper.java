@@ -34,4 +34,3 @@ public class EmployerMongoMapper {
                 entity.getLocationId());
     }
 }
-

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mongodb.client.MongoClients;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -34,7 +33,7 @@ class SecurityStateStoreIT {
         jdbc.execute("CREATE SCHEMA IF NOT EXISTS jobfinder");
         jdbc.execute(
                 "CREATE TABLE IF NOT EXISTS jobfinder.account_security(id VARCHAR(100) PRIMARY KEY,"
-                    + " version BIGINT NOT NULL, payload TEXT NOT NULL)");
+                        + " version BIGINT NOT NULL, payload TEXT NOT NULL)");
         verify(new PostgresSecurityStateStore(jdbc), new PostgresSecurityStateStore(jdbc));
     }
 

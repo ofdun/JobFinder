@@ -169,7 +169,8 @@ class SecurityConfigurationTest {
         var response = new MockHttpServletResponse();
         var downstream = mock(FilterChain.class);
         when(provider.getAccountType("invalid-token")).thenReturn(AccountType.APPLICANT);
-        when(provider.validateAccessToken("invalid-token", AccountType.APPLICANT)).thenReturn(false);
+        when(provider.validateAccessToken("invalid-token", AccountType.APPLICANT))
+                .thenReturn(false);
 
         security.doFilter(request, response, downstream);
 

@@ -57,40 +57,41 @@ public class GraphQlConfiguration {
                                 List.of(
                                         new MaxQueryDepthInstrumentation(8),
                                         new MaxQueryComplexityInstrumentation(200))))
-                .defaultDataFetcherExceptionHandler(
-                        parameters -> {
-                            Throwable ex = parameters.getException();
-                            while (ex.getCause() != null
-                                    && (ex instanceof java.util.concurrent.CompletionException
-                                            || ex
-                                                    instanceof
-                                                    java.lang.reflect.InvocationTargetException))
-                                ex = ex.getCause();
-                            String code = errorCode(ex);
-                            if (code.equals("INTERNAL_SERVER_ERROR")
-                                    || code.equals("SERVICE_UNAVAILABLE"))
-                                org.slf4j.LoggerFactory.getLogger(GraphQlConfiguration.class)
-                                        .error("GraphQL field {} failed", parameters.getPath(), ex);
-                            String message =
-                                    switch (code) {
-                                        case "UNAUTHENTICATED" -> "Authentication required";
-                                        case "FORBIDDEN" -> "Access denied";
-                                        case "NOT_FOUND" -> "Resource not found";
-                                        case "CONFLICT" -> "Resource conflict";
-                                        case "BAD_USER_INPUT" -> "Invalid input";
-                                        case "SERVICE_UNAVAILABLE" -> "Service unavailable";
-                                        default -> "Internal server error";
-                                    };
-                            var error =
-                                    GraphqlErrorBuilder.newError(
-                                                    parameters.getDataFetchingEnvironment())
-                                            .message(message)
-                                            .extensions(Map.of("code", code))
-                                            .build();
-                            return CompletableFuture.completedFuture(
-                                    DataFetcherExceptionHandlerResult.newResult(error).build());
-                        })
+                .defaultDataFetcherExceptionHandler(GraphQlConfiguration::handleException)
                 .build();
+    }
+
+    private static CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
+            graphql.execution.DataFetcherExceptionHandlerParameters parameters) {
+        Throwable ex = parameters.getException();
+        while (ex.getCause() != null
+                && (ex instanceof java.util.concurrent.CompletionException
+                        || ex instanceof java.lang.reflect.InvocationTargetException))
+            ex = ex.getCause();
+        String code = errorCode(ex);
+        if (code.equals("INTERNAL_SERVER_ERROR") || code.equals("SERVICE_UNAVAILABLE"))
+            org.slf4j.LoggerFactory.getLogger(GraphQlConfiguration.class)
+                    .error("GraphQL field {} failed", parameters.getPath(), ex);
+        String message = errorMessage(code);
+        var error =
+                GraphqlErrorBuilder.newError(parameters.getDataFetchingEnvironment())
+                        .message(message)
+                        .extensions(Map.of("code", code))
+                        .build();
+        return CompletableFuture.completedFuture(
+                DataFetcherExceptionHandlerResult.newResult(error).build());
+    }
+
+    private static String errorMessage(String code) {
+        return switch (code) {
+            case "UNAUTHENTICATED" -> "Authentication required";
+            case "FORBIDDEN" -> "Access denied";
+            case "NOT_FOUND" -> "Resource not found";
+            case "CONFLICT" -> "Resource conflict";
+            case "BAD_USER_INPUT" -> "Invalid input";
+            case "SERVICE_UNAVAILABLE" -> "Service unavailable";
+            default -> "Internal server error";
+        };
     }
 
     static String errorCode(Throwable ex) {
@@ -100,16 +101,23 @@ public class GraphQlConfiguration {
         if (name.contains("AlreadyExists")
                 || ex instanceof org.springframework.dao.DataIntegrityViolationException)
             return "CONFLICT";
-        if (name.equals("InvalidPasswordException")
-                || name.equals("InvalidRefreshTokenException")
-                || name.equals("SessionIsOverException")) return "UNAUTHENTICATED";
+        if (Set.of(
+                        "InvalidPasswordException",
+                        "InvalidRefreshTokenException",
+                        "SessionIsOverException")
+                .contains(name)) return "UNAUTHENTICATED";
         if (ex instanceof org.springframework.security.access.AccessDeniedException)
             return "FORBIDDEN";
         if (ex instanceof IllegalArgumentException
                 || ex instanceof jakarta.validation.ValidationException) return "BAD_USER_INPUT";
-        if (ex instanceof org.springframework.dao.DataAccessResourceFailureException
-                || name.contains("Connection")
-                || name.contains("Timeout")) return "SERVICE_UNAVAILABLE";
+        if (isUnavailable(ex)) return "SERVICE_UNAVAILABLE";
         return "INTERNAL_SERVER_ERROR";
+    }
+
+    private static boolean isUnavailable(Throwable ex) {
+        String name = ex.getClass().getSimpleName();
+        return ex instanceof org.springframework.dao.DataAccessResourceFailureException
+                || name.contains("Connection")
+                || name.contains("Timeout");
     }
 }

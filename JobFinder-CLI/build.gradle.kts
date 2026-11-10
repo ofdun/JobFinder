@@ -48,7 +48,6 @@ tasks.test {
 }
 
 spotless {
-    ratchetFrom("origin/main")
 
     format("misc") {
         target("*.gradle", ".gitattributes", ".gitignore")

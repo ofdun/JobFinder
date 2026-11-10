@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SkillDocumentMongoEventListener extends AbstractMongoEventListener<@NonNull SkillDocument> {
+public class SkillDocumentMongoEventListener
+        extends AbstractMongoEventListener<@NonNull SkillDocument> {
     private static final String SKILLS_SEQUENCE_NAME = "skills_sequence";
 
     private final MongoSequenceService mongoSequenceService;
@@ -24,4 +25,3 @@ public class SkillDocumentMongoEventListener extends AbstractMongoEventListener<
         }
     }
 }
-

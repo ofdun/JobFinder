@@ -204,7 +204,6 @@ tasks.register("testAll") {
 apply(from = "../ci/testing.gradle")
 
 spotless {
-    ratchetFrom("origin/main")
 
     format("misc") {
         target("*.gradle", ".gitattributes", ".gitignore")

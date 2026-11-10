@@ -29,8 +29,8 @@ import org.testcontainers.utility.DockerImageName;
         properties = {
             "spring.flyway.enabled=false",
             "spring.autoconfigure.exclude="
-                + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+                    + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
+                    + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
         },
         classes = {QdrantResumeRepository.class, VectorClientConfiguration.class})
 @Testcontainers

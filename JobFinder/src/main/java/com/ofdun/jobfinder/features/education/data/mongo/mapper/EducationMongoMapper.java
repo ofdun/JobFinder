@@ -2,7 +2,6 @@ package com.ofdun.jobfinder.features.education.data.mongo.mapper;
 
 import com.ofdun.jobfinder.features.education.data.mongo.entity.EducationDocument;
 import com.ofdun.jobfinder.features.education.domain.model.EducationModel;
-import java.time.Year;
 
 public class EducationMongoMapper {
     public static EducationModel toModel(EducationDocument entity) {
@@ -33,4 +32,3 @@ public class EducationMongoMapper {
                 model.getYearOfGraduation());
     }
 }
-

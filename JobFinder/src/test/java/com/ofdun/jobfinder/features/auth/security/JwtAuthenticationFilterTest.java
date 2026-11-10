@@ -5,10 +5,11 @@ import static org.mockito.Mockito.*;
 
 import com.ofdun.jobfinder.features.auth.domain.jwt.JwtProvider;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -26,10 +27,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 @Tag("equivalence")
 @ExtendWith(MockitoExtension.class)

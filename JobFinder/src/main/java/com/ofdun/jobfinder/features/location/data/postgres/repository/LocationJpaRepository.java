@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LocationJpaRepository
         extends JpaRepository<@NonNull LocationEntity, @NonNull Long> {
-    List<LocationEntity>
-            findByCityContainingIgnoreCaseOrCountryContainingIgnoreCaseOrderByCityAsc(
-                    String cityQuery, String countryQuery, Pageable pageable);
+    List<LocationEntity> findByCityContainingIgnoreCaseOrCountryContainingIgnoreCaseOrderByCityAsc(
+            String cityQuery, String countryQuery, Pageable pageable);
 }

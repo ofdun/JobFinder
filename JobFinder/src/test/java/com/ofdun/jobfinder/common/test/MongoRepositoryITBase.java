@@ -16,23 +16,21 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class MongoRepositoryITBase {
 
-    @Container
-    static final MongoDBContainer mongo = new MongoDBContainer("mongo:7.0");
+    @Container static final MongoDBContainer mongo = new MongoDBContainer("mongo:7.0");
 
     @DynamicPropertySource
     static void registerMongoProperties(DynamicPropertyRegistry registry) {
-        String uri = String.format(
-                "mongodb://%s:%d/test?directConnection=true",
-                mongo.getHost(), mongo.getMappedPort(27017)
-        );
+        String uri =
+                String.format(
+                        "mongodb://%s:%d/test?directConnection=true",
+                        mongo.getHost(), mongo.getMappedPort(27017));
 
         registry.add("spring.data.mongodb.uri", () -> uri);
         registry.add("spring.mongodb.uri", () -> uri);
         registry.add("app.persistence.type", () -> "mongo");
     }
 
-    @Autowired
-    protected MongoTemplate mongoTemplate;
+    @Autowired protected MongoTemplate mongoTemplate;
 
     @BeforeEach
     void cleanDatabase() {

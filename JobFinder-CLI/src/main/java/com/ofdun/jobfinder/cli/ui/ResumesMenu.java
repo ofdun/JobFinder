@@ -182,24 +182,7 @@ public final class ResumesMenu {
     private void search() {
         var p = ctx.getPrompt();
         try {
-            Map<String, Object> q = new HashMap<>();
-            String text = p.readLine("q (подстрока, можно пусто): ");
-            if (!text.isBlank()) q.put("q", text);
-            Long applicantId = p.readLong("applicantId (можно пусто): ", true);
-            if (applicantId != null) q.put("applicantId", applicantId);
-            Long categoryId = p.readLong("categoryId (можно пусто): ", true);
-            if (categoryId != null) q.put("categoryId", categoryId);
-
-            var skillIds = p.readLongList("skillIds", true);
-            if (!skillIds.isEmpty()) q.put("skillIds", skillIds);
-            var languageIds = p.readLongList("languageIds", true);
-            if (!languageIds.isEmpty()) q.put("languageIds", languageIds);
-
-            Integer limit = p.readInt("limit (по умолчанию 20): ", true);
-            if (limit != null) q.put("limit", limit);
-            Integer offset = p.readInt("offset (по умолчанию 0): ", true);
-            if (offset != null) q.put("offset", offset);
-
+            Map<String, Object> q = searchParameters();
             ResumePageResponse page = ctx.getApi().searchResumes(q);
             if (page == null || page.items() == null) {
                 p.println("Пустой ответ.");
@@ -225,5 +208,28 @@ public final class ResumesMenu {
         } finally {
             p.pause();
         }
+    }
+
+    private Map<String, Object> searchParameters() {
+        var p = ctx.getPrompt();
+        Map<String, Object> q = new HashMap<>();
+        String text = p.readLine("q (подстрока, можно пусто): ");
+        if (!text.isBlank()) q.put("q", text);
+        Long applicantId = p.readLong("applicantId (можно пусто): ", true);
+        if (applicantId != null) q.put("applicantId", applicantId);
+        Long categoryId = p.readLong("categoryId (можно пусто): ", true);
+        if (categoryId != null) q.put("categoryId", categoryId);
+
+        var skillIds = p.readLongList("skillIds", true);
+        if (!skillIds.isEmpty()) q.put("skillIds", skillIds);
+        var languageIds = p.readLongList("languageIds", true);
+        if (!languageIds.isEmpty()) q.put("languageIds", languageIds);
+
+        Integer limit = p.readInt("limit (по умолчанию 20): ", true);
+        if (limit != null) q.put("limit", limit);
+        Integer offset = p.readInt("offset (по умолчанию 0): ", true);
+        if (offset != null) q.put("offset", offset);
+
+        return q;
     }
 }

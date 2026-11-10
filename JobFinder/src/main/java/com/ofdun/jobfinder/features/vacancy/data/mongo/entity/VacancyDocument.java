@@ -21,8 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VacancyDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long employerId;
 
@@ -50,4 +49,3 @@ public class VacancyDocument {
 
     @NotNull private VacancyStatus status;
 }
-

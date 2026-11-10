@@ -18,4 +18,3 @@ public class LocationMongoMapper {
         return new LocationModel(entity.getId(), entity.getCity(), entity.getCountry());
     }
 }
-

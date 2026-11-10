@@ -7,4 +7,3 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DraftVacancyJpaRepository extends JpaRepository<DraftVacancyEntity, Long> {
     List<DraftVacancyEntity> findAllByVacancyIdOrderByVersionTimestampDesc(Long vacancyId);
 }
-

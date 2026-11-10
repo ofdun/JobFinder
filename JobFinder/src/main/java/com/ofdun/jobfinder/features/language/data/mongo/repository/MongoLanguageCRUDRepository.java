@@ -9,4 +9,3 @@ public interface MongoLanguageCRUDRepository
         extends MongoRepository<@NonNull LanguageDocument, @NonNull Long> {
     List<LanguageDocument> findAllByOrderByNameAsc();
 }
-

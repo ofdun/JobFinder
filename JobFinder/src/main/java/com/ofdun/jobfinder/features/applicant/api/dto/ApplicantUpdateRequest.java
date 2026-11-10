@@ -32,4 +32,3 @@ public class ApplicantUpdateRequest {
     @NotNull(message = "Location is required")
     private Long locationId;
 }
-
