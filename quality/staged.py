@@ -16,7 +16,7 @@ def main():
         ).splitlines()
         for name in variables:
             environment.pop(name, None)
-        result = subprocess.run(["bash", "quality/check.sh"], cwd=root, env=environment)
+        result = subprocess.run(["bash", "JobFinder/gradlew", "-p", ".", "staticAnalysis", "--console=plain"], cwd=root, env=environment)
         if result.returncode:
             print("Коммит отменён: исправьте ошибки статического анализа.")
         return result.returncode

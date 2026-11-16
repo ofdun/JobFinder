@@ -231,3 +231,5 @@ tasks.processResources {
     from("../docs/schema.graphqls") { into("graphql") }
     from("../docs/swagger.yml") { into("static/api/v2"); rename { "openapi.yml" } }
 }
+
+apply(from = "../ci/quality.gradle")

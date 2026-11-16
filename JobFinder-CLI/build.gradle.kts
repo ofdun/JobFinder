@@ -77,3 +77,5 @@ application {
 tasks.named<JavaExec>("run") {
     standardInput = System.`in`
 }
+
+apply(from = "../ci/quality.gradle")

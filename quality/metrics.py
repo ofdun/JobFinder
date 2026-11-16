@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from argparse import Namespace
+from argparse import ArgumentParser, Namespace
 from html import escape
 
 import lizard
@@ -14,8 +14,9 @@ LIMIT = 10
 SOURCE_ROOTS = ("JobFinder/src", "JobFinder-CLI/src")
 
 
-def sources():
-    files = sorted(path for source in SOURCE_ROOTS for path in (ROOT / source).rglob("*.java"))
+def sources(module=None):
+    roots = (module / "src",) if module else tuple(ROOT / source for source in SOURCE_ROOTS)
+    files = sorted(path for source in roots for path in source.rglob("*.java"))
     if not files:
         raise ValueError("Не найдены Java-исходники")
     return files
@@ -73,10 +74,14 @@ def render(report, output):
 
 
 def main():
-    files = sources()
+    parser = ArgumentParser()
+    parser.add_argument("--module", type=Path)
+    args = parser.parse_args()
+    module = args.module.resolve() if args.module else None
+    files = sources(module)
     methods = cyclomatic(files)
     measures = halstead(files)
-    output = ROOT / "JobFinder/build/reports/quality"
+    output = (module or ROOT / "JobFinder") / "build/reports/quality"
     output.mkdir(parents=True, exist_ok=True)
     report = {"limit": LIMIT, "methods": methods, "halstead": measures}
     (output / "metrics.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")

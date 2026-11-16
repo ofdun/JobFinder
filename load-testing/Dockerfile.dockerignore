@@ -11,3 +11,5 @@
 !docs
 !docs/swagger.yml
 !docs/schema.graphqls
+
+!ci/quality.gradle
