@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.auth.mfa;
 import com.ofdun.jobfinder.features.api.ApiFailure;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity.Account;
+import io.micrometer.observation.annotation.Observed;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -19,6 +20,10 @@ public class TotpAuthentication {
     private final TotpSupport totp;
     private final Clock clock;
 
+    @Observed(
+            name = "jobfinder.auth.service.setup",
+            contextualName = "Подготовка подключения TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Map<String, String> setup(AccountType type, long id, String password) {
         var account = accounts.account(type, id);
         accounts.checkCurrentPassword(account, password);
@@ -38,6 +43,10 @@ public class TotpAuthentication {
         return Map.of("secret", secret, "qrCode", totp.qr(secret, account.email()));
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.enable",
+            contextualName = "Подтверждение подключения TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public List<String> enable(AccountType type, long id, String code) {
         List<String> backup = new ArrayList<>();
         for (int i = 0; i < 10; i++) backup.add(totp.randomToken());
@@ -72,6 +81,10 @@ public class TotpAuthentication {
         return backup;
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.disable",
+            contextualName = "Отключение TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void disable(AccountType type, long id, String password, String code) {
         var account = accounts.account(type, id);
         accounts.checkCurrentPassword(account, password);
@@ -79,6 +92,10 @@ public class TotpAuthentication {
         reset(type, id);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.verifyFactor",
+            contextualName = "Проверка второго фактора",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void verifyFactor(Account account, String code) {
         int result =
                 states.update(
@@ -103,6 +120,10 @@ public class TotpAuthentication {
         accounts.requireSuccess(result, account.type(), account.id());
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.reset",
+            contextualName = "Сброс настроек TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void reset(AccountType type, long id) {
         states.update(
                 type,

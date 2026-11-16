@@ -1,6 +1,7 @@
 package com.ofdun.jobfinder.features.auth.mfa;
 
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import io.micrometer.observation.annotation.Observed;
 import java.util.function.Function;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,15 +19,48 @@ public class PostgresSecurityStateStore implements SecurityStateStore {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.repository.get",
+            contextualName = "PostgreSQL: получение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public SecurityState get(AccountType type, long id) {
         return SecurityStateStore.super.get(type, id);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.repository.update",
+            contextualName = "PostgreSQL: атомарное обновление состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public <T> T update(AccountType type, long id, Function<SecurityState, T> action) {
         return SecurityStateStore.super.update(type, id, action);
     }
 
+    @Observed(
+            name = "jobfinder.auth.repository.read",
+            contextualName = "PostgreSQL: чтение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Snapshot read(String key) {
         return jdbc
                 .query(
@@ -40,6 +74,17 @@ public class PostgresSecurityStateStore implements SecurityStateStore {
                 .orElseGet(() -> new Snapshot(-1, new SecurityState()));
     }
 
+    @Observed(
+            name = "jobfinder.auth.repository.save",
+            contextualName = "PostgreSQL: сохранение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public boolean save(String key, long version, SecurityState state) {
         if (version == -1) {
             return jdbc.update(
@@ -58,6 +103,17 @@ public class PostgresSecurityStateStore implements SecurityStateStore {
                 == 1;
     }
 
+    @Observed(
+            name = "jobfinder.auth.repository.delete",
+            contextualName = "PostgreSQL: удаление состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public void delete(String key) {
         jdbc.update("DELETE FROM jobfinder.account_security WHERE id = ?", key);
     }

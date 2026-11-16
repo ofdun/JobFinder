@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaRequest;
 import com.ofdun.jobfinder.features.clients.ai.DTO.OllamaResponse;
 import com.ofdun.jobfinder.features.clients.ai.exception.AiEmptyRespondException;
+import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -24,6 +25,12 @@ public class OllamaAiClient implements AiClient {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.clients.client.getEmbedding",
+            contextualName = "Ollama: построение вектора текста в Ollama",
+            lowCardinalityKeyValues = {
+                "feature", "clients", "layer", "client", "storage", "Ollama"
+            })
     public List<Float> getEmbedding(@NonNull String content) {
 
         var response =

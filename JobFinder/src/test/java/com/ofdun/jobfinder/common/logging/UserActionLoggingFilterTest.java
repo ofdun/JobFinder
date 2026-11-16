@@ -36,8 +36,19 @@ class UserActionLoggingFilterTest {
                     assertNull(MDC.get("trace_id"));
                 });
         assertEquals("request-id", response.getHeader("X-Request-Id"));
+        assertEquals("existing-trace", response.getHeader("X-Trace-Id"));
         assertEquals("existing-trace", MDC.get("traceId"));
         assertNull(MDC.get("request_id"));
+    }
+
+    @Test
+    void noTraceHeaderIsInventedWithoutTracing() throws Exception {
+        var response = new MockHttpServletResponse();
+        filter.doFilter(
+                new MockHttpServletRequest("GET", "/api/v1/categories"),
+                response,
+                (request, result) -> {});
+        assertNull(response.getHeader("X-Trace-Id"));
     }
 
     @Test

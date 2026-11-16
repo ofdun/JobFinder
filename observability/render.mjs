@@ -62,7 +62,7 @@ try {
   for (const profile of profiles) {
     const runs = data.runs.filter(r => r.profile === profile);
     const summaries = await Promise.all(runs.map(async r => JSON.parse(await readFile(path.join(root,r.run,'summary.json'),'utf8'))));
-    await capture(page,'comparison',{suite,profile},`${profile}.png`,Math.min(...summaries.map(s=>s.measurement_start)),Math.max(...summaries.map(s=>s.measurement_stop)),9);
+    await capture(page,'comparison',{suite,profile},`${profile}.png`,Math.min(...summaries.map(s=>s.measurement_start)),Math.max(...summaries.map(s=>s.measurement_stop)),7);
     overview += `<h2>${escape(profile)}</h2><img src="grafana/${profile}.png" alt="${escape(profile)} — Grafana">`;
   }
   overview += '<h2>Прогоны</h2><div class="table"><table><tr><th>Сценарий</th><th>Настройки</th><th>Запросы</th><th>Ошибки</th></tr>';

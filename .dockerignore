@@ -1,0 +1,16 @@
+.git
+.local
+**/node_modules
+**/build
+**/dist
+**/.gradle
+**/.env
+**/logs
+**/*.log
+**/.DS_Store
+
+!JobFinder/build/libs/*SNAPSHOT.jar
+
+
+**/results
+.ci-*

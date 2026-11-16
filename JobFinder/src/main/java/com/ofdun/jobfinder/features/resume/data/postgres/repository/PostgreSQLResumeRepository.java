@@ -11,6 +11,7 @@ import com.ofdun.jobfinder.features.resume.data.spec.ResumeSpecifications;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Optional;
@@ -32,6 +33,17 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
 
     @Override
     @Transactional
+    @Observed(
+            name = "jobfinder.resume.repository.createResume",
+            contextualName = "PostgreSQL: создание резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Long createResume(ResumeModel resumeModel) {
         var savedResume = resumeJpaRepository.save(ResumeMapper.toEntity(resumeModel));
         var resumeId = savedResume.getId();
@@ -67,6 +79,17 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
 
     @Override
     @Transactional(readOnly = true)
+    @Observed(
+            name = "jobfinder.resume.repository.getResumeById",
+            contextualName = "PostgreSQL: получение резюме по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Optional<ResumeModel> getResumeById(Long resumeId) {
         return resumeJpaRepository
                 .findById(resumeId)
@@ -89,6 +112,17 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
 
     @Override
     @Transactional
+    @Observed(
+            name = "jobfinder.resume.repository.updateResume",
+            contextualName = "PostgreSQL: обновление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public ResumeModel updateResume(ResumeModel resumeModel) {
         var savedResume = resumeJpaRepository.save(ResumeMapper.toEntity(resumeModel));
         var resumeId = savedResume.getId();
@@ -127,6 +161,17 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
 
     @Override
     @Transactional
+    @Observed(
+            name = "jobfinder.resume.repository.deleteResume",
+            contextualName = "PostgreSQL: удаление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Boolean deleteResume(Long resumeId) {
         if (resumeJpaRepository.findById(resumeId).isEmpty()) {
             return false;
@@ -141,6 +186,17 @@ public class PostgreSQLResumeRepository implements RelationalResumeRepository {
 
     @Override
     @Transactional(readOnly = true)
+    @Observed(
+            name = "jobfinder.resume.repository.searchResumes",
+            contextualName = "PostgreSQL: поиск резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public PageResult<ResumeModel> searchResumes(
             ResumeSearchFilter filter, int limit, int offset, String sortBy, boolean sortDesc) {
         Specification<ResumeEntity> spec = ResumeSpecifications.byFilter(filter);

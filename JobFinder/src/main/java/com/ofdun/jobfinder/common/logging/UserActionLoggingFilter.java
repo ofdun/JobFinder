@@ -41,6 +41,8 @@ public class UserActionLoggingFilter extends OncePerRequestFilter {
         MDC.put("service", "JobFinder");
         MDC.put("request_id", requestId);
         response.setHeader("X-Request-Id", requestId);
+        String traceId = MDC.get("traceId");
+        if (traceId != null) response.setHeader("X-Trace-Id", traceId);
         MDC.put("http.method", request.getMethod());
         MDC.put("http.path", request.getRequestURI());
         MDC.put("event.action", request.getMethod() + " " + request.getRequestURI());

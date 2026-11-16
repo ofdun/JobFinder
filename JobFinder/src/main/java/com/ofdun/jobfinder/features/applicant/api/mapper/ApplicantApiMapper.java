@@ -7,6 +7,7 @@ import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 import com.ofdun.jobfinder.features.encrypt.EncryptionService;
 import com.ofdun.jobfinder.features.location.api.mapper.LocationApiMapper;
 import com.ofdun.jobfinder.features.location.domain.model.LocationModel;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,10 @@ import org.springframework.stereotype.Component;
 public class ApplicantApiMapper {
     private final EncryptionService encryptionService;
 
+    @Observed(
+            name = "jobfinder.applicant.mapper.toModel",
+            contextualName = "Подготовка модели соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "mapper"})
     public ApplicantModel toModel(ApplicantRequest request) {
         if (request == null) return null;
         return new ApplicantModel(
@@ -27,6 +32,10 @@ public class ApplicantApiMapper {
                 request.getLocationId());
     }
 
+    @Observed(
+            name = "jobfinder.applicant.mapper.toModel",
+            contextualName = "Подготовка модели соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "mapper"})
     public ApplicantModel toModel(ApplicantUpdateRequest request, String currentPasswordHash) {
         if (request == null) return null;
 
@@ -45,6 +54,10 @@ public class ApplicantApiMapper {
                 request.getLocationId());
     }
 
+    @Observed(
+            name = "jobfinder.applicant.mapper.toResponse",
+            contextualName = "Подготовка ответа API для соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "mapper"})
     public ApplicantResponse toResponse(ApplicantModel model, LocationModel location) {
         if (model == null) return null;
         return new ApplicantResponse(

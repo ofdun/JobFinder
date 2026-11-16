@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.auth.data.mapper.EmployerAccountMapper;
 import com.ofdun.jobfinder.features.auth.domain.model.EmployerAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.EmployerAccountRepository;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,17 @@ public class PostgreSQLEmployerAccountRepository implements EmployerAccountRepos
     private final EmployerRepository employerRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.repository.findByEmail",
+            contextualName = "PostgreSQL: поиск учётной записи по почте",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public EmployerAccountModel findByEmail(String email) {
         return employerRepository
                 .getEmployerByEmail(email)

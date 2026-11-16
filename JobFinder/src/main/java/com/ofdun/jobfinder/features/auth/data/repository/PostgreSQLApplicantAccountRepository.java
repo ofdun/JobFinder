@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantReposit
 import com.ofdun.jobfinder.features.auth.data.mapper.ApplicantAccountMapper;
 import com.ofdun.jobfinder.features.auth.domain.model.ApplicantAccountModel;
 import com.ofdun.jobfinder.features.auth.domain.repository.ApplicantAccountRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,6 +17,17 @@ public class PostgreSQLApplicantAccountRepository implements ApplicantAccountRep
     private final ApplicantRepository applicantRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.repository.findByEmail",
+            contextualName = "PostgreSQL: поиск учётной записи по почте",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Optional<ApplicantAccountModel> findByEmail(String email) {
         return applicantRepository.getApplicantByEmail(email).map(ApplicantAccountMapper::toModel);
     }

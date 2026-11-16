@@ -7,6 +7,7 @@ import com.ofdun.jobfinder.features.resume.data.mongo.mapper.ResumeMongoMapper;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,6 +27,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
     private final MongoJobExperienceRepository mongoJobExperienceRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.createResume",
+            contextualName = "MongoDB: создание резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Long createResume(ResumeModel resumeModel) {
         var savedResume = mongoResumeCRUDRepository.save(ResumeMongoMapper.toEntity(resumeModel));
         var resumeId = savedResume.getId();
@@ -56,6 +68,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.getResumeById",
+            contextualName = "MongoDB: получение резюме по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Optional<ResumeModel> getResumeById(Long resumeId) {
         return mongoResumeCRUDRepository
                 .findById(resumeId)
@@ -74,6 +97,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.updateResume",
+            contextualName = "MongoDB: обновление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public ResumeModel updateResume(ResumeModel resumeModel) {
         var savedResume = mongoResumeCRUDRepository.save(ResumeMongoMapper.toEntity(resumeModel));
         var resumeId = savedResume.getId();
@@ -107,6 +141,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.deleteResume",
+            contextualName = "MongoDB: удаление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Boolean deleteResume(Long resumeId) {
         return mongoResumeCRUDRepository
                 .findById(resumeId)
@@ -121,6 +166,17 @@ public class MongoResumeRepository implements RelationalResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.searchResumes",
+            contextualName = "MongoDB: поиск резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public PageResult<ResumeModel> searchResumes(
             ResumeSearchFilter filter, int limit, int offset, String sortBy, boolean sortDesc) {
         var filtered =

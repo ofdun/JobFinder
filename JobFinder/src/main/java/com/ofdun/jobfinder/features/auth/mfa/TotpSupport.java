@@ -1,25 +1,22 @@
 package com.ofdun.jobfinder.features.auth.mfa;
 
 import com.ofdun.jobfinder.features.api.ApiFailure;
-
 import dev.samstevens.totp.code.DefaultCodeGenerator;
 import dev.samstevens.totp.code.HashingAlgorithm;
 import dev.samstevens.totp.qr.QrData;
 import dev.samstevens.totp.qr.ZxingPngQrGenerator;
 import dev.samstevens.totp.secret.DefaultSecretGenerator;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
+import io.micrometer.observation.annotation.Observed;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TotpSupport {
@@ -30,16 +27,28 @@ public class TotpSupport {
         this.encryptionKey = encryptionKey;
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.newSecret",
+            contextualName = "Генерация секрета TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String newSecret() {
         return new DefaultSecretGenerator().generate();
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.randomToken",
+            contextualName = "Генерация одноразового токена",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String randomToken() {
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.qr",
+            contextualName = "Создание QR-кода TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String qr(String secret, String email) {
         try {
             var data =
@@ -58,6 +67,10 @@ public class TotpSupport {
         }
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.matchedStep",
+            contextualName = "Проверка кода TOTP и повторного использования",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public long matchedStep(String secret, String code, long nowMillis, long lastStep) {
         if (code == null || !code.matches("[0-9]{6}")) return -1;
         long current = nowMillis / 30_000;
@@ -77,6 +90,10 @@ public class TotpSupport {
         }
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.encrypt",
+            contextualName = "Шифрование секрета TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String encrypt(String secret, String accountKey) {
         try {
             var key = key();
@@ -96,6 +113,10 @@ public class TotpSupport {
         }
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.decrypt",
+            contextualName = "Расшифровка секрета TOTP",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String decrypt(String encrypted, String accountKey) {
         try {
             var cipher = Cipher.getInstance("AES/GCM/NoPadding");

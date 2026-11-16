@@ -10,12 +10,17 @@ import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyRequest;
 import com.ofdun.jobfinder.features.vacancy.api.dto.VacancyResponse;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
+import io.micrometer.observation.annotation.Observed;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VacancyApiMapper {
+    @Observed(
+            name = "jobfinder.vacancy.mapper.toModel",
+            contextualName = "Подготовка модели вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "mapper"})
     public VacancyModel toModel(VacancyRequest request) {
         if (request == null) return null;
         return new VacancyModel(
@@ -35,6 +40,10 @@ public class VacancyApiMapper {
                 request.getStatus() == null ? VacancyStatus.ACTIVE : request.getStatus());
     }
 
+    @Observed(
+            name = "jobfinder.vacancy.mapper.toResponse",
+            contextualName = "Подготовка ответа API для вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "mapper"})
     public VacancyResponse toResponse(
             VacancyModel model,
             LocationModel location,

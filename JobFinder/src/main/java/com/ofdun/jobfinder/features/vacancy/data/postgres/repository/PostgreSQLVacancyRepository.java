@@ -8,6 +8,7 @@ import com.ofdun.jobfinder.features.vacancy.data.spec.VacancySpecifications;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Optional;
@@ -25,16 +26,49 @@ public class PostgreSQLVacancyRepository implements VacancyRepository {
     @PersistenceContext private EntityManager entityManager;
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.createVacancy",
+            contextualName = "PostgreSQL: создание вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Long createVacancy(VacancyModel vacancyModel) {
         return vacancyJpaRepository.save(VacancyMapper.toEntity(vacancyModel)).getId();
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.getVacancyById",
+            contextualName = "PostgreSQL: получение вакансии по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Optional<VacancyModel> getVacancyById(Long id) {
         return vacancyJpaRepository.findById(id).map(VacancyMapper::toModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.updateVacancy",
+            contextualName = "PostgreSQL: обновление вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public VacancyModel updateVacancy(VacancyModel vacancyModel) {
         return vacancyJpaRepository.save(VacancyMapper.toEntity(vacancyModel)).getId() != null
                 ? vacancyModel
@@ -42,6 +76,17 @@ public class PostgreSQLVacancyRepository implements VacancyRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.deleteVacancy",
+            contextualName = "PostgreSQL: удаление вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Boolean deleteVacancy(Long id) {
         return vacancyJpaRepository
                 .findById(id)
@@ -54,6 +99,17 @@ public class PostgreSQLVacancyRepository implements VacancyRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.searchVacancies",
+            contextualName = "PostgreSQL: поиск вакансий",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public PageResult<VacancyModel> searchVacancies(
             VacancySearchFilter filter, OffsetPagination pagination) {
         OffsetPagination p = pagination == null ? OffsetPagination.builder().build() : pagination;

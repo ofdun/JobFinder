@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.clients.ai.AiClient;
 import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.util.Collections;
 import java.util.List;
 import lombok.NonNull;
@@ -18,6 +19,10 @@ public class BasicMatchingService implements MatchingService {
     private final AiClient aiClient;
 
     @Override
+    @Observed(
+            name = "jobfinder.matching.service.findSuitableCandidates",
+            contextualName = "Подбор кандидатов на вакансию",
+            lowCardinalityKeyValues = {"feature", "matching", "layer", "service"})
     public List<MatchResultModel> findSuitableCandidates(
             @NonNull Long vacancyId, @NonNull Integer maxAmount) {
         if (maxAmount <= 0) {

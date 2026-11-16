@@ -3,7 +3,7 @@
   "title": "Ресурсы",
   "schemaVersion": 39,
   "version": 1,
-  "editable": false,
+  "editable": true,
   "timezone": "utc",
   "refresh": "",
   "time": {

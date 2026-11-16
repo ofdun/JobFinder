@@ -12,11 +12,16 @@ import com.ofdun.jobfinder.features.resume.api.dto.ResumeUpdateRequest;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.skill.api.mapper.SkillApiMapper;
 import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
+import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ResumeApiMapper {
+    @Observed(
+            name = "jobfinder.resume.mapper.toModel",
+            contextualName = "Подготовка модели резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "mapper"})
     public ResumeModel toModel(ResumeRequest request) {
         if (request == null) {
             return null;
@@ -41,6 +46,10 @@ public class ResumeApiMapper {
                 null);
     }
 
+    @Observed(
+            name = "jobfinder.resume.mapper.toModel",
+            contextualName = "Подготовка модели резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "mapper"})
     public ResumeModel toModel(ResumeUpdateRequest request) {
         if (request == null) {
             return null;
@@ -65,6 +74,10 @@ public class ResumeApiMapper {
                 null);
     }
 
+    @Observed(
+            name = "jobfinder.resume.mapper.toResponse",
+            contextualName = "Подготовка ответа API для резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "mapper"})
     public ResumeResponse toResponse(
             ResumeModel resume,
             CategoryModel category,

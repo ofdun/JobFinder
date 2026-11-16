@@ -6,6 +6,7 @@ import com.ofdun.jobfinder.features.vacancy.data.mongo.mapper.VacancyMongoMapper
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,22 +25,66 @@ public class MongoVacancyRepository implements VacancyRepository {
     private final MongoVacancyCRUDRepository mongoRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.createVacancy",
+            contextualName = "MongoDB: создание вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Long createVacancy(VacancyModel vacancyModel) {
         return mongoRepository.save(VacancyMongoMapper.toEntity(vacancyModel)).getId();
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.getVacancyById",
+            contextualName = "MongoDB: получение вакансии по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Optional<VacancyModel> getVacancyById(Long id) {
         return mongoRepository.findById(id).map(VacancyMongoMapper::toModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.updateVacancy",
+            contextualName = "MongoDB: обновление вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public VacancyModel updateVacancy(VacancyModel vacancyModel) {
         var saved = mongoRepository.save(VacancyMongoMapper.toEntity(vacancyModel));
         return VacancyMongoMapper.toModel(saved);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.deleteVacancy",
+            contextualName = "MongoDB: удаление вакансии",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Boolean deleteVacancy(Long id) {
         return mongoRepository
                 .findById(id)
@@ -52,6 +97,17 @@ public class MongoVacancyRepository implements VacancyRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.repository.searchVacancies",
+            contextualName = "MongoDB: поиск вакансий",
+            lowCardinalityKeyValues = {
+                "feature",
+                "vacancy",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public PageResult<VacancyModel> searchVacancies(
             VacancySearchFilter filter, OffsetPagination pagination) {
         OffsetPagination p = pagination == null ? OffsetPagination.builder().build() : pagination;
