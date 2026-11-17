@@ -5,6 +5,7 @@ import com.ofdun.jobfinder.features.applicant.domain.repository.ApplicantReposit
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.employer.domain.repository.EmployerRepository;
 import com.ofdun.jobfinder.features.encrypt.EncryptionService;
+import io.micrometer.observation.annotation.Observed;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
@@ -51,6 +52,10 @@ public class AccountSecurity {
 
     record Account(AccountType type, long id, String email, String hash) {}
 
+    @Observed(
+            name = "jobfinder.auth.service.find",
+            contextualName = "Поиск аккаунта",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     Optional<Account> find(AccountType type, String email) {
         if (type == AccountType.APPLICANT)
             return applicants
@@ -61,6 +66,10 @@ public class AccountSecurity {
                 .map(a -> new Account(type, a.getId(), a.getEmail(), a.getPasswordHash()));
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.account",
+            contextualName = "Получение аккаунта",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     Account account(AccountType type, long id) {
         if (type == AccountType.APPLICANT)
             return applicants
@@ -73,16 +82,28 @@ public class AccountSecurity {
                 .orElseThrow(AccountSecurity::invalid);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.sessionStamp",
+            contextualName = "Получение версии сессии",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String sessionStamp(AccountType type, long id) {
         var account = account(type, id);
         return TotpSupport.digest(account.hash() + ":" + states.get(type, id).sessionVersion);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.sessionAllowed",
+            contextualName = "Проверка актуальности сессии",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public boolean sessionAllowed(AccountType type, long id, String stamp) {
         var state = states.get(type, id);
         return !state.locked && !expired(state) && sessionStamp(type, id).equals(stamp);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.status",
+            contextualName = "Получение настроек безопасности",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Map<String, Object> status(AccountType type, long id) {
         var state = states.get(type, id);
         return Map.of(
@@ -94,21 +115,37 @@ public class AccountSecurity {
                 state.passwordChangedAt + passwordLifetime);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.checkProfilePasswordChange",
+            contextualName = "Проверка смены пароля профиля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void checkProfilePasswordChange(AccountType type, long id, String newHash) {
         if (!account(type, id).hash().equals(newHash) && states.get(type, id).secret != null)
             throw new ApiFailure(
                     "PASSWORD_CHANGE_REQUIRED", 409, "Используйте защищённую смену пароля");
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.remove",
+            contextualName = "Удаление настроек безопасности",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void remove(AccountType type, long id) {
         states.delete(states.key(type, id));
         redis.delete("auth:recovery:" + states.key(type, id));
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.checkPassword",
+            contextualName = "Проверка пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void checkPassword(Account account, String password) {
         if (!passwords.matches(password, account.hash())) throw invalid();
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.checkCurrentPassword",
+            contextualName = "Проверка текущего пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void checkCurrentPassword(Account account, String password) {
         try {
             checkPassword(account, password);
@@ -123,6 +160,10 @@ public class AccountSecurity {
         }
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.checkUnlocked",
+            contextualName = "Проверка блокировки аккаунта",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void checkUnlocked(Account account) {
         if (!states.get(account.type(), account.id()).locked) return;
         boolean locked =
@@ -155,10 +196,18 @@ public class AccountSecurity {
         return 401;
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.expired",
+            contextualName = "Проверка срока действия пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     boolean expired(SecurityState state) {
         return clock.millis() - state.passwordChangedAt >= passwordLifetime;
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.validateNewPassword",
+            contextualName = "Проверка нового пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void validateNewPassword(Account account, String password) {
         if (password == null
                 || password.length() < 12
@@ -171,6 +220,10 @@ public class AccountSecurity {
                             + " байт");
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.replacePassword",
+            contextualName = "Обновление пароля аккаунта",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void replacePassword(Account account, String password) {
         String hash = passwords.encrypt(password);
         states.update(
@@ -207,6 +260,10 @@ public class AccountSecurity {
         return new ApiFailure("UNAUTHENTICATED", 401, "Неверные данные аутентификации");
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.requireSuccess",
+            contextualName = "Проверка результата аутентификации",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     void requireSuccess(int status, AccountType type, long id) {
         if (status == 423) {
             var state = states.get(type, id);

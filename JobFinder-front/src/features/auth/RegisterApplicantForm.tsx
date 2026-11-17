@@ -24,7 +24,7 @@ export function RegisterApplicantForm() {
         phoneNumber,
         locationId: locationId as number,
       }),
-    onSuccess: () => navigate('/login'),
+    onSuccess: () => navigate('/login?role=applicant'),
   });
 
   const onSubmit = (event: FormEvent) => {

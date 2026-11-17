@@ -1,0 +1,46 @@
+extensions:
+  file_storage:
+    directory: /var/lib/otelcol
+receivers:
+  filelog:
+    include: [/var/log/jobfinder/jobfinder.log]
+    start_at: end
+    storage: file_storage
+    resource:
+      service.name: JobFinder
+    operators:
+    - type: json_parser
+      timestamp:
+        parse_from: attributes.timestamp
+        layout_type: gotime
+        layout: '2006-01-02T15:04:05.999999999Z07:00'
+      severity:
+        parse_from: attributes.level
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 192
+    spike_limit_mib: 32
+  batch:
+    timeout: 1s
+    send_batch_size: 512
+exporters:
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+  otlp_http/tempo:
+    endpoint: http://tempo:4318
+service:
+  extensions: [file_storage]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/tempo]
+    logs:
+      receivers: [filelog]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/loki]

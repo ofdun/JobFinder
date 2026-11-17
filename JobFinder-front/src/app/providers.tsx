@@ -6,7 +6,7 @@ import { queryClient } from '../shared/lib/queryClient';
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>{children}</BrowserRouter>
     </QueryClientProvider>
   );
 }

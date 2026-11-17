@@ -26,7 +26,7 @@ export function RegisterEmployerForm() {
         websiteLink,
         locationId: locationId as number,
       }),
-    onSuccess: () => navigate('/login'),
+    onSuccess: () => navigate('/login?role=employer'),
   });
 
   const onSubmit = (event: FormEvent) => {

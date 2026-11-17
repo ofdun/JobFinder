@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.NonNull;
@@ -36,17 +37,25 @@ public class UserActionLoggingFilter extends OncePerRequestFilter {
                         .filter(v -> !v.isBlank())
                         .orElseGet(() -> UUID.randomUUID().toString());
 
+        Map<String, String> previousContext = MDC.getCopyOfContextMap();
         MDC.put("service", "JobFinder");
         MDC.put("request_id", requestId);
-        MDC.put("trace_id", requestId);
         response.setHeader("X-Request-Id", requestId);
+        String traceId = MDC.get("traceId");
+        if (traceId != null) response.setHeader("X-Trace-Id", traceId);
         MDC.put("http.method", request.getMethod());
         MDC.put("http.path", request.getRequestURI());
         MDC.put("event.action", request.getMethod() + " " + request.getRequestURI());
         putActor(request);
 
         try {
+            log.debug("User action started");
             filterChain.doFilter(request, response);
+            putActor(request);
+            log.debug(
+                    "User action dispatched: dispatcher={}, async={}",
+                    request.getDispatcherType(),
+                    request.isAsyncStarted());
             logOutcome(response.getStatus(), startedAt, null);
         } catch (Exception ex) {
             MDC.put("error.type", ex.getClass().getSimpleName());
@@ -54,6 +63,9 @@ public class UserActionLoggingFilter extends OncePerRequestFilter {
             throw ex;
         } finally {
             MDC.clear();
+            if (previousContext != null) {
+                MDC.setContextMap(previousContext);
+            }
         }
     }
 

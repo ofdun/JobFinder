@@ -1,5 +1,6 @@
 package com.ofdun.jobfinder.features.api;
 
+import com.ofdun.jobfinder.common.observability.TraceDiagnostics;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantAlreadyExistsException;
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
 import com.ofdun.jobfinder.features.application.exception.ApplicationAlreadyExistsException;
@@ -18,9 +19,9 @@ import com.ofdun.jobfinder.features.resume.exception.ResumeNotFoundException;
 import com.ofdun.jobfinder.features.skill.exception.SkillNotFoundException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyAlreadyExistsException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
-
 import jakarta.validation.ConstraintViolationException;
-
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -31,9 +32,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Arrays;
-import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,6 +64,7 @@ public class GlobalExceptionHandler {
     })
     public org.springframework.http.ResponseEntity<ApiErrorResponse> handleHttpProtocolException(
             Exception ex) {
+        TraceDiagnostics.recordHttpFailure(ex, "HTTP_PROTOCOL_ERROR");
         var error = (org.springframework.web.ErrorResponse) ex;
         int status = error.getStatusCode().value();
         return org.springframework.http.ResponseEntity.status(status)
@@ -76,6 +75,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiFailure.class)
     public org.springframework.http.ResponseEntity<ApiErrorResponse> handleApiFailure(
             ApiFailure ex) {
+        TraceDiagnostics.recordHttpFailure(ex, ex.getCode());
         var response = org.springframework.http.ResponseEntity.status(ex.getStatus());
         if (ex.getStatus() == 401) response.header("WWW-Authenticate", "Bearer");
         return response.body(
@@ -282,6 +282,7 @@ public class GlobalExceptionHandler {
 
     private ApiErrorResponse createErrorResponse(
             String message, HttpStatus status, String errorCode, Exception ex) {
+        TraceDiagnostics.recordHttpFailure(ex, errorCode);
         logBusinessException(message, status, errorCode, ex);
         List<String> stackTrace =
                 Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).toList();

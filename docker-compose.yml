@@ -1,3 +1,6 @@
+include:
+- ./observability/compose.yml
+
 services:
   ollama:
     build: ./docker/ollama
@@ -58,6 +61,10 @@ services:
     working_dir: /workspace/JobFinder
     environment:
       GRADLE_USER_HOME: /home/gradle/.gradle
+      SPRING_DATA_REDIS_HOST: redis
+      TRACING_ENABLED: 'true'
+      TRACING_ENDPOINT: http://otel-collector:4318/v1/traces
+      LOGGING_LEVEL_COM_OFDUN_JOBFINDER_COMMON_LOGGING: DEBUG
     command: sh -c "chmod +x ./gradlew && ./gradlew bootRun --no-daemon"
     env_file:
       - ./JobFinder/.env
@@ -67,11 +74,13 @@ services:
       - qdrant
       - ollama
       - mongodb
+      - otel-collector
     ports:
       - "8080:8080"
     volumes:
       - ./JobFinder:/workspace/JobFinder
       - ./docs:/workspace/docs:ro
+      - ./ci:/workspace/ci:ro
       - gradle_cache:/home/gradle/.gradle
       - backend_logs:/workspace/JobFinder/logs
 
@@ -81,6 +90,7 @@ services:
     working_dir: /workspace/JobFinder-front
     environment:
       VITE_PROXY_TARGET: http://jobfinder-backend:8080
+      VITE_BASE_PATH: /legacy/
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     depends_on:
       - backend
@@ -89,6 +99,43 @@ services:
     volumes:
       - ./JobFinder-front:/workspace/JobFinder-front
       - frontend_node_modules:/workspace/JobFinder-front/node_modules
+
+  adminer:
+    image: adminer:6.0.1-standalone
+    container_name: jobfinder-adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: project-gateway
+    container_name: jobfinder-gateway
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${JOBFINDER_HTTP_PORT:-8088}:80
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/static/management.html:/usr/share/nginx/html/static/management.html:ro
+    secrets:
+      - admin_htpasswd
+    depends_on:
+      - backend
+      - frontend
+      - adminer
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1/health]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+secrets:
+  admin_htpasswd:
+    file: ./.local/gateway/admin.htpasswd
 
 volumes:
   mongodb_data:

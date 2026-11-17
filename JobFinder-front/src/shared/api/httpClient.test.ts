@@ -1,7 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('httpClient refresh flow', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/');
     vi.resetModules();
 
     const storage = new Map<string, string>();
@@ -131,5 +134,36 @@ describe('httpClient refresh flow', () => {
     expect(sessionStore.getSession()).toBeNull();
     expect(globalThis.window.location.assign).toHaveBeenCalledTimes(1);
   });
+  it('keeps session-expiry redirects and return paths inside the configured SPA base', async () => {
+    vi.stubEnv('BASE_URL', '/legacy/');
+    Object.assign(window.location, { pathname: '/legacy/me/applicant', search: '?tab=resumes', hash: '' });
+    const httpClient = await import('./httpClient');
+    Object.defineProperty(globalThis, 'fetch', {
+      value: vi.fn().mockResolvedValue(new Response('{}', {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })),
+      configurable: true,
+    });
+    await expect(httpClient.request('/secure', { auth: true })).rejects.toBeInstanceOf(httpClient.ApiError);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      '/legacy/login?from=%2Fme%2Fapplicant%3Ftab%3Dresumes',
+    );
+  });
+
+  it('keeps permission-denied redirects inside the configured SPA base', async () => {
+    vi.stubEnv('BASE_URL', '/legacy/');
+    const httpClient = await import('./httpClient');
+    Object.defineProperty(globalThis, 'fetch', {
+      value: vi.fn().mockResolvedValue(new Response('{}', {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })),
+      configurable: true,
+    });
+    await expect(httpClient.request('/secure', { auth: true })).rejects.toBeInstanceOf(httpClient.ApiError);
+    expect(window.location.assign).toHaveBeenCalledWith('/legacy/forbidden');
+  });
+
 });
 

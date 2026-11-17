@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.vacancy.domain.model.VacancyModel;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyAlreadyExistsException;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,17 +14,29 @@ public class BasicVacancyValidator implements VacancyValidator {
     private final VacancyRepository vacancyRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.validation.validateVacancyForCreate",
+            contextualName = "Проверка вакансии перед созданием",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "validation"})
     public void validateVacancyForCreate(VacancyModel vacancy) {
         java.util.Objects.requireNonNull(vacancy, "Vacancy is required");
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.validation.validateVacancyForUpdate",
+            contextualName = "Проверка вакансии перед обновлением",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "validation"})
     public void validateVacancyForUpdate(VacancyModel vacancy) {
         validateId(vacancy.getId());
         validateVacancyExists(vacancy.getId());
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.validation.validateVacancyForDelete",
+            contextualName = "Проверка вакансии перед удалением",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "validation"})
     public void validateVacancyForDelete(Long vacancyId) {
         validateId(vacancyId);
         validateVacancyExists(vacancyId);

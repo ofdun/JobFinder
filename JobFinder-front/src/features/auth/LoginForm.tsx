@@ -78,7 +78,7 @@ export function LoginForm({ role }: LoginFormProps) {
       const destination =
         resolveSafeReturnPath(destinationFromState) ??
         resolveSafeReturnPath(destinationFromQuery);
-      navigate(destination || (role === 'applicant' ? '/me/applicant' : '/me/employer'));
+      navigate(destination || "/");
     },
   });
 

@@ -6,6 +6,7 @@ import com.ofdun.jobfinder.features.applicant.domain.validator.ApplicantValidato
 import com.ofdun.jobfinder.features.applicant.exception.ApplicantNotFoundException;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,20 @@ public class BasicApplicantService implements ApplicantService {
     private final ApplicantValidator applicantValidator;
 
     @Override
+    @Observed(
+            name = "jobfinder.applicant.service.createApplicant",
+            contextualName = "Создание соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "service"})
     public Long createApplicant(@NonNull @Valid ApplicantModel applicantModel) {
         applicantValidator.validateApplicantForCreate(applicantModel);
         return applicantRepository.createApplicant(applicantModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.applicant.service.getApplicantById",
+            contextualName = "Получение соискателя по ID",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "service"})
     public ApplicantModel getApplicantById(@NonNull Long id) {
         return applicantRepository
                 .getApplicantById(id)
@@ -33,6 +42,10 @@ public class BasicApplicantService implements ApplicantService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.applicant.service.updateApplicant",
+            contextualName = "Обновление соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "service"})
     public ApplicantModel updateApplicant(@NonNull @Valid ApplicantModel applicantModel) {
         protection.checkProfilePasswordChange(
                 AccountType.APPLICANT, applicantModel.getId(), applicantModel.getPasswordHash());
@@ -41,6 +54,10 @@ public class BasicApplicantService implements ApplicantService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.applicant.service.deleteApplicant",
+            contextualName = "Удаление соискателя",
+            lowCardinalityKeyValues = {"feature", "applicant", "layer", "service"})
     public Boolean deleteApplicant(@NonNull Long id) {
         applicantValidator.validateApplicantForDelete(id);
         var deleted = applicantRepository.deleteApplicant(id);

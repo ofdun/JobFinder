@@ -80,7 +80,7 @@ def wait_for_backend(container, seconds=180):
     raise TimeoutError('Backend readiness exceeded 180 seconds')
 
 
-def run_one(directory, plan, images, cpus, index, machine=None):
+def run_one(directory, plan, images, cpus, index, machine=None, observation=None):
     directory.mkdir()
     write_json(directory / 'plan.json', plan)
     token = 'jf-load-' + secrets.token_hex(6)
@@ -95,6 +95,8 @@ def run_one(directory, plan, images, cpus, index, machine=None):
     network_created = False
     started = time.monotonic()
     write_json(directory / 'manifest.json', manifest)
+    if observation is not None:
+        manifest['observation'] = observation
 
     def create(name, image, memory, cpu_group='application', extra=(), command=()):
         container = token + '-' + name
@@ -148,6 +150,21 @@ def run_one(directory, plan, images, cpus, index, machine=None):
                        'SERVER_TOMCAT_THREADS_MAX': '32', 'SERVER_TOMCAT_ACCEPT_COUNT': '32',
                        'SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE': '8', 'LOGGING_LEVEL_ROOT': 'WARN',
                        'LOGGING_FILE_NAME': '/tmp/application.log'}
+        if observation is not None:
+            environment['TRACING_ENABLED'] = str(observation['tracing']).lower()
+            if not observation['tracing']:
+                environment['SPRING_AUTOCONFIGURE_EXCLUDE'] = (
+                    'org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryTracingAutoConfiguration')
+            environment['LOGGING_LEVEL_ROOT'] = 'INFO'
+            environment['LOGGING_LEVEL_COM_OFDUN_JOBFINDER_COMMON_LOGGING'] = (
+                'DEBUG' if observation['extended_logging'] else 'INFO')
+            if observation['tracing']:
+                create('collector', images['collector'], '256m', 'monitor', extra=(
+                    '--user', '0:0', '-v', f'{ROOT / "collector.yaml"}:/etc/otelcol-contrib/config.yaml:ro',
+                    '-v', f'{directory}:/results'))
+                docker('start', containers['collector'], capture_output=True)
+                environment.update({
+                    'TRACING_ENDPOINT': 'http://collector:4318/v1/traces'})
         extra = []
         for key, value in environment.items():
             extra += ['-e', key + '=' + value]
@@ -199,6 +216,10 @@ def run_one(directory, plan, images, cpus, index, machine=None):
             subprocess.run(['docker', 'stop', '-t', '8', containers['monitor']], capture_output=True)
         if process is not None and process.poll() is None:
             process.terminate()
+        if observation is not None and 'backend' in containers:
+            subprocess.run(['docker', 'stop', '-t', '30', containers['backend']], capture_output=True)
+        if 'collector' in containers:
+            subprocess.run(['docker', 'stop', '-t', '15', containers['collector']], capture_output=True)
         manifest['wall_seconds'] = time.monotonic() - started
         manifest['finished_at'] = datetime.now(timezone.utc).isoformat()
         for name, container in containers.items():

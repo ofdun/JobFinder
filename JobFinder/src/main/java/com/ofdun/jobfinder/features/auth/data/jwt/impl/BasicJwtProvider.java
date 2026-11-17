@@ -6,6 +6,7 @@ import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.micrometer.observation.annotation.Observed;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -35,6 +36,10 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.generateAccessToken",
+            contextualName = "Выпуск access-токена",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String generateAccessToken(AccountType type, Long userId) {
         return Jwts.builder()
                 .subject(userId.toString())
@@ -49,6 +54,10 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.generateRefreshToken",
+            contextualName = "Выпуск refresh-токена",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public String generateRefreshToken(AccountType type, Long userId) {
         return Jwts.builder()
                 .subject(userId.toString())
@@ -63,6 +72,10 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.validateToken",
+            contextualName = "Проверка подписи JWT",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Boolean validateToken(@NonNull String token, AccountType type) {
         try {
             var claims =
@@ -76,11 +89,19 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.validateAccessToken",
+            contextualName = "Проверка access-токена",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Boolean validateAccessToken(String token, AccountType type) {
         return validatePurpose(token, type, "access", false);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.validateRefreshToken",
+            contextualName = "Проверка refresh-токена",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Boolean validateRefreshToken(String token, AccountType type) {
         // Legacy refresh tokens are additionally checked against their Redis record.
         return validatePurpose(token, type, "refresh", true);
@@ -100,6 +121,10 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.getUserId",
+            contextualName = "Чтение идентификатора из JWT",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public Long getUserId(@NonNull String token) {
         Claims claims =
                 Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();
@@ -111,6 +136,10 @@ public class BasicJwtProvider implements JwtProvider {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.auth.service.getAccountType",
+            contextualName = "Чтение роли из JWT",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public AccountType getAccountType(@NonNull String token) {
         Claims claims =
                 Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getPayload();

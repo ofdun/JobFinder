@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.application.data.mongo.repository;
 import com.ofdun.jobfinder.features.application.data.mongo.mapper.ApplicationMongoMapper;
 import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 import com.ofdun.jobfinder.features.application.domain.repository.ApplicationRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,17 @@ public class MongoApplicationRepository implements ApplicationRepository {
     private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.getApplicationsByApplicantId",
+            contextualName = "MongoDB: получение откликов соискателя",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public List<ApplicationModel> getApplicationsByApplicantId(
             Long applicantId, int limit, int offset) {
         var resumes =
@@ -57,16 +69,49 @@ public class MongoApplicationRepository implements ApplicationRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.createApplication",
+            contextualName = "MongoDB: создание отклика",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Long createApplication(ApplicationModel application) {
         return mongoRepository.save(ApplicationMongoMapper.toEntity(application)).getId();
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.getApplicationById",
+            contextualName = "MongoDB: получение отклика по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Optional<ApplicationModel> getApplicationById(Long id) {
         return mongoRepository.findById(id).map(ApplicationMongoMapper::toModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.getApplicationsByVacancyId",
+            contextualName = "MongoDB: получение откликов на вакансию",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public List<ApplicationModel> getApplicationsByVacancyId(Long vacancyId) {
         return mongoRepository.findByVacancyIdOrderByApplicationDateDesc(vacancyId).stream()
                 .map(ApplicationMongoMapper::toModel)
@@ -74,12 +119,34 @@ public class MongoApplicationRepository implements ApplicationRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.updateApplication",
+            contextualName = "MongoDB: обновление отклика",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public ApplicationModel updateApplication(ApplicationModel application) {
         var entity = mongoRepository.save(ApplicationMongoMapper.toEntity(application));
         return ApplicationMongoMapper.toModel(entity);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.application.repository.deleteApplication",
+            contextualName = "MongoDB: удаление отклика",
+            lowCardinalityKeyValues = {
+                "feature",
+                "application",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Boolean deleteApplication(Long id) {
         return mongoRepository
                 .findById(id)

@@ -2,6 +2,7 @@ import { clearSession, getSession, setSession } from '../session/sessionStore';
 import { queryClient } from '../lib/queryClient';
 import { TokenPair } from '../types/auth';
 
+const APP_BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
 
 interface RequestOptions extends RequestInit {
@@ -55,11 +56,11 @@ function redirectTo(path: string): void {
     return;
   }
 
-  if (window.location.pathname === path) {
+  if (window.location.pathname === `${APP_BASE_PATH}${path}`) {
     return;
   }
 
-  window.location.assign(path);
+  window.location.assign(`${APP_BASE_PATH}${path}`);
 }
 
 function handleAuthError(status: number, authRequired: boolean): void {
@@ -71,7 +72,7 @@ function handleAuthError(status: number, authRequired: boolean): void {
     const from =
       typeof window === 'undefined'
         ? '/'
-        : `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        : `${window.location.pathname.slice(APP_BASE_PATH.length) || "/"}${window.location.search}${window.location.hash}`;
     queryClient.clear();
     clearSession();
     redirectTo(`/login?from=${encodeURIComponent(from)}`);
