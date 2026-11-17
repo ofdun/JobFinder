@@ -12,7 +12,12 @@ storage:
     backend: local
     wal:
       path: /var/tempo/wal
+      ingestion_time_range_slack: 720h
     local:
       path: /var/tempo/blocks
 usage_report:
   reporting_enabled: false
+overrides:
+  defaults:
+    compaction:
+      block_retention: 720h

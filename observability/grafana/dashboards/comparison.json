@@ -1337,7 +1337,7 @@
     },
     {
       "id": 5,
-      "title": "Процессорное время мониторинга и Collector",
+      "title": "Процессорное время мониторинга",
       "type": "barchart",
       "gridPos": {
         "x": 0,
@@ -1356,7 +1356,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "measurements"
           },
-          "rawSql": "SELECT r.mode || ' · ' || s.component AS configuration, avg(s.cpu_seconds) * 1000 AS cpu_ms FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE r.suite=${suite:sqlstring} AND r.profile=${profile:sqlstring} AND s.component IN ('monitor','collector') GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component",
+          "rawSql": "SELECT r.mode AS configuration, avg(s.cpu_seconds) * 1000 AS cpu_ms FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE r.suite=${suite:sqlstring} AND r.profile=${profile:sqlstring} AND s.component='monitor' GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component",
           "editorMode": "code",
           "rawQuery": true,
           "format": "table"
@@ -1668,7 +1668,7 @@
     },
     {
       "id": 6,
-      "title": "Память мониторинга и Collector",
+      "title": "Память мониторинга",
       "type": "barchart",
       "gridPos": {
         "x": 12,
@@ -1687,7 +1687,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "measurements"
           },
-          "rawSql": "SELECT r.mode || ' · ' || s.component AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE r.suite=${suite:sqlstring} AND r.profile=${profile:sqlstring} AND s.component IN ('monitor','collector') GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component",
+          "rawSql": "SELECT r.mode AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE r.suite=${suite:sqlstring} AND r.profile=${profile:sqlstring} AND s.component='monitor' GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component",
           "editorMode": "code",
           "rawQuery": true,
           "format": "table"

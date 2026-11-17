@@ -69,6 +69,21 @@ public class TraceDiagnostics
 
     @Override
     public Observation.Context map(Observation.Context context) {
+        if (context
+                instanceof
+                org.springframework.http.server.observation.ServerRequestObservationContext http) {
+            var request = http.getCarrier();
+            if (request != null) {
+                String path = request.getRequestURI();
+                context.addHighCardinalityKeyValue(KeyValue.of("url.path", path));
+                var match =
+                        java.util.regex.Pattern.compile("/api/v[12]/vacancies/([0-9]+)(?:/.*)?")
+                                .matcher(path);
+                if (match.matches())
+                    context.addHighCardinalityKeyValue(KeyValue.of("vacancy.id", match.group(1)));
+            }
+            return context;
+        }
         if (!(context instanceof ObservedAspectContext)) return context;
         Throwable error = context.getError();
         if (context.getLowCardinalityKeyValue("operation.outcome") == null) {
