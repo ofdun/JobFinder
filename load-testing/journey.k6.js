@@ -17,7 +17,7 @@ const started = new Gauge('load_started_ms');
 const stages = plan.phases.map(p => ({ duration: `${p.seconds}s`, target: p.vus }));
 export const options = {
   scenarios: {
-    users: { executor: 'ramping-vus', startVUs: plan.phases[0].vus, stages,
+    users: { executor: 'ramping-vus', startVUs: 0, stages,
       gracefulRampDown: '15s', gracefulStop: '15s' },
   },
   maxRedirects: 0,

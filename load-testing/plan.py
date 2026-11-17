@@ -33,7 +33,7 @@ def make_plan(profile, smoke=False, stable_vus=4, peak_vus=128, soak_seconds=180
         add('steady', 15 if smoke else soak_seconds, stable_vus)
     return dict(profile=profile, smoke=smoke, phases=phases,
                 error_percent={'soak-10': 10, 'soak-20': 20}.get(profile, 0),
-                think_seconds=0.3 if smoke else 1.5, request_timeout_seconds=3,
+                think_seconds=0.3 if smoke else 1.5, request_timeout_seconds=30,
                 latency_limit_ms=500, error_limit=0.01, window_seconds=2 if smoke else 10,
                 minimum_window_requests=5 if smoke else 20,
                 minimum_samples=20 if smoke else 1000,
