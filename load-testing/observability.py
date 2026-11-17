@@ -238,7 +238,7 @@ def main():
     parser.add_argument('--skip-build', action='store_true')
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--warmup-seconds', type=int, default=60)
-    parser.add_argument('--stable-vus', type=int, default=4)
+    parser.add_argument('--stable-vus', type=int, default=100)
     parser.add_argument('--peak-vus', type=int, default=128)
     parser.add_argument('--soak-seconds', type=int, default=600)
     parser.add_argument('--recovery-seconds', type=int, default=600)
@@ -252,7 +252,8 @@ def main():
         parser.error('warmup must be at least 60 seconds')
     cpus = cpu_layout(args.application_cpus, args.generator_cpus, args.monitor_cpus)
     profiles = PROFILES if args.profile == 'all' else (args.profile,)
-    plans = [make_plan(p, args.smoke, args.stable_vus, min(8, args.peak_vus) if args.smoke else args.peak_vus,
+    stable_vus = min(4, args.stable_vus) if args.smoke else args.stable_vus
+    plans = [make_plan(p, args.smoke, stable_vus, min(8, args.peak_vus) if args.smoke else args.peak_vus,
                        args.soak_seconds, args.recovery_seconds) for p in profiles]
     if not args.smoke:
         for plan in plans:
