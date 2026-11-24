@@ -8,6 +8,7 @@ import com.ofdun.jobfinder.features.vacancy.domain.repository.DraftVacancyReposi
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.enums.VacancyStatus;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+import io.micrometer.observation.annotation.Observed;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,10 @@ public class BasicDraftVacancyService implements DraftVacancyService {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.createDraft",
+            contextualName = "Создание черновика вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public DraftVacancyModel createDraft(Long vacancyId) {
         var vacancy = getVacancyRequired(vacancyId);
         var snapshot = writeSnapshot(vacancy);
@@ -29,12 +34,20 @@ public class BasicDraftVacancyService implements DraftVacancyService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.getDrafts",
+            contextualName = "Получение черновиков вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public List<DraftVacancyModel> getDrafts(Long vacancyId) {
         ensureVacancyExists(vacancyId);
         return draftVacancyRepository.getByVacancyId(vacancyId);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.applyDraft",
+            contextualName = "Применение черновика вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public VacancyModel applyDraft(Long vacancyId, Long draftId) {
         var draft = getDraftRequired(vacancyId, draftId);
 
@@ -46,6 +59,10 @@ public class BasicDraftVacancyService implements DraftVacancyService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.deleteDraft",
+            contextualName = "Удаление черновика вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public void deleteDraft(Long vacancyId, Long draftId) {
         getDraftRequired(vacancyId, draftId);
         draftVacancyRepository.deleteById(draftId);

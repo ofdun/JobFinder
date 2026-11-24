@@ -1,34 +1,43 @@
-import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
-import { getLanguages } from '../../shared/api/languageApi';
-import { getSkills } from '../../shared/api/skillApi';
-import { searchVacancies } from '../../shared/api/vacancyApi';
+import { VacancyCard } from "../../shared/ui/VacancyCard";
+import { Icon } from "../../shared/ui/Icon";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { getLanguages } from "../../shared/api/languageApi";
+import { getSkills } from "../../shared/api/skillApi";
+import { searchVacancies } from "../../shared/api/vacancyApi";
 import {
-  formatDate,
   formatEmploymentType,
   formatJobFormat,
   formatLanguageProficiency,
   formatPaymentFrequency,
-  formatSalary,
   formatVacancyStatus,
-} from '../../shared/lib/format';
-import { useDebouncedValue } from '../../shared/lib/useDebouncedValue';
+} from "../../shared/lib/format";
+import { useDebouncedValue } from "../../shared/lib/useDebouncedValue";
 import {
   EmploymentType,
   JobFormat,
   PaymentFrequency,
   VacancySearchParams,
   VacancyStatus,
-} from '../../shared/types/vacancy';
-import { LocationTypeahead } from '../../shared/ui/LocationTypeahead';
-import { MultiSelectChips } from '../../shared/ui/MultiSelectChips';
-import { QueryStateBlock } from '../../shared/ui/QueryStateBlock';
+} from "../../shared/types/vacancy";
+import { LocationTypeahead } from "../../shared/ui/LocationTypeahead";
+import { MultiSelectChips } from "../../shared/ui/MultiSelectChips";
+import { QueryStateBlock } from "../../shared/ui/QueryStateBlock";
 
 const PAGE_SIZE = 10;
-const paymentFrequencies: PaymentFrequency[] = ['HOURLY', 'WEEKLY', 'MONTHLY', 'PROJECT'];
-const employmentTypes: EmploymentType[] = ['FULL_TIME', 'PART_TIME', 'FREELANCE'];
-const jobFormats: JobFormat[] = ['REMOTE', 'OFFICE', 'HYBRID'];
-const vacancyStatuses: VacancyStatus[] = ['ACTIVE', 'INACTIVE'];
+const paymentFrequencies: PaymentFrequency[] = [
+  "HOURLY",
+  "WEEKLY",
+  "MONTHLY",
+  "PROJECT",
+];
+const employmentTypes: EmploymentType[] = [
+  "FULL_TIME",
+  "PART_TIME",
+  "FREELANCE",
+];
+const jobFormats: JobFormat[] = ["REMOTE", "OFFICE", "HYBRID"];
+const vacancyStatuses: VacancyStatus[] = ["ACTIVE", "INACTIVE"];
 
 function parsePage(value: string | null): number {
   const parsed = Number(value);
@@ -58,7 +67,7 @@ function parseIdList(value: string | null): number[] | undefined {
   }
 
   const items = value
-    .split(',')
+    .split(",")
     .map((item) => Number(item.trim()))
     .filter((item) => Number.isInteger(item) && item > 0);
 
@@ -70,11 +79,16 @@ function parseIdListForUi(value: string | null): number[] {
 }
 
 function stringifyIdList(value: number[]): string {
-  return value.join(',');
+  return value.join(",");
 }
 
 function parsePaymentFrequency(value: string): PaymentFrequency | undefined {
-  if (value === 'HOURLY' || value === 'WEEKLY' || value === 'MONTHLY' || value === 'PROJECT') {
+  if (
+    value === "HOURLY" ||
+    value === "WEEKLY" ||
+    value === "MONTHLY" ||
+    value === "PROJECT"
+  ) {
     return value;
   }
 
@@ -82,7 +96,7 @@ function parsePaymentFrequency(value: string): PaymentFrequency | undefined {
 }
 
 function parseEmploymentType(value: string): EmploymentType | undefined {
-  if (value === 'FULL_TIME' || value === 'PART_TIME' || value === 'FREELANCE') {
+  if (value === "FULL_TIME" || value === "PART_TIME" || value === "FREELANCE") {
     return value;
   }
 
@@ -90,7 +104,7 @@ function parseEmploymentType(value: string): EmploymentType | undefined {
 }
 
 function parseWorkFormat(value: string): JobFormat | undefined {
-  if (value === 'REMOTE' || value === 'OFFICE' || value === 'HYBRID') {
+  if (value === "REMOTE" || value === "OFFICE" || value === "HYBRID") {
     return value;
   }
 
@@ -98,43 +112,30 @@ function parseWorkFormat(value: string): JobFormat | undefined {
 }
 
 function parseVacancyStatus(value: string): VacancyStatus | undefined {
-  if (value === 'ACTIVE' || value === 'INACTIVE') {
+  if (value === "ACTIVE" || value === "INACTIVE") {
     return value;
   }
 
   return undefined;
 }
 
-function buildCardTitle(description: string): string {
-  const normalized = description.trim();
-  if (!normalized) {
-    return 'Вакансия';
-  }
-
-  if (normalized.length <= 80) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, 80)}...`;
-}
-
 export function VacancySearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const q = searchParams.get('q') ?? '';
-  const salaryMin = searchParams.get('salaryMin') ?? '';
-  const salaryMax = searchParams.get('salaryMax') ?? '';
-  const locationId = searchParams.get('locationId') ?? '';
-  const publicationDateFrom = searchParams.get('publicationDateFrom') ?? '';
-  const publicationDateTo = searchParams.get('publicationDateTo') ?? '';
-  const skillIdsText = searchParams.get('skillIds') ?? '';
-  const languageIdsText = searchParams.get('languageIds') ?? '';
-  const paymentFrequency = searchParams.get('paymentFrequency') ?? '';
-  const employmentType = searchParams.get('employmentType') ?? '';
-  const workFormat = searchParams.get('workFormat') ?? '';
-  const status = searchParams.get('status') ?? '';
-  const sortBy = searchParams.get('sortBy') ?? '';
-  const sortDesc = searchParams.get('sortDesc') === 'true';
-  const page = parsePage(searchParams.get('page'));
+  const q = searchParams.get("q") ?? "";
+  const salaryMin = searchParams.get("salaryMin") ?? "";
+  const salaryMax = searchParams.get("salaryMax") ?? "";
+  const locationId = searchParams.get("locationId") ?? "";
+  const publicationDateFrom = searchParams.get("publicationDateFrom") ?? "";
+  const publicationDateTo = searchParams.get("publicationDateTo") ?? "";
+  const skillIdsText = searchParams.get("skillIds") ?? "";
+  const languageIdsText = searchParams.get("languageIds") ?? "";
+  const paymentFrequency = searchParams.get("paymentFrequency") ?? "";
+  const employmentType = searchParams.get("employmentType") ?? "";
+  const workFormat = searchParams.get("workFormat") ?? "";
+  const status = searchParams.get("status") ?? "";
+  const sortBy = searchParams.get("sortBy") ?? "";
+  const sortDesc = searchParams.get("sortDesc") === "true";
+  const page = parsePage(searchParams.get("page"));
   const debouncedQ = useDebouncedValue(q, 350);
 
   const setQueryState = (key: string, value: string, nextPage = 1) => {
@@ -146,13 +147,13 @@ export function VacancySearchPage() {
       next.delete(key);
     }
 
-    next.set('page', String(nextPage));
+    next.set("page", String(nextPage));
     setSearchParams(next);
   };
 
   const query = useQuery({
     queryKey: [
-      'vacancies',
+      "vacancies",
       debouncedQ,
       salaryMin,
       salaryMax,
@@ -194,65 +195,92 @@ export function VacancySearchPage() {
   });
 
   const skillsQuery = useQuery({
-    queryKey: ['skills'],
+    queryKey: ["skills"],
     queryFn: getSkills,
     staleTime: 1000 * 60 * 60,
   });
 
   const languagesQuery = useQuery({
-    queryKey: ['languages'],
+    queryKey: ["languages"],
     queryFn: getLanguages,
     staleTime: 1000 * 60 * 60,
   });
 
   return (
     <main className="page">
-      <h1>Поиск вакансий</h1>
+      <div className="search-page-heading">
+        <div>
+          <span className="eyebrow">ПРОСТРАНСТВО ВОЗМОЖНОСТЕЙ</span>
+          <h1>Найдите своё место.</h1>
+          <p>Работа под ваш опыт, интересы и ритм жизни.</p>
+        </div>
+        <span className="search-heading-art" aria-hidden="true">
+          ↗
+        </span>
+      </div>
       <div className="vacancy-layout">
         <section className="vacancy-main">
-          <div className="toolbar">
+          <div className="toolbar search-input-bar">
+            <Icon name="search" />
             <input
+              aria-label="Поиск по описанию вакансии"
               value={q}
-              onChange={(event) => setQueryState('q', event.target.value)}
+              onChange={(event) => setQueryState("q", event.target.value)}
               placeholder="Поиск по описанию"
             />
           </div>
 
-          {query.isLoading ? <QueryStateBlock variant="loading" message="Загрузка вакансий..." /> : null}
+          {query.isLoading ? (
+            <QueryStateBlock variant="loading" message="Загрузка вакансий..." />
+          ) : null}
           {query.isError ? (
             <QueryStateBlock
               variant="error"
-              message={query.error.message || 'Ошибка загрузки вакансий.'}
+              message={query.error.message || "Ошибка загрузки вакансий."}
               onRetry={() => query.refetch()}
             />
           ) : null}
-          {!query.isLoading && !query.isError && query.data && query.data.items.length === 0 ? (
-            <QueryStateBlock variant="empty" message="По вашему запросу вакансии не найдены." />
+          {!query.isLoading &&
+          !query.isError &&
+          query.data &&
+          query.data.items.length === 0 ? (
+            <QueryStateBlock
+              variant="empty"
+              message="По вашему запросу вакансии не найдены."
+            />
           ) : null}
 
+          <div className="search-results-heading">
+            <h2>Вакансии</h2>
+            <span>
+              {query.data
+                ? `${query.data.totalElements} найдено`
+                : "Подбираем варианты…"}
+            </span>
+          </div>
           <div className="list">
             {query.data?.items.map((vacancy) => (
-              <article key={vacancy.id} className="card">
-                <h3>{buildCardTitle(vacancy.description)}</h3>
-                <p>Формат: {formatJobFormat(vacancy.jobFormat)}</p>
-                <p>Занятость: {formatEmploymentType(vacancy.employmentType)}</p>
-                <p>Статус: {formatVacancyStatus(vacancy.status)}</p>
-                <p>Зарплата: {formatSalary(vacancy)}</p>
-                <p>Опубликовано: {formatDate(vacancy.publicationDate)}</p>
-                <Link to={`/vacancies/${vacancy.id}`}>Подробнее</Link>
-              </article>
+              <VacancyCard key={vacancy.id} vacancy={vacancy} />
             ))}
           </div>
 
           <div className="toolbar pagination-toolbar">
-            <button type="button" disabled={page === 1} onClick={() => setQueryState('page', String(page - 1), page - 1)}>
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => setQueryState("page", String(page - 1), page - 1)}
+            >
               Назад
             </button>
             <span>Страница {page}</span>
             <button
               type="button"
-              disabled={!query.data || query.data.totalPages === 0 || page >= query.data.totalPages}
-              onClick={() => setQueryState('page', String(page + 1), page + 1)}
+              disabled={
+                !query.data ||
+                query.data.totalPages === 0 ||
+                page >= query.data.totalPages
+              }
+              onClick={() => setQueryState("page", String(page + 1), page + 1)}
             >
               Вперед
             </button>
@@ -260,137 +288,202 @@ export function VacancySearchPage() {
         </section>
 
         <aside className="vacancy-sidebar card vacancy-filter-card">
-          <h3>Фильтры</h3>
+          <div className="filter-heading">
+            <h3>Ваши предпочтения</h3>
+            <button
+              className="button-quiet"
+              type="button"
+              onClick={() => setSearchParams({})}
+            >
+              Сбросить
+            </button>
+          </div>
           <div className="toolbar">
-          <label>
-            Зарплата от
-            <input type="number" min={0} value={salaryMin} onChange={(event) => setQueryState('salaryMin', event.target.value)} />
-          </label>
-          <label>
-            Зарплата до
-            <input type="number" min={0} value={salaryMax} onChange={(event) => setQueryState('salaryMax', event.target.value)} />
-          </label>
-          <label>
-            Локация
-            <LocationTypeahead
-              label=""
-              value={parseOptionalNumber(locationId)}
-              onChange={(next) => setQueryState('locationId', next ? String(next) : '')}
-              placeholder="Введите город или страну"
-            />
-          </label>
+            <label>
+              Зарплата от
+              <input
+                type="number"
+                min={0}
+                value={salaryMin}
+                onChange={(event) =>
+                  setQueryState("salaryMin", event.target.value)
+                }
+              />
+            </label>
+            <label>
+              Зарплата до
+              <input
+                type="number"
+                min={0}
+                value={salaryMax}
+                onChange={(event) =>
+                  setQueryState("salaryMax", event.target.value)
+                }
+              />
+            </label>
+            <label>
+              Локация
+              <LocationTypeahead
+                label=""
+                value={parseOptionalNumber(locationId)}
+                onChange={(next) =>
+                  setQueryState("locationId", next ? String(next) : "")
+                }
+                placeholder="Введите город или страну"
+              />
+            </label>
           </div>
 
           <div className="toolbar">
-          <label>
-            Дата публикации от
-            <input
-              type="datetime-local"
-              value={publicationDateFrom}
-              onChange={(event) => setQueryState('publicationDateFrom', event.target.value)}
-            />
-          </label>
-          <label>
-            Дата публикации до
-            <input
-              type="datetime-local"
-              value={publicationDateTo}
-              onChange={(event) => setQueryState('publicationDateTo', event.target.value)}
-            />
-          </label>
+            <label>
+              Дата публикации от
+              <input
+                type="datetime-local"
+                value={publicationDateFrom}
+                onChange={(event) =>
+                  setQueryState("publicationDateFrom", event.target.value)
+                }
+              />
+            </label>
+            <label>
+              Дата публикации до
+              <input
+                type="datetime-local"
+                value={publicationDateTo}
+                onChange={(event) =>
+                  setQueryState("publicationDateTo", event.target.value)
+                }
+              />
+            </label>
           </div>
 
           <MultiSelectChips
             label="Навыки"
             options={skillsQuery.data ?? []}
             selectedIds={parseIdListForUi(skillIdsText)}
-            onChange={(next) => setQueryState('skillIds', stringifyIdList(next))}
+            onChange={(next) =>
+              setQueryState("skillIds", stringifyIdList(next))
+            }
             placeholder="Добавить навык"
           />
           {skillsQuery.isLoading ? <p>Загрузка навыков...</p> : null}
-          {skillsQuery.isError ? <p className="error">Не удалось загрузить навыки.</p> : null}
+          {skillsQuery.isError ? (
+            <p className="error">Не удалось загрузить навыки.</p>
+          ) : null}
           <MultiSelectChips
             label="Языки"
-            options={languagesQuery.data?.map((language) => ({
-              id: language.id,
-              name: `${language.name} (${formatLanguageProficiency(language.proficiencyLevel)})`,
-            })) ?? []}
+            options={
+              languagesQuery.data?.map((language) => ({
+                id: language.id,
+                name: `${language.name} (${formatLanguageProficiency(language.proficiencyLevel)})`,
+              })) ?? []
+            }
             selectedIds={parseIdListForUi(languageIdsText)}
-            onChange={(next) => setQueryState('languageIds', stringifyIdList(next))}
+            onChange={(next) =>
+              setQueryState("languageIds", stringifyIdList(next))
+            }
             placeholder="Добавить язык"
           />
           {languagesQuery.isLoading ? <p>Загрузка языков...</p> : null}
-          {languagesQuery.isError ? <p className="error">Не удалось загрузить языки.</p> : null}
+          {languagesQuery.isError ? (
+            <p className="error">Не удалось загрузить языки.</p>
+          ) : null}
 
           <div className="toolbar">
-          <label>
-            Частота выплат
-            <select value={paymentFrequency} onChange={(event) => setQueryState('paymentFrequency', event.target.value)}>
-              <option value="">Любая</option>
-              {paymentFrequencies.map((option) => (
-                <option key={option} value={option}>
-                  {formatPaymentFrequency(option)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Занятость
-            <select value={employmentType} onChange={(event) => setQueryState('employmentType', event.target.value)}>
-              <option value="">Любой</option>
-              {employmentTypes.map((option) => (
-                <option key={option} value={option}>
-                  {formatEmploymentType(option)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Формат работы
-            <select value={workFormat} onChange={(event) => setQueryState('workFormat', event.target.value)}>
-              <option value="">Любой</option>
-              {jobFormats.map((option) => (
-                <option key={option} value={option}>
-                  {formatJobFormat(option)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Статус
-            <select value={status} onChange={(event) => setQueryState('status', event.target.value)}>
-              <option value="">Любой</option>
-              {vacancyStatuses.map((option) => (
-                <option key={option} value={option}>
-                  {formatVacancyStatus(option)}
-                </option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Частота выплат
+              <select
+                value={paymentFrequency}
+                onChange={(event) =>
+                  setQueryState("paymentFrequency", event.target.value)
+                }
+              >
+                <option value="">Любая</option>
+                {paymentFrequencies.map((option) => (
+                  <option key={option} value={option}>
+                    {formatPaymentFrequency(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Занятость
+              <select
+                value={employmentType}
+                onChange={(event) =>
+                  setQueryState("employmentType", event.target.value)
+                }
+              >
+                <option value="">Любой</option>
+                {employmentTypes.map((option) => (
+                  <option key={option} value={option}>
+                    {formatEmploymentType(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Формат работы
+              <select
+                value={workFormat}
+                onChange={(event) =>
+                  setQueryState("workFormat", event.target.value)
+                }
+              >
+                <option value="">Любой</option>
+                {jobFormats.map((option) => (
+                  <option key={option} value={option}>
+                    {formatJobFormat(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Статус
+              <select
+                value={status}
+                onChange={(event) =>
+                  setQueryState("status", event.target.value)
+                }
+              >
+                <option value="">Любой</option>
+                {vacancyStatuses.map((option) => (
+                  <option key={option} value={option}>
+                    {formatVacancyStatus(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="toolbar">
-          <label>
-            Сортировка
-            <select value={sortBy} onChange={(event) => setQueryState('sortBy', event.target.value)}>
-              <option value="">Без сортировки</option>
-              <option value="publicationDate">По дате публикации</option>
-              <option value="salary">По зарплате</option>
-            </select>
-          </label>
+            <label>
+              Сортировка
+              <select
+                value={sortBy}
+                onChange={(event) =>
+                  setQueryState("sortBy", event.target.value)
+                }
+              >
+                <option value="">Без сортировки</option>
+                <option value="publicationDate">По дате публикации</option>
+                <option value="salary">По зарплате</option>
+              </select>
+            </label>
 
-          <label className="inline-checkbox">
-            <input
-              type="checkbox"
-              checked={sortDesc}
-              onChange={(event) => setQueryState('sortDesc', String(event.target.checked))}
-            />
-            По убыванию
-          </label>
+            <label className="inline-checkbox">
+              <input
+                type="checkbox"
+                checked={sortDesc}
+                onChange={(event) =>
+                  setQueryState("sortDesc", String(event.target.checked))
+                }
+              />
+              По убыванию
+            </label>
           </div>
         </aside>
       </div>
     </main>
   );
 }
-

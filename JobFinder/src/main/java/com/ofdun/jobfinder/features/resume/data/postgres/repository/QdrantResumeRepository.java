@@ -4,6 +4,7 @@ import com.ofdun.jobfinder.features.clients.vector.VectorClient;
 import com.ofdun.jobfinder.features.matching.domain.model.MatchResultModel;
 import com.ofdun.jobfinder.features.resume.domain.model.ResumeModel;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
+import io.micrometer.observation.annotation.Observed;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.VectorsFactory;
 import io.qdrant.client.grpc.Points;
@@ -18,11 +19,33 @@ public class QdrantResumeRepository implements VectorResumeRepository {
     private final VectorClient client;
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.createResume",
+            contextualName = "Qdrant: создание резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "Qdrant"
+            })
     public Long createResume(ResumeModel resumeModel) {
         return saveResume(resumeModel).getId();
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.getResumeById",
+            contextualName = "Qdrant: получение резюме по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "Qdrant"
+            })
     public Optional<ResumeModel> getResumeById(Long resumeId) {
         try {
             var resp =
@@ -50,11 +73,33 @@ public class QdrantResumeRepository implements VectorResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.updateResume",
+            contextualName = "Qdrant: обновление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "Qdrant"
+            })
     public ResumeModel updateResume(ResumeModel resumeModel) {
         return saveResume(resumeModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.getMostSimilarResumes",
+            contextualName = "Qdrant: поиск похожих резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "Qdrant"
+            })
     public List<MatchResultModel> getMostSimilarResumes(List<Float> embedding, Integer maxAmount) {
         try {
             var points =
@@ -75,6 +120,17 @@ public class QdrantResumeRepository implements VectorResumeRepository {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.repository.deleteResume",
+            contextualName = "Qdrant: удаление резюме",
+            lowCardinalityKeyValues = {
+                "feature",
+                "resume",
+                "layer",
+                "repository",
+                "storage",
+                "Qdrant"
+            })
     public Boolean deleteResume(Long resumeId) {
         var id = PointIdFactory.id(resumeId);
 

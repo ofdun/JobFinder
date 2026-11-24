@@ -1,65 +1,80 @@
-import { NavLink } from 'react-router-dom';
-import { LogoutButton } from '../features/auth/LogoutButton';
-import { useSession } from '../shared/session/sessionStore';
+import { ThemeToggle } from "../shared/ui/ThemeToggle";
+import { NavLink } from "react-router-dom";
+import { LogoutButton } from "../features/auth/LogoutButton";
+import { useSession } from "../shared/session/sessionStore";
+import { Icon, IconName } from "../shared/ui/Icon";
 
 export function AppShell() {
   const session = useSession();
-
+  const links: { to: string; label: string; icon: IconName }[] =
+    session?.role === "employer"
+      ? [
+          { to: "/", label: "Обзор", icon: "grid" },
+          { to: "/me/vacancies", label: "Мои вакансии", icon: "briefcase" },
+          {
+            to: "/me/resumes/search",
+            label: "Найти кандидата",
+            icon: "search",
+          },
+        ]
+      : session?.role === "applicant"
+        ? [
+            { to: "/", label: "Обзор", icon: "grid" },
+            { to: "/vacancies/search", label: "Найти работу", icon: "search" },
+            { to: "/me/resumes", label: "Мои резюме", icon: "resume" },
+            { to: "/me/applications", label: "Отклики", icon: "send" },
+          ]
+        : [{ to: "/vacancies/search", label: "Найти работу", icon: "search" }];
   return (
     <header className="app-shell">
       <div className="app-shell-inner">
-        <NavLink className="brand-link" to="/vacancies/search">
-          JobFinder
+        <NavLink className="brand-link" to="/" aria-label="JobFinder — главная">
+          <span className="brand-symbol">
+            <Icon name="spark" size={23} />
+          </span>
+          jobfinder<span className="brand-dot">.</span>
         </NavLink>
-
         <nav className="app-shell-nav" aria-label="Основная навигация">
-          <NavLink to="/vacancies/search" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            Вакансии
-          </NavLink>
-
-          {session?.role === 'applicant' ? (
-            <>
-              <NavLink to="/me/applicant" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Кабинет соискателя
-              </NavLink>
-              <NavLink to="/me/resumes" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Резюме
-              </NavLink>
-              <NavLink to="/me/applications" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Отклики
-              </NavLink>
-            </>
-          ) : null}
-
-          {session?.role === 'employer' ? (
-            <>
-              <NavLink to="/me/employer" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Кабинет работодателя
-              </NavLink>
-              <NavLink to="/me/vacancies" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Мои вакансии
-              </NavLink>
-              <NavLink to="/me/resumes/search" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Поиск резюме
-              </NavLink>
-            </>
-          ) : null}
-
-          {!session ? (
-            <>
-              <NavLink to="/login" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Вход
-              </NavLink>
-              <NavLink to="/register" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                Регистрация
-              </NavLink>
-            </>
-          ) : null}
+          {links.map((link) => (
+            <NavLink key={link.to} to={link.to} end={link.to === "/"}>
+              <Icon name={link.icon} size={16} />
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
-
-        {session ? <LogoutButton className="app-shell-logout" /> : null}
+        <div className="shell-account">
+          <ThemeToggle />
+          {session ? (
+            <>
+              <NavLink
+                className="account-link"
+                to={
+                  session.role === "applicant"
+                    ? "/me/applicant"
+                    : "/me/employer"
+                }
+              >
+                <span className="account-avatar">
+                  <Icon name="person" size={17} />
+                </span>
+                <span>
+                  {session.role === "applicant" ? "Соискатель" : "Работодатель"}
+                </span>
+              </NavLink>
+              <LogoutButton className="button-quiet" />
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className="login-link">
+                Войти
+              </NavLink>
+              <NavLink to="/register" className="button button-dark">
+                Начать <Icon name="arrow" size={17} />
+              </NavLink>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
 }
-

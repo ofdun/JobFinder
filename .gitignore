@@ -15,3 +15,5 @@
 *cities500.txt
 *.log
 *.gz
+
+.local/

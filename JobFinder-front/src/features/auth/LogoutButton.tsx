@@ -23,7 +23,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
     } finally {
       queryClient.clear();
       clearSession();
-      navigate('/login');
+      navigate("/");
     }
   };
 

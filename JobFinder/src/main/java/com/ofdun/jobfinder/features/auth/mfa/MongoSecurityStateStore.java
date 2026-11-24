@@ -1,5 +1,8 @@
 package com.ofdun.jobfinder.features.auth.mfa;
 
+import com.ofdun.jobfinder.features.auth.enums.AccountType;
+import io.micrometer.observation.annotation.Observed;
+import java.util.function.Function;
 import org.bson.Document;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DuplicateKeyException;
@@ -18,6 +21,49 @@ public class MongoSecurityStateStore implements SecurityStateStore {
         this.mongo = mongo;
     }
 
+    @Override
+    @Observed(
+            name = "jobfinder.auth.repository.get",
+            contextualName = "MongoDB: получение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
+    public SecurityState get(AccountType type, long id) {
+        return SecurityStateStore.super.get(type, id);
+    }
+
+    @Override
+    @Observed(
+            name = "jobfinder.auth.repository.update",
+            contextualName = "MongoDB: атомарное обновление состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
+    public <T> T update(AccountType type, long id, Function<SecurityState, T> action) {
+        return SecurityStateStore.super.update(type, id, action);
+    }
+
+    @Observed(
+            name = "jobfinder.auth.repository.read",
+            contextualName = "MongoDB: чтение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public Snapshot read(String key) {
         var document = mongo.findById(key, Document.class, "account_security");
         return document == null
@@ -27,6 +73,17 @@ public class MongoSecurityStateStore implements SecurityStateStore {
                         SecurityStateStore.decode(document.getString("payload")));
     }
 
+    @Observed(
+            name = "jobfinder.auth.repository.save",
+            contextualName = "MongoDB: сохранение состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public boolean save(String key, long version, SecurityState state) {
         if (version == -1) {
             try {
@@ -51,6 +108,17 @@ public class MongoSecurityStateStore implements SecurityStateStore {
                 == 1;
     }
 
+    @Observed(
+            name = "jobfinder.auth.repository.delete",
+            contextualName = "MongoDB: удаление состояния безопасности",
+            lowCardinalityKeyValues = {
+                "feature",
+                "auth",
+                "layer",
+                "repository",
+                "storage",
+                "MongoDB"
+            })
     public void delete(String key) {
         mongo.remove(Query.query(Criteria.where("_id").is(key)), "account_security");
     }

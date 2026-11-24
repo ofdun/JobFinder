@@ -7,6 +7,7 @@ import com.ofdun.jobfinder.features.vacancy.domain.model.VacancySearchFilter;
 import com.ofdun.jobfinder.features.vacancy.domain.repository.VacancyRepository;
 import com.ofdun.jobfinder.features.vacancy.domain.validator.VacancyValidator;
 import com.ofdun.jobfinder.features.vacancy.exception.VacancyNotFoundException;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,20 @@ public class BasicVacancyService implements VacancyService {
     private final VacancyValidator vacancyValidator;
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.createVacancy",
+            contextualName = "Создание вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public Long createVacancy(@NonNull @Valid VacancyModel vacancyModel) {
         vacancyValidator.validateVacancyForCreate(vacancyModel);
         return vacancyRepository.createVacancy(vacancyModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.getVacancyById",
+            contextualName = "Получение вакансии по ID",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public VacancyModel getVacancyById(@NonNull Long id) {
         return vacancyRepository
                 .getVacancyById(id)
@@ -34,18 +43,30 @@ public class BasicVacancyService implements VacancyService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.updateVacancy",
+            contextualName = "Обновление вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public VacancyModel updateVacancy(@NonNull @Valid VacancyModel vacancyModel) {
         vacancyValidator.validateVacancyForUpdate(vacancyModel);
         return vacancyRepository.updateVacancy(vacancyModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.deleteVacancy",
+            contextualName = "Удаление вакансии",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public Boolean deleteVacancy(@NonNull Long id) {
         vacancyValidator.validateVacancyForDelete(id);
         return vacancyRepository.deleteVacancy(id);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.vacancy.service.searchVacancies",
+            contextualName = "Поиск вакансий",
+            lowCardinalityKeyValues = {"feature", "vacancy", "layer", "service"})
     public PageResult<VacancyModel> searchVacancies(
             VacancySearchFilter filter, OffsetPagination pagination) {
         OffsetPagination p = pagination == null ? OffsetPagination.builder().build() : pagination;

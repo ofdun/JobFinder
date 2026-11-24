@@ -3,6 +3,7 @@ package com.ofdun.jobfinder.features.skill.data.postgres.repository;
 import com.ofdun.jobfinder.features.skill.data.postgres.mapper.SkillMapper;
 import com.ofdun.jobfinder.features.skill.domain.model.SkillModel;
 import com.ofdun.jobfinder.features.skill.domain.repository.SkillRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,33 @@ public class PostgreSQLSkillRepository implements SkillRepository {
     private final SkillJpaRepository skillJpaRepository;
 
     @Override
+    @Observed(
+            name = "jobfinder.skill.repository.getSkillById",
+            contextualName = "PostgreSQL: получение навыка по ID",
+            lowCardinalityKeyValues = {
+                "feature",
+                "skill",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public Optional<SkillModel> getSkillById(Long id) {
         return skillJpaRepository.findById(id).map(SkillMapper::toModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.skill.repository.getAllSkills",
+            contextualName = "PostgreSQL: получение списка навыков",
+            lowCardinalityKeyValues = {
+                "feature",
+                "skill",
+                "layer",
+                "repository",
+                "storage",
+                "PostgreSQL"
+            })
     public List<SkillModel> getAllSkills() {
         return skillJpaRepository.findAllByOrderByNameAsc().stream()
                 .map(SkillMapper::toModel)

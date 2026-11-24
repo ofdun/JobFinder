@@ -32,17 +32,13 @@ import com.ofdun.jobfinder.features.vacancy.api.dto.*;
 import com.ofdun.jobfinder.features.vacancy.api.mapper.*;
 import com.ofdun.jobfinder.features.vacancy.domain.model.*;
 import com.ofdun.jobfinder.features.vacancy.domain.service.*;
-
 import graphql.schema.DataFetchingEnvironment;
-
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Validator;
-
+import java.util.*;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -87,6 +83,10 @@ public class GraphQlOperations {
                     .findAndRegisterModules()
                     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    @Observed(
+            name = "jobfinder.graphql.query",
+            contextualName = "Чтение данных GraphQL",
+            lowCardinalityKeyValues = {"feature", "graphql", "layer", "api"})
     public Object query(DataFetchingEnvironment env) {
         Authentication auth = env.getGraphQlContext().get("authentication");
         Map<String, Object> a = env.getArguments();
@@ -187,6 +187,10 @@ public class GraphQlOperations {
         };
     }
 
+    @Observed(
+            name = "jobfinder.graphql.mutation",
+            contextualName = "Изменение данных GraphQL",
+            lowCardinalityKeyValues = {"feature", "graphql", "layer", "api"})
     public Object mutation(DataFetchingEnvironment env) {
         Authentication auth = env.getGraphQlContext().get("authentication");
         Map<String, Object> a = env.getArguments();
@@ -370,6 +374,10 @@ public class GraphQlOperations {
         };
     }
 
+    @Observed(
+            name = "jobfinder.graphql.related",
+            contextualName = "Получение связанных данных GraphQL",
+            lowCardinalityKeyValues = {"feature", "graphql", "layer", "api"})
     public Object related(DataFetchingEnvironment env) {
         Authentication auth = env.getGraphQlContext().get("authentication");
         Map<String, Object> source = json.convertValue(env.getSource(), Map.class);

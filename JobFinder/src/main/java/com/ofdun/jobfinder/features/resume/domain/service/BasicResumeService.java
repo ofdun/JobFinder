@@ -14,6 +14,7 @@ import com.ofdun.jobfinder.features.resume.domain.model.ResumeSearchFilter;
 import com.ofdun.jobfinder.features.resume.domain.repository.RelationalResumeRepository;
 import com.ofdun.jobfinder.features.resume.domain.repository.VectorResumeRepository;
 import com.ofdun.jobfinder.features.resume.exception.FailedToCreateResumeException;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import java.util.function.Function;
@@ -73,6 +74,10 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.service.createResume",
+            contextualName = "Создание резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public Long createResume(@NonNull @Valid ResumeModel resumeModel) {
         var result = saveChain.apply(resumeModel);
         return result.orElseThrow(
@@ -82,6 +87,10 @@ public class BasicResumeService implements ResumeService {
 
     @Override
     @Transactional(readOnly = true)
+    @Observed(
+            name = "jobfinder.resume.service.getResumeById",
+            contextualName = "Получение резюме по ID",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public Optional<ResumeModel> getResumeById(@NonNull Long resumeId) {
         var model = new ResumeModel();
         model.setId(resumeId);
@@ -89,6 +98,10 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.service.replaceResume",
+            contextualName = "Замена резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public Optional<ResumeModel> replaceResume(ResumeModel model) {
         var existing =
                 relationalResumeRepository
@@ -105,11 +118,19 @@ public class BasicResumeService implements ResumeService {
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.service.updateResume",
+            contextualName = "Обновление резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public Optional<ResumeModel> updateResume(@NonNull @Valid ResumeModel resumeModel) {
         return updateChain.apply(resumeModel);
     }
 
     @Override
+    @Observed(
+            name = "jobfinder.resume.service.deleteResume",
+            contextualName = "Удаление резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public Boolean deleteResume(@NonNull Long resumeId) {
         var relationalDelete = relationalResumeRepository.deleteResume(resumeId);
 
@@ -128,6 +149,10 @@ public class BasicResumeService implements ResumeService {
 
     @Override
     @Transactional(readOnly = true)
+    @Observed(
+            name = "jobfinder.resume.service.searchResumes",
+            contextualName = "Поиск резюме",
+            lowCardinalityKeyValues = {"feature", "resume", "layer", "service"})
     public PageResult<ResumeModel> searchResumes(
             ResumeSearchFilter filter, OffsetPagination pagination) {
         OffsetPagination p = pagination == null ? OffsetPagination.builder().build() : pagination;

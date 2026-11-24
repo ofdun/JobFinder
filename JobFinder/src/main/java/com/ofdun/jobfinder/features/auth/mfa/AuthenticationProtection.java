@@ -6,6 +6,7 @@ import com.ofdun.jobfinder.features.auth.domain.model.TokenPair;
 import com.ofdun.jobfinder.features.auth.domain.repository.TokenRepository;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
 import com.ofdun.jobfinder.features.auth.mfa.AccountSecurity.Account;
+import io.micrometer.observation.annotation.Observed;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -44,6 +45,10 @@ public class AuthenticationProtection {
 
     private record Challenge(Account account, String stamp) {}
 
+    @Observed(
+            name = "jobfinder.auth.service.login",
+            contextualName = "Вход в аккаунт",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public TokenPair login(AccountType type, String email, String password) {
         var account = accounts.find(type, email).orElseThrow(AccountSecurity::invalid);
         String stamp = accounts.sessionStamp(type, account.id());
@@ -62,6 +67,10 @@ public class AuthenticationProtection {
         return issue(account, stamp);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.verify",
+            contextualName = "Подтверждение второго фактора",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public TokenPair verify(String token, String code) {
         var challenge = readChallenge(token, "TOTP");
         var account = challenge.account();
@@ -72,6 +81,10 @@ public class AuthenticationProtection {
         return issue(account, challenge.stamp());
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.refresh",
+            contextualName = "Обновление сессии",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public TokenPair refresh(AccountType type, String token) {
         String stamp;
         try {
@@ -86,6 +99,10 @@ public class AuthenticationProtection {
         return issue(accounts.account(type, Long.parseLong(id)), stamp);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.changePassword",
+            contextualName = "Смена пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void changePassword(
             AccountType type, long id, String oldPassword, String newPassword, String code) {
         var account = accounts.account(type, id);
@@ -95,6 +112,10 @@ public class AuthenticationProtection {
         accounts.replacePassword(account, newPassword);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.renewPassword",
+            contextualName = "Замена просроченного пароля",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void renewPassword(String token, String newPassword) {
         var challenge = readChallenge(token, "PASSWORD_CHANGE");
         accounts.validateNewPassword(challenge.account(), newPassword);
@@ -102,6 +123,10 @@ public class AuthenticationProtection {
         accounts.replacePassword(challenge.account(), newPassword);
     }
 
+    @Observed(
+            name = "jobfinder.auth.service.recover",
+            contextualName = "Восстановление доступа резервным кодом",
+            lowCardinalityKeyValues = {"feature", "auth", "layer", "service"})
     public void recover(
             AccountType type,
             String email,

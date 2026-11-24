@@ -52,7 +52,7 @@ export function EmployerVacanciesPage() {
             <div className="toolbar">
               <Link to={`/me/vacancies/${vacancy.id}/edit`}>Редактировать</Link>
               <Link to={`/me/vacancies/${vacancy.id}/applications`}>Отклики</Link>
-              <Link to={`/me/vacancies/${vacancy.id}/matching`}>Matching</Link>
+              <Link to={`/me/vacancies/${vacancy.id}/matching`}>Подбор кандидатов</Link>
               <button
                 type="button"
                 className="danger"
