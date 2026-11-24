@@ -5,9 +5,9 @@ import com.ofdun.jobfinder.features.applicant.domain.model.ApplicantModel;
 
 public class ApplicantPostgreSQLMapper {
     public static ApplicantEntity toEntity(ApplicantModel applicant) {
-        if (applicant == null) {
-            return null;
+        if (applicant == null) { return null;
         }
+
         return new ApplicantEntity(
                 applicant.getId(),
                 applicant.getName(),
