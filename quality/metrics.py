@@ -58,7 +58,7 @@ def render(report, output):
     for name, metrics in report["halstead"].items():
         complexity = max((m["complexity"] for m in report["methods"] if m["file"] == name), default=0)
         values = [escape(name), str(complexity)] + [
-            f'{metrics[key]:.2f}' for key in ("halstead_volume", "halstead_difficulty", "halstead_effort")
+            f'{metrics[key]:.2f}' for key in ("halstead_difficulty",)
         ]
         rows.append("<tr>" + "".join(f"<td>{value}</td>" for value in values) + "</tr>")
     output.write_text(
@@ -67,8 +67,8 @@ def render(report, output):
         'td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd}td:first-child{overflow-wrap:anywhere}</style>'
         '<h1>Статический анализ</h1><p>Максимальная цикломатическая сложность метода: 10.</p>'
         '<p><a href="metrics.json">Метрики каждого метода и исходные счётчики Холстеда</a></p>'
-        '<table><thead><tr><th>Файл</th><th>Максимум CC</th><th>Объём Холстеда</th>'
-        '<th>Сложность Холстеда</th><th>Усилия Холстеда</th></tr></thead><tbody>'
+        '<table><thead><tr><th>Файл</th><th>Максимум CC</th>'
+        '<th>Сложность Холстеда</th></tr></thead><tbody>'
         + "".join(rows) + '</tbody></table></html>'
     )
 

@@ -5,7 +5,8 @@ import com.ofdun.jobfinder.features.application.domain.model.ApplicationModel;
 
 public class ApplicationPostgreSQLMapper {
     public static ApplicationEntity toEntity(ApplicationModel application) {
-        if (application == null) {return null;
+        if (application == null) {
+            return null;
         }
 
         return new ApplicationEntity(
