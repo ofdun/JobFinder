@@ -69,6 +69,12 @@ public class TraceDiagnostics
 
     @Override
     public Observation.Context map(Observation.Context context) {
+        if (context
+                instanceof
+                org.springframework.http.server.observation.ServerRequestObservationContext http) {
+            addHttpAttributes(http);
+            return context;
+        }
         if (!(context instanceof ObservedAspectContext)) return context;
         Throwable error = context.getError();
         if (context.getLowCardinalityKeyValue("operation.outcome") == null) {
@@ -89,6 +95,20 @@ public class TraceDiagnostics
                             "http.response.status_code", Integer.toString(failure.getStatus())));
         }
         return context;
+    }
+
+    private static void addHttpAttributes(
+            org.springframework.http.server.observation.ServerRequestObservationContext context) {
+        var request = context.getCarrier();
+        if (request != null) {
+            String path = request.getRequestURI();
+            context.addHighCardinalityKeyValue(KeyValue.of("url.path", path));
+            var match =
+                    java.util.regex.Pattern.compile("/api/v[12]/vacancies/([0-9]+)(?:/.*)?")
+                            .matcher(path);
+            if (match.matches())
+                context.addHighCardinalityKeyValue(KeyValue.of("vacancy.id", match.group(1)));
+        }
     }
 
     public static void recordHttpFailure(Exception error, String code) {

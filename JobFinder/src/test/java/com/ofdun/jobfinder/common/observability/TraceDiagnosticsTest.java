@@ -40,6 +40,37 @@ class TraceDiagnosticsTest {
                     .withUserConfiguration(ConfigurationForTest.class);
 
     @Test
+    void httpSpanContainsVacancyIdWithoutAddingMetricLabels() {
+        var request =
+                new org.springframework.mock.web.MockHttpServletRequest(
+                        "GET", "/api/v1/vacancies/42");
+        var context =
+                new org.springframework.http.server.observation.ServerRequestObservationContext(
+                        request, new org.springframework.mock.web.MockHttpServletResponse());
+        new TraceDiagnostics().map(context);
+        assertEquals("42", context.getHighCardinalityKeyValue("vacancy.id").getValue());
+        assertEquals(
+                "/api/v1/vacancies/42", context.getHighCardinalityKeyValue("url.path").getValue());
+        assertNull(context.getLowCardinalityKeyValue("vacancy.id"));
+    }
+
+    @Test
+    void searchSpanDoesNotGetAVacancyIdOrQueryParameters() {
+        var request =
+                new org.springframework.mock.web.MockHttpServletRequest(
+                        "GET", "/api/v1/vacancies/search");
+        request.setQueryString("token=private");
+        var context =
+                new org.springframework.http.server.observation.ServerRequestObservationContext(
+                        request, new org.springframework.mock.web.MockHttpServletResponse());
+        new TraceDiagnostics().map(context);
+        assertNull(context.getHighCardinalityKeyValue("vacancy.id"));
+        assertEquals(
+                "/api/v1/vacancies/search",
+                context.getHighCardinalityKeyValue("url.path").getValue());
+    }
+
+    @Test
     void serviceAndRepositoryRemainChildrenOfTheRequest() {
         runner.run(
                 context -> {

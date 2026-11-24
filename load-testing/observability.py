@@ -124,13 +124,15 @@ def verify_telemetry(root, config, summary):
     return spans, logs
 
 
-def compare(directory):
+def compare(directory, expected_profiles=None, expected_repeats=None):
     results = []
-    reference = None
+    references = {}
+    sources = set()
     groups = {}
     for path in sorted(directory.glob('*/manifest.json')):
         root = path.parent
         manifest = json.loads(path.read_text())
+        sources.add(manifest['source_sha256'])
         config = manifest['observation']
         mode = next(k for k, v in MODES.items() if v == config)
         profile = manifest['plan']['profile']
@@ -143,9 +145,10 @@ def compare(directory):
         conditions = [manifest['base_images'], manifest['cpu_sets'], manifest['machine'],
                       manifest['source_sha256'], settings,
                       {k: v['resources'] for k, v in manifest['containers'].items() if k != 'collector'}]
+        reference = references.get(profile)
         if reference is not None and reference != conditions:
             raise ValueError('Comparison requires identical sources, images, resources and machine')
-        reference = conditions
+        references[profile] = conditions
         summary = json.loads((root / 'summary.json').read_text())
         records = [json.loads(line) for line in (root / 'resources.jsonl').read_text().splitlines()]
         start, stop = summary['measurement_start'], summary['measurement_stop']
@@ -161,6 +164,13 @@ def compare(directory):
         results.append(item)
     if not groups:
         raise ValueError('No comparison results')
+    if len(sources) != 1:
+        raise ValueError('All profiles must use identical application sources')
+    profiles = set(expected_profiles or (profile for _, profile in groups))
+    attempts = ({f'{i:02d}' for i in range(1, expected_repeats + 1)}
+                if expected_repeats is not None else {attempt for attempt, _ in groups})
+    if set(groups) != {(attempt, profile) for attempt in attempts for profile in profiles}:
+        raise ValueError('Comparison is missing requested profiles or repetitions')
     differences = []
     for (attempt, profile), group in groups.items():
         if set(group) != set(MODES) or any(r['plan'] != group['default']['plan'] for r in group.values()):
@@ -211,14 +221,14 @@ def compare(directory):
     return results
 
 
-def collect(source, output):
+def collect(source, output, expected_profiles=None, expected_repeats=None):
     paths = list(source.rglob('manifest.json'))
     output.mkdir(parents=True, exist_ok=False)
     for path in paths:
         if any(p.is_symlink() for p in [path.parent, *path.parent.rglob('*')]):
             raise ValueError('Symbolic links are not allowed')
         shutil.copytree(path.parent, output / path.parent.name)
-    compare(output)
+    compare(output, expected_profiles, expected_repeats)
 
 
 def main():
@@ -228,7 +238,7 @@ def main():
     parser.add_argument('--skip-build', action='store_true')
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--warmup-seconds', type=int, default=60)
-    parser.add_argument('--stable-vus', type=int, default=4)
+    parser.add_argument('--stable-vus', type=int, default=100)
     parser.add_argument('--peak-vus', type=int, default=128)
     parser.add_argument('--soak-seconds', type=int, default=600)
     parser.add_argument('--recovery-seconds', type=int, default=600)
@@ -242,7 +252,8 @@ def main():
         parser.error('warmup must be at least 60 seconds')
     cpus = cpu_layout(args.application_cpus, args.generator_cpus, args.monitor_cpus)
     profiles = PROFILES if args.profile == 'all' else (args.profile,)
-    plans = [make_plan(p, args.smoke, args.stable_vus, min(8, args.peak_vus) if args.smoke else args.peak_vus,
+    stable_vus = min(4, args.stable_vus) if args.smoke else args.stable_vus
+    plans = [make_plan(p, args.smoke, stable_vus, min(8, args.peak_vus) if args.smoke else args.peak_vus,
                        args.soak_seconds, args.recovery_seconds) for p in profiles]
     if not args.smoke:
         for plan in plans:
@@ -269,7 +280,7 @@ def main():
                 run_one(output / name, plan, images, cpus, name, machine, MODES[mode])
                 verify_telemetry(output / name, MODES[mode],
                                  json.loads((output / name / 'summary.json').read_text()))
-    compare(output)
+    compare(output, profiles, args.repeat)
     print('Report:', output / 'index.html', flush=True)
 
 

@@ -1,0 +1,15 @@
+apiVersion: 1
+datasources:
+- name: Логи
+  uid: loki
+  type: loki
+  access: proxy
+  url: http://loki:3100
+  editable: false
+  jsonData:
+    derivedFields:
+    - name: TraceID
+      datasourceUid: tempo
+      matcherRegex: '"traceId":"([a-f0-9]+)"'
+      url: '$${__value.raw}'
+      urlDisplayLabel: Открыть трейс

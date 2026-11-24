@@ -1,4 +1,11 @@
 services:
+  loki:
+    image: grafana/loki:3.7.0
+    restart: unless-stopped
+    command: [-config.file=/etc/loki/config.yaml]
+    volumes:
+    - ./loki.yaml:/etc/loki/config.yaml:ro
+    - loki_data:/loki
   tempo:
     image: grafana/tempo:3.0.0
     restart: unless-stopped
@@ -20,9 +27,14 @@ services:
     - 127.0.0.1:4318:4318
     volumes:
     - ./collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    - backend_logs:/var/log/jobfinder:ro
+    - collector_data:/var/lib/otelcol
+    user: "0:0"
     depends_on:
       tempo:
         condition: service_healthy
+      loki:
+        condition: service_started
   metrics-db:
     image: postgres:15-alpine
     restart: unless-stopped
@@ -65,6 +77,9 @@ services:
       start_period: 20s
       retries: 24
 volumes:
+  backend_logs:
+  loki_data:
+  collector_data:
   tempo_data:
   metrics_data:
   load_grafana_data:

@@ -48,8 +48,8 @@ def definitions():
         panel(2, 'Память приложения', "SELECT r.mode AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak " + grouped, 'barchart', 'megabytes'),
         panel(3, 'Пропускная способность', 'SELECT mode AS configuration, avg(rps) AS requests_per_second FROM runs GROUP BY profile,mode ORDER BY profile,mode', 'barchart', 'reqps'),
         panel(4, 'Задержка p95', 'SELECT mode AS configuration, avg(p95_ms) AS p95 FROM runs GROUP BY profile,mode ORDER BY profile,mode', 'barchart', 'ms'),
-        panel(5, 'Процессорное время мониторинга и Collector', "SELECT r.mode || ' · ' || s.component AS configuration, avg(s.cpu_seconds) * 1000 AS cpu_ms FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE s.component IN ('monitor','collector') GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component", 'barchart', 'ms'),
-        panel(6, 'Память мониторинга и Collector', "SELECT r.mode || ' · ' || s.component AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE s.component IN ('monitor','collector') GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component", 'barchart', 'megabytes'),
+        panel(5, 'Процессорное время мониторинга', "SELECT r.mode AS configuration, avg(s.cpu_seconds) * 1000 AS cpu_ms FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE s.component='monitor' GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component", 'barchart', 'ms'),
+        panel(6, 'Память мониторинга', "SELECT r.mode AS configuration, avg(s.ram_mean_mib) * 1.048576 AS mean, max(s.ram_peak_mib) * 1.048576 AS peak FROM resources_summary s JOIN runs r ON r.id=s.run_id WHERE s.component='monitor' GROUP BY r.profile,r.mode,s.component ORDER BY r.profile,r.mode,s.component", 'barchart', 'megabytes'),
         panel(7, 'Объём логов', 'SELECT mode AS configuration, avg(log_bytes) / 1000000.0 AS bytes FROM runs GROUP BY profile,mode ORDER BY profile,mode', 'barchart', 'megabytes')]
     selected = 'WHERE run_id=${run:sqlstring}'
     load = [

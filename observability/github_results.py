@@ -100,27 +100,28 @@ def main():
     run = wait_for_run(args.repository, args.run_id, token, args.wait)
     artifacts = api(f'/repos/{args.repository}/actions/runs/{args.run_id}/artifacts?per_page=100', token)
     selected = [a for a in artifacts['artifacts']
-                if a['name'] == f'load-results-{args.run_id}-suite' and not a['expired']]
-    if len(selected) != 1:
+                if a['name'].startswith(f'load-results-{args.run_id}-') and not a['expired']]
+    if not selected:
         raise ValueError(f'Нет результатов измерений: {run["conclusion"]}')
     destination = ROOT / 'results' / f'github-{args.run_id}-{run["run_attempt"]}'
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=destination.parent) as temporary:
         directory = Path(temporary)
-        archive = directory / 'artifact.zip'
-        download(args.repository, selected[0]['id'], token, archive)
         extracted = directory / 'data'
         extracted.mkdir()
-        extract(archive, extracted)
-        candidates = list(extracted.rglob('comparison.json'))
-        if len(candidates) != 1:
-            raise ValueError('Artifact не содержит одну завершённую серию сравнений')
-        source = candidates[0].parent
+        for artifact in selected:
+            archive = directory / 'artifact.zip'
+            download(args.repository, artifact['id'], token, archive)
+            target = extracted / str(artifact['id'])
+            target.mkdir()
+            extract(archive, target)
+            archive.unlink()
         sys_path = str(ROOT.parent / 'load-testing')
         import sys
         sys.path.insert(0, sys_path)
-        from observability import compare
-        compare(source)
+        from observability import collect
+        source = directory / 'suite'
+        collect(extracted, source)
         subprocess.run(['docker', 'compose', '-p', args.project, '-f', str(ROOT / 'compose.yml'),
                         'up', '-d', '--wait', 'grafana', 'metrics-db'], check=True)
         import_results(source, destination.name, args.project)

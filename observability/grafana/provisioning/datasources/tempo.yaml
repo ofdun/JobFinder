@@ -10,3 +10,11 @@ datasources:
     httpMethod: GET
     nodeGraph:
       enabled: true
+    tracesToLogsV2:
+      datasourceUid: loki
+      spanStartTimeShift: '-5s'
+      spanEndTimeShift: '5s'
+      filterByTraceID: false
+      filterBySpanID: false
+      customQuery: true
+      query: '{service_name="JobFinder"} | json | traceId = "$${__span.traceId}"'

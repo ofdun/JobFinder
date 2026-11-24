@@ -18,6 +18,10 @@ on:
         description: Smoke
         type: boolean
         default: false
+      stable_vus:
+        description: Пользователи постоянной нагрузки
+        type: number
+        default: 100
       peak_vus:
         description: Пиковые пользователи
         type: number
@@ -50,13 +54,34 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  plan:
+    name: План нагрузки
+    if: inputs.report_run_id == '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      profiles: ${{ steps.profiles.outputs.profiles }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: profiles
+        env:
+          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+        run: python3 load-testing/pipeline.py profiles --profile "$LOAD_PROFILE"
+
   load:
     if: inputs.report_run_id == '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.run_attempt > 1)
-    name: Load testing
-    concurrency:
-      group: load-testing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: false
+    name: Load testing · ${{ matrix.profile }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        profile: ${{ fromJSON(needs.plan.outputs.profiles) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     steps:
@@ -71,8 +96,9 @@ jobs:
         env:
           LOAD_REPEATS: ${{ inputs.repeats || '1' }}
           LOAD_WARMUP_SECONDS: ${{ inputs.warmup_seconds || '60' }}
-          LOAD_PROFILE: ${{ inputs.profile || 'all' }}
+          LOAD_PROFILE: ${{ matrix.profile }}
           LOAD_SMOKE: ${{ inputs.smoke || false }}
+          LOAD_STABLE_VUS: ${{ inputs.stable_vus || 100 }}
           LOAD_PEAK_VUS: ${{ inputs.peak_vus || 128 }}
           LOAD_SOAK_SECONDS: ${{ inputs.soak_seconds || '600' }}
           LOAD_RECOVERY_SECONDS: ${{ inputs.recovery_seconds || '600' }}
@@ -85,7 +111,7 @@ jobs:
             --peak-vus "$LOAD_PEAK_VUS"
             --soak-seconds "$LOAD_SOAK_SECONDS"
             --recovery-seconds "$LOAD_RECOVERY_SECONDS"
-            --stable-vus 4
+            --stable-vus "$LOAD_STABLE_VUS"
             --application-cpus '0,1'
             --generator-cpus 2
             --monitor-cpus 3
@@ -100,9 +126,12 @@ jobs:
           profiles = PROFILES if os.environ['LOAD_PROFILE'] == 'all' else [os.environ['LOAD_PROFILE']]
           smoke = os.environ['LOAD_SMOKE'] == 'true'
           extra_warmup = 0 if smoke else int(os.environ['LOAD_WARMUP_SECONDS']) - 60
-          duration = sum(make_plan(p, smoke, 4, 128, int(os.environ['LOAD_SOAK_SECONDS']),
+          peak = min(8, int(os.environ['LOAD_PEAK_VUS'])) if smoke else int(os.environ['LOAD_PEAK_VUS'])
+          stable = min(4, int(os.environ['LOAD_STABLE_VUS'])) if smoke else int(os.environ['LOAD_STABLE_VUS'])
+          duration = sum(make_plan(p, smoke, stable, peak, int(os.environ['LOAD_SOAK_SECONDS']),
                                   int(os.environ['LOAD_RECOVERY_SECONDS']))['duration_seconds'] + extra_warmup + 180
                          for p in profiles) * 4 * int(os.environ['LOAD_REPEATS']) + 900
+          print(f'Оценка времени с подготовкой: {duration / 60:.0f} мин', flush=True)
           if duration > 18000:
               raise SystemExit('Выберите отдельный сценарий или меньшую длительность: выбранные повторы превышают лимит job.')
           PY
@@ -113,7 +142,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: load-results-${{ github.run_id }}-suite
+          name: load-results-${{ github.run_id }}-${{ matrix.profile }}
           path: load-testing/results/
           if-no-files-found: warn
           overwrite: true
@@ -130,7 +159,7 @@ jobs:
     if: ${{ !cancelled() && (needs.load.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.report_run_id != '')) }}
     needs: load
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 90
     permissions:
       contents: read
       actions: read
@@ -153,10 +182,11 @@ jobs:
       - name: Сборка отчёта
         env:
           LOAD_PROFILE: ${{ inputs.profile || 'all' }}
-        run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE"
+          LOAD_REPEATS: ${{ inputs.repeats || '1' }}
+        run: python3 load-testing/pipeline.py collect --input .ci-load-inputs --output .ci-load-report/suite --profile "$LOAD_PROFILE" --repeats "$LOAD_REPEATS"
       - name: Подготовка Grafana
         if: hashFiles('.ci-load-report/suite/comparison.json') != ''
-        run: docker compose -p load-report -f observability/compose.yml up -d --wait
+        run: docker compose -p load-report -f observability/compose.yml up -d --wait grafana metrics-db
       - name: Загрузка измерений
         if: hashFiles('.ci-load-report/suite/comparison.json') != ''
         env:
@@ -226,7 +256,7 @@ jobs:
 
   pages:
     name: Pages
-    if: ${{ !cancelled() && needs.report.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    if: ${{ !cancelled() && needs.report.result == 'success' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     needs: report
     permissions:
       contents: read

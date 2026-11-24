@@ -24,14 +24,14 @@ def bundle(output):
     docker('image', 'save', '--output', output / 'images.tar', *IMAGES.values())
 
 
-def collect(source, output, profiles):
+def collect(source, output, profiles, repeats=None):
     paths = list(source.rglob('manifest.json'))
     if paths and 'observation' in json.loads(paths[0].read_text()):
         from observability import collect as collect_observations
         found_profiles = {json.loads(path.read_text())['plan']['profile'] for path in paths}
         if found_profiles != set(profiles):
             raise ValueError('Comparison profiles do not match requested profiles')
-        return collect_observations(source, output)
+        return collect_observations(source, output, profiles, repeats)
     found = {}
     manifests = []
     for path in sorted(source.rglob('manifest.json')):
@@ -75,6 +75,7 @@ def main():
     combine.add_argument('--input', type=Path, required=True)
     combine.add_argument('--output', type=Path, required=True)
     combine.add_argument('--profile', choices=('all', *PROFILES), default='all')
+    combine.add_argument('--repeats', type=int)
     args = parser.parse_args()
     if args.command == 'profiles':
         value = json.dumps(profiles_for(args.profile))
@@ -83,7 +84,7 @@ def main():
     elif args.command == 'bundle':
         bundle(args.output)
     else:
-        collect(args.input, args.output, profiles_for(args.profile))
+        collect(args.input, args.output, profiles_for(args.profile), args.repeats)
 
 
 if __name__ == '__main__':
