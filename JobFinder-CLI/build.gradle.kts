@@ -50,10 +50,10 @@ tasks.test {
 spotless {
 
     format("misc") {
-        target("*.gradle", ".gitattributes", ".gitignore")
+        target("*.gradle.kts", ".gitattributes", ".gitignore")
 
         trimTrailingWhitespace()
-        leadingSpacesToTabs()
+        leadingTabsToSpaces(4)
         endWithNewline()
     }
 
@@ -78,4 +78,4 @@ tasks.named<JavaExec>("run") {
     standardInput = System.`in`
 }
 
-apply(from = "../ci/quality.gradle")
+apply(from = "../ci/quality.gradle.kts")

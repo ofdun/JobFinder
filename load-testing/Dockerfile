@@ -3,7 +3,7 @@ WORKDIR /source
 COPY JobFinder/gradle gradle
 COPY JobFinder/gradlew JobFinder/build.gradle.kts JobFinder/settings.gradle.kts ./
 COPY JobFinder/src src
-COPY ci/testing.gradle ci/quality.gradle /ci/
+COPY ci/testing.gradle.kts ci/quality.gradle.kts /ci/
 COPY docs/swagger.yml docs/schema.graphqls /docs/
 RUN --mount=type=cache,target=/home/gradle/.gradle gradle --no-daemon --console=plain bootJar -x test
 
