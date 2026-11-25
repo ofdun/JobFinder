@@ -94,30 +94,39 @@ public class OpenApiContract implements HandlerInterceptor {
                     throw new IllegalArgumentException("Missing parameter");
                 continue;
             }
-            JsonNode schema = param.path("schema");
-            try {
-                JsonNode value =
-                        switch (schema.path("type").asText()) {
-                            case "integer" -> json.getNodeFactory().numberNode(Long.parseLong(raw));
-                            case "number" ->
-                                    json.getNodeFactory().numberNode(new java.math.BigDecimal(raw));
-                            case "boolean" -> {
-                                if (!raw.equals("true") && !raw.equals("false"))
-                                    throw new IllegalArgumentException();
-                                yield json.getNodeFactory().booleanNode(Boolean.parseBoolean(raw));
-                            }
-                            case "array" -> {
-                                var array = json.createArrayNode();
-                                for (String item : raw.split(",")) array.add(Long.parseLong(item));
-                                yield array;
-                            }
-                            default -> json.getNodeFactory().textNode(raw);
-                        };
-                validate(schema, value);
-            } catch (RuntimeException ex) {
-                throw new IllegalArgumentException("Invalid parameter: " + name);
-            }
+            validateParameter(param, raw, name);
         }
+        validateSort(request);
+        return true;
+    }
+
+    private void validateParameter(JsonNode param, String raw, String name) {
+        JsonNode schema = param.path("schema");
+        try {
+            JsonNode value =
+                    switch (schema.path("type").asText()) {
+                        case "integer" -> json.getNodeFactory().numberNode(Long.parseLong(raw));
+                        case "number" ->
+                                json.getNodeFactory().numberNode(new java.math.BigDecimal(raw));
+                        case "boolean" -> {
+                            if (!raw.equals("true") && !raw.equals("false"))
+                                throw new IllegalArgumentException();
+                            yield json.getNodeFactory().booleanNode(Boolean.parseBoolean(raw));
+                        }
+                        case "array" -> {
+                            var array = json.createArrayNode();
+                            for (String item : raw.split(",")) array.add(Long.parseLong(item));
+                            yield array;
+                        }
+                        default -> json.getNodeFactory().textNode(raw);
+                    };
+            validate(schema, value);
+        } catch (RuntimeException ex) {
+            throw new IllegalArgumentException("Invalid parameter: " + name);
+        }
+    }
+
+    private void validateSort(HttpServletRequest request) {
         String sort = request.getParameter("sortBy");
         if (sort != null
                 && !(request.getRequestURI().contains("/vacancies")
@@ -125,6 +134,5 @@ public class OpenApiContract implements HandlerInterceptor {
                                 : List.of("id", "date", "creationDate"))
                         .contains(sort))
             throw new IllegalArgumentException("Unsupported sort field");
-        return true;
     }
 }

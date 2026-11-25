@@ -214,6 +214,12 @@ class ApplicationJourneyE2E {
         if (expected == 204)
             assertTrue(response.body().isBlank(), "204 must not contain a response body");
         var result = response.body().isBlank() ? json.nullNode() : json.readTree(response.body());
+        assertContractResponse(path, expected, response, result);
+        return result;
+    }
+
+    private void assertContractResponse(
+            String path, int expected, HttpResponse<String> response, JsonNode result) {
         if (path.startsWith("/api/v2/") && expected == 201) {
             long createdId = result.isNumber() ? result.asLong() : result.get("id").asLong();
             assertEquals(
@@ -226,7 +232,6 @@ class ApplicationJourneyE2E {
             assertTrue(result.get("exceptionMessage").isNull());
             assertEquals(0, result.get("stackTrace").size());
         }
-        return result;
     }
 
     @AfterEach

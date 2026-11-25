@@ -6,8 +6,10 @@
 !JobFinder/settings.gradle.kts
 !JobFinder/src/**
 !ci
-!ci/testing.gradle
+!ci/testing.gradle.kts
 
 !docs
 !docs/swagger.yml
 !docs/schema.graphqls
+
+!ci/quality.gradle.kts

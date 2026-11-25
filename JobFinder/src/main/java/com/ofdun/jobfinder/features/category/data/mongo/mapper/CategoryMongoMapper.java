@@ -18,4 +18,3 @@ public class CategoryMongoMapper {
         return new CategoryDocument(model.getId(), model.getName());
     }
 }
-

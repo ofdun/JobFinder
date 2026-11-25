@@ -6,7 +6,6 @@ import com.ofdun.jobfinder.common.test.MongoRepositoryITBase;
 import com.ofdun.jobfinder.features.education.data.mongo.repository.MongoEducationRepository;
 import com.ofdun.jobfinder.features.education.domain.model.EducationModel;
 import com.ofdun.jobfinder.features.resume.enums.EducationDegree;
-import java.time.Year;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -26,21 +25,9 @@ class MongoEducationRepositoryIT extends MongoRepositoryITBase {
         var input =
                 List.of(
                         new EducationModel(
-                                1L,
-                                101L,
-                                EducationDegree.BACHELOR,
-                                "BMSTU",
-                                "IU",
-                                "SE",
-                                2024),
+                                1L, 101L, EducationDegree.BACHELOR, "BMSTU", "IU", "SE", 2024),
                         new EducationModel(
-                                2L,
-                                102L,
-                                EducationDegree.MASTER,
-                                "MSU",
-                                "CS",
-                                "AI",
-                                2025));
+                                2L, 102L, EducationDegree.MASTER, "MSU", "CS", "AI", 2025));
 
         var saved = mongoEducationRepository.createEducations(input);
 
@@ -52,21 +39,9 @@ class MongoEducationRepositoryIT extends MongoRepositoryITBase {
         var input =
                 List.of(
                         new EducationModel(
-                                1L,
-                                101L,
-                                EducationDegree.BACHELOR,
-                                "BMSTU",
-                                "IU",
-                                "SE",
-                                2024),
+                                1L, 101L, EducationDegree.BACHELOR, "BMSTU", "IU", "SE", 2024),
                         new EducationModel(
-                                2L,
-                                102L,
-                                EducationDegree.MASTER,
-                                "MSU",
-                                "CS",
-                                "AI",
-                                2025));
+                                2L, 102L, EducationDegree.MASTER, "MSU", "CS", "AI", 2025));
         mongoEducationRepository.createEducations(input);
 
         var byResume = mongoEducationRepository.getEducationsByResumeId(101L);
@@ -80,13 +55,7 @@ class MongoEducationRepositoryIT extends MongoRepositoryITBase {
         var input =
                 List.of(
                         new EducationModel(
-                                1L,
-                                101L,
-                                EducationDegree.BACHELOR,
-                                "BMSTU",
-                                "IU",
-                                "SE",
-                                2024));
+                                1L, 101L, EducationDegree.BACHELOR, "BMSTU", "IU", "SE", 2024));
         mongoEducationRepository.createEducations(input);
 
         mongoEducationRepository.deleteAllByResumeId(101L);

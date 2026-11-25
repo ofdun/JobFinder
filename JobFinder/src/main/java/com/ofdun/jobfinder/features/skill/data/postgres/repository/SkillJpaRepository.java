@@ -6,5 +6,5 @@ import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SkillJpaRepository extends JpaRepository<@NonNull SkillEntity, @NonNull Long> {
-	List<SkillEntity> findAllByOrderByNameAsc();
+    List<SkillEntity> findAllByOrderByNameAsc();
 }

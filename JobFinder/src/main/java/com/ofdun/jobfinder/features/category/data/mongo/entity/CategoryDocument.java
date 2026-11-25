@@ -12,10 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotBlank(message = "Category name is required")
     private String name;
 }
-

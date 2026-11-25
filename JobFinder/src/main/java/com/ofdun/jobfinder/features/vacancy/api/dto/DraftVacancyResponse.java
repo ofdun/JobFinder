@@ -13,4 +13,3 @@ public class DraftVacancyResponse {
     private Long vacancyId;
     private Date versionTimestamp;
 }
-

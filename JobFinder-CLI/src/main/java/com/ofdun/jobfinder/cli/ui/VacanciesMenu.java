@@ -125,39 +125,7 @@ public final class VacanciesMenu {
     private void search() {
         var p = ctx.getPrompt();
         try {
-            Map<String, Object> q = new HashMap<>();
-            String text = p.readLine("q (подстрока, можно пусто): ");
-            if (!text.isBlank()) q.put("q", text);
-            Long employerId = p.readLong("employerId (можно пусто): ", true);
-            if (employerId != null) q.put("employerId", employerId);
-            Long locationId = p.readLong("locationId: ", false);
-            if (locationId != null) q.put("locationId", locationId);
-            BigDecimal salaryMin = p.readDecimal("salaryMin (можно пусто): ", true);
-            if (salaryMin != null) q.put("salaryMin", salaryMin);
-            BigDecimal salaryMax = p.readDecimal("salaryMax (можно пусто): ", true);
-            if (salaryMax != null) q.put("salaryMax", salaryMax);
-
-            PaymentFrequency pf = p.readEnum("paymentFrequency", PaymentFrequency.class, true);
-            if (pf != null) q.put("paymentFrequency", pf.name());
-            EmploymentType et = p.readEnum("employmentType", EmploymentType.class, true);
-            if (et != null) q.put("employmentType", et.name());
-            JobFormat jf = p.readEnum("workFormat", JobFormat.class, true);
-            if (jf != null) q.put("workFormat", jf.name());
-
-            var skillIds = p.readLongList("skillIds", true);
-            if (!skillIds.isEmpty()) q.put("skillIds", skillIds);
-            var languageIds = p.readLongList("languageIds", true);
-            if (!languageIds.isEmpty()) q.put("languageIds", languageIds);
-
-            Integer limit = p.readInt("limit (по умолчанию 20): ", true);
-            if (limit != null) q.put("limit", limit);
-            Integer offset = p.readInt("offset (по умолчанию 0): ", true);
-            if (offset != null) q.put("offset", offset);
-            String sortBy = p.readLine("sortBy (PUBLICATION_DATE, SALARY, ID; можно пусто): ");
-            if (!sortBy.isBlank()) q.put("sortBy", sortBy);
-            String sortDesc = p.readLine("sortDesc true/false (можно пусто): ");
-            if (!sortDesc.isBlank()) q.put("sortDesc", Boolean.parseBoolean(sortDesc));
-
+            Map<String, Object> q = searchParameters();
             VacancyPageResponse page = ctx.getApi().searchVacancies(q);
             if (page == null || page.items() == null) {
                 p.println("Пустой ответ.");
@@ -185,5 +153,52 @@ public final class VacanciesMenu {
         } finally {
             p.pause();
         }
+    }
+
+    private Map<String, Object> searchParameters() {
+        var p = ctx.getPrompt();
+        Map<String, Object> q = new HashMap<>();
+        String text = p.readLine("q (подстрока, можно пусто): ");
+        if (!text.isBlank()) q.put("q", text);
+        Long employerId = p.readLong("employerId (можно пусто): ", true);
+        if (employerId != null) q.put("employerId", employerId);
+        Long locationId = p.readLong("locationId: ", false);
+        if (locationId != null) q.put("locationId", locationId);
+        BigDecimal salaryMin = p.readDecimal("salaryMin (можно пусто): ", true);
+        if (salaryMin != null) q.put("salaryMin", salaryMin);
+        BigDecimal salaryMax = p.readDecimal("salaryMax (можно пусто): ", true);
+        if (salaryMax != null) q.put("salaryMax", salaryMax);
+
+        readEmploymentFilters(q);
+
+        var skillIds = p.readLongList("skillIds", true);
+        if (!skillIds.isEmpty()) q.put("skillIds", skillIds);
+        var languageIds = p.readLongList("languageIds", true);
+        if (!languageIds.isEmpty()) q.put("languageIds", languageIds);
+
+        readPaging(q);
+        return q;
+    }
+
+    private void readEmploymentFilters(Map<String, Object> q) {
+        var p = ctx.getPrompt();
+        PaymentFrequency pf = p.readEnum("paymentFrequency", PaymentFrequency.class, true);
+        if (pf != null) q.put("paymentFrequency", pf.name());
+        EmploymentType et = p.readEnum("employmentType", EmploymentType.class, true);
+        if (et != null) q.put("employmentType", et.name());
+        JobFormat jf = p.readEnum("workFormat", JobFormat.class, true);
+        if (jf != null) q.put("workFormat", jf.name());
+    }
+
+    private void readPaging(Map<String, Object> q) {
+        var p = ctx.getPrompt();
+        Integer limit = p.readInt("limit (по умолчанию 20): ", true);
+        if (limit != null) q.put("limit", limit);
+        Integer offset = p.readInt("offset (по умолчанию 0): ", true);
+        if (offset != null) q.put("offset", offset);
+        String sortBy = p.readLine("sortBy (PUBLICATION_DATE, SALARY, ID; можно пусто): ");
+        if (!sortBy.isBlank()) q.put("sortBy", sortBy);
+        String sortDesc = p.readLine("sortDesc true/false (можно пусто): ");
+        if (!sortDesc.isBlank()) q.put("sortDesc", Boolean.parseBoolean(sortDesc));
     }
 }

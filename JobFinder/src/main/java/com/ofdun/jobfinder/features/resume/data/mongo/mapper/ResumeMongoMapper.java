@@ -34,4 +34,3 @@ public class ResumeMongoMapper {
                 entity.getCreationDate());
     }
 }
-

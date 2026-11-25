@@ -18,4 +18,3 @@ public class LanguageMongoMapper {
         return new LanguageDocument(model.getId(), model.getName(), model.getProficiencyLevel());
     }
 }
-

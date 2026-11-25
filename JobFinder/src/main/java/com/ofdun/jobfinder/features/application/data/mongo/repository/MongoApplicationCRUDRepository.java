@@ -9,4 +9,3 @@ public interface MongoApplicationCRUDRepository
         extends MongoRepository<@NonNull ApplicationDocument, @NonNull Long> {
     List<ApplicationDocument> findByVacancyIdOrderByApplicationDateDesc(Long vacancyId);
 }
-

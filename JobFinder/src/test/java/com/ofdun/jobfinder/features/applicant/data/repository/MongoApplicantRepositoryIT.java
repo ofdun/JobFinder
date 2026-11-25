@@ -57,7 +57,8 @@ class MongoApplicantRepositoryIT extends MongoRepositoryITBase {
 
     @Test
     void deleteApplicant_whenExists_thenDeleted() {
-        var applicant = new ApplicantModel(7L, "Bob", "bob.mongo@example.com", "pass", "a", "+7000", 1L);
+        var applicant =
+                new ApplicantModel(7L, "Bob", "bob.mongo@example.com", "pass", "a", "+7000", 1L);
         applicantRepository.createApplicant(applicant);
 
         var deleted = applicantRepository.deleteApplicant(7L);

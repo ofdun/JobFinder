@@ -14,8 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResumeDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long applicantId;
 
@@ -29,4 +28,3 @@ public class ResumeDocument {
 
     @NotNull private Date creationDate;
 }
-

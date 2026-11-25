@@ -2,10 +2,8 @@ package com.ofdun.jobfinder.features.auth.mfa;
 
 import com.ofdun.jobfinder.features.api.ApiFailure;
 import com.ofdun.jobfinder.features.auth.enums.AccountType;
-
-import tools.jackson.databind.json.JsonMapper;
-
 import java.util.function.Function;
+import tools.jackson.databind.json.JsonMapper;
 
 public interface SecurityStateStore {
     record Snapshot(long version, SecurityState state) {}

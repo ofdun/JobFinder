@@ -9,8 +9,8 @@ public enum GraphqlOperation {
     VERIFY_TOTP(
             false,
             "mutation VERIFY_TOTP($challengeToken: String!, $code: String!) { result:"
-                + " verifyTotp(challengeToken: $challengeToken, code: $code) { accessToken"
-                + " refreshToken challengeToken nextStep } }"),
+                    + " verifyTotp(challengeToken: $challengeToken, code: $code) { accessToken"
+                    + " refreshToken challengeToken nextStep } }"),
     RENEW_PASSWORD(
             false,
             "mutation RENEW_PASSWORD($challengeToken: String!, $newPassword: String!) { result:"

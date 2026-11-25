@@ -12,9 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SkillDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotBlank private String name;
 }
-

@@ -8,4 +8,3 @@ import lombok.Data;
 public class ApplicationStatusUpdateRequest {
     @NotNull private ApplicationStatus applicationStatus;
 }
-

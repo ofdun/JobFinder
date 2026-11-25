@@ -14,8 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EducationDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotNull private Long resumeId;
 
@@ -29,4 +28,3 @@ public class EducationDocument {
 
     @NotNull private Integer graduationYear;
 }
-

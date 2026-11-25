@@ -18,4 +18,3 @@ public class SkillMongoMapper {
         return new SkillDocument(model.getId(), model.getName());
     }
 }
-

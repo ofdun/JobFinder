@@ -14,12 +14,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "languages")
 public class LanguageDocument {
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @NotBlank(message = "Language name cannot be blank")
     private String name;
 
     @NotNull private LanguageProficiencyLevel proficiencyLevel;
 }
-

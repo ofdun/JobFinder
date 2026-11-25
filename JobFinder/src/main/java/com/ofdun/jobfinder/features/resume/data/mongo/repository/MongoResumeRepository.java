@@ -206,6 +206,20 @@ public class MongoResumeRepository implements RelationalResumeRepository {
             return true;
         }
 
+        if (!matchesOwnerAndCategory(resume, filter)) return false;
+
+        if (!matchesDates(resume, filter)) return false;
+
+        if (!matchesDescription(resume, filter)) return false;
+
+        if (!containsAll(resume.getSkillIds(), filter.getSkillIds())) {
+            return false;
+        }
+
+        return containsAll(resume.getLanguageIds(), filter.getLanguageIds());
+    }
+
+    private boolean matchesOwnerAndCategory(ResumeModel resume, ResumeSearchFilter filter) {
         if (filter.getApplicantId() != null
                 && !Objects.equals(resume.getApplicantId(), filter.getApplicantId())) {
             return false;
@@ -216,6 +230,10 @@ public class MongoResumeRepository implements RelationalResumeRepository {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean matchesDates(ResumeModel resume, ResumeSearchFilter filter) {
         if (filter.getCreationDateFrom() != null
                 && !isAfterOrEqual(resume.getDate(), filter.getCreationDateFrom())) {
             return false;
@@ -226,6 +244,10 @@ public class MongoResumeRepository implements RelationalResumeRepository {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean matchesDescription(ResumeModel resume, ResumeSearchFilter filter) {
         if (filter.getQ() != null && !filter.getQ().isBlank()) {
             var query = filter.getQ().trim().toLowerCase();
             var description =
@@ -235,11 +257,7 @@ public class MongoResumeRepository implements RelationalResumeRepository {
             }
         }
 
-        if (!containsAll(resume.getSkillIds(), filter.getSkillIds())) {
-            return false;
-        }
-
-        return containsAll(resume.getLanguageIds(), filter.getLanguageIds());
+        return true;
     }
 
     private boolean containsAll(List<Long> source, List<Long> required) {

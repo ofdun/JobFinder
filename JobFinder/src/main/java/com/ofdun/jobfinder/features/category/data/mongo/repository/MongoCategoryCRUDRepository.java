@@ -9,4 +9,3 @@ public interface MongoCategoryCRUDRepository
         extends MongoRepository<@NonNull CategoryDocument, @NonNull Long> {
     List<CategoryDocument> findAllByOrderByNameAsc();
 }
-

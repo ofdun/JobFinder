@@ -1,0 +1,5 @@
+lizard==1.25.1
+multimetric==2.4.5
+Pygments==2.21.0
+pathspec==1.1.1
+chardet==7.7.0

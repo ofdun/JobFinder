@@ -9,4 +9,3 @@ public interface MongoEmployerCRUDRepository
         extends MongoRepository<@NonNull EmployerDocument, @NonNull Long> {
     Optional<EmployerDocument> findByEmail(String email);
 }
-

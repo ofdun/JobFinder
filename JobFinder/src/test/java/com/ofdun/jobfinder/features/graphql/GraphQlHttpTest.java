@@ -415,6 +415,10 @@ class GraphQlHttpTest {
         mvc.perform(operation(query, "M", Map.of()).principal(actor(role, 1)))
                 .andExpect(jsonPath("$.errors").doesNotExist())
                 .andExpect(jsonPath("$.data." + field + ".id").value(String.valueOf(id)));
+        verifyDeletion(resource, id);
+    }
+
+    private void verifyDeletion(String resource, long id) {
         switch (resource) {
             case "Applicant" -> verify(applicants).deleteApplicant(id);
             case "Employer" -> verify(employers).deleteEmployer(id);

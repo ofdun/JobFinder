@@ -4,4 +4,3 @@ public enum VacancyStatus {
     INACTIVE,
     ACTIVE
 }
-

@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ApplicationJpaRepository extends JpaRepository<@NonNull ApplicationEntity, @NonNull Long> {
-	List<ApplicationEntity> findByVacancyIdOrderByDateDesc(Long vacancyId);
+public interface ApplicationJpaRepository
+        extends JpaRepository<@NonNull ApplicationEntity, @NonNull Long> {
+    List<ApplicationEntity> findByVacancyIdOrderByDateDesc(Long vacancyId);
 }

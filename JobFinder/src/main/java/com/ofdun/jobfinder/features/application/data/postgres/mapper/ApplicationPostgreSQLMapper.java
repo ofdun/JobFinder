@@ -8,6 +8,7 @@ public class ApplicationPostgreSQLMapper {
         if (application == null) {
             return null;
         }
+
         return new ApplicationEntity(
                 application.getId(),
                 application.getVacancyId(),

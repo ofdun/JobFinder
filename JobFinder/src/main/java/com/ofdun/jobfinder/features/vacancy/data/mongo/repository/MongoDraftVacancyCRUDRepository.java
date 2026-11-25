@@ -8,4 +8,3 @@ public interface MongoDraftVacancyCRUDRepository
         extends MongoRepository<DraftVacancyDocument, Long> {
     List<DraftVacancyDocument> findAllByVacancyIdOrderByVersionTimestampDesc(Long vacancyId);
 }
-

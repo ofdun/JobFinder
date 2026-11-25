@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ResumeDocumentMongoEventListener extends AbstractMongoEventListener<@NonNull ResumeDocument> {
+public class ResumeDocumentMongoEventListener
+        extends AbstractMongoEventListener<@NonNull ResumeDocument> {
     private static final String RESUMES_SEQUENCE_NAME = "resumes_sequence";
 
     private final MongoSequenceService mongoSequenceService;
@@ -29,4 +30,3 @@ public class ResumeDocumentMongoEventListener extends AbstractMongoEventListener
         }
     }
 }
-

@@ -4,7 +4,6 @@ import com.ofdun.jobfinder.cli.CliContext;
 import com.ofdun.jobfinder.cli.auth.UserRole;
 import com.ofdun.jobfinder.cli.dto.auth.TokenPair;
 import com.ofdun.jobfinder.cli.http.ApiException;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

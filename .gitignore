@@ -17,3 +17,6 @@
 *.gz
 
 .local/
+
+/.gradle/
+/build/

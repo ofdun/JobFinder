@@ -201,16 +201,15 @@ tasks.register("testAll") {
     dependsOn("unitTest", "integrationTest")
 }
 
-apply(from = "../ci/testing.gradle")
+apply(from = "../ci/testing.gradle.kts")
 
 spotless {
-    ratchetFrom("origin/main")
 
     format("misc") {
-        target("*.gradle", ".gitattributes", ".gitignore")
+        target("*.gradle.kts", ".gitattributes", ".gitignore")
 
         trimTrailingWhitespace()
-        leadingSpacesToTabs()
+        leadingTabsToSpaces(4)
         endWithNewline()
     }
 
@@ -227,8 +226,9 @@ spotless {
     }
 }
 
-// Package the single maintained contract with the application.
 tasks.processResources {
     from("../docs/schema.graphqls") { into("graphql") }
     from("../docs/swagger.yml") { into("static/api/v2"); rename { "openapi.yml" } }
 }
+
+apply(from = "../ci/quality.gradle.kts")

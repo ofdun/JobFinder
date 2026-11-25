@@ -23,7 +23,34 @@ env:
   CI_FORCE_FAILURE: ${{ inputs.force_failure || 'none' }}
 
 jobs:
+  quality:
+    name: Static analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: bash JobFinder/gradlew -p . staticAnalysis --console=plain
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-analysis
+          path: |
+            JobFinder/build/reports/quality/
+            JobFinder-CLI/build/reports/quality/
+            JobFinder/build/reports/spotless/
+            JobFinder-CLI/build/reports/spotless/
+          retention-days: 14
+
   unit:
+    needs: quality
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:

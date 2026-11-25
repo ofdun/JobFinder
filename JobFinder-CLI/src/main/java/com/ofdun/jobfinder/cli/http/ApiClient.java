@@ -13,21 +13,17 @@ import com.ofdun.jobfinder.cli.dto.profiles.*;
 import com.ofdun.jobfinder.cli.dto.resumes.*;
 import com.ofdun.jobfinder.cli.dto.vacancies.*;
 import com.ofdun.jobfinder.cli.logging.StructuredCliLogger;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-
-import okhttp3.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import okhttp3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ApiClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -284,16 +280,17 @@ public final class ApiClient {
         } else if (value.isArray()) {
             ArrayNode array = (ArrayNode) value;
             for (int i = 0; i < array.size(); i++) array.set(i, normalize(array.get(i), field));
-        } else if (value.isNumber()
-                && (field.equals("id") || field.endsWith("Id") || field.endsWith("Ids"))) {
+        } else if (value.isNumber() && isIdentifier(field)) {
             return mapper.getNodeFactory().textNode(value.asText());
         } else if (value.isNumber()
-                && (field.equals("salary")
-                        || field.equals("salaryMin")
-                        || field.equals("salaryMax"))) {
+                && java.util.Set.of("salary", "salaryMin", "salaryMax").contains(field)) {
             return mapper.getNodeFactory().textNode(new BigDecimal(value.asText()).toPlainString());
         }
         return value;
+    }
+
+    private boolean isIdentifier(String field) {
+        return field.equals("id") || field.endsWith("Id") || field.endsWith("Ids");
     }
 
     private <T> T send(Request request, Class<T> responseType, boolean mayRefresh) {
@@ -322,24 +319,7 @@ public final class ApiClient {
             } catch (IOException error) {
                 throw new ApiException("HTTP " + status + ": сервер вернул не JSON");
             }
-            if (envelope != null
-                    && envelope.path("errors").isArray()
-                    && !envelope.path("errors").isEmpty()) {
-                StringBuilder message = new StringBuilder();
-                for (JsonNode error : envelope.path("errors")) {
-                    if (!message.isEmpty()) message.append("; ");
-                    message.append(error.path("extensions").path("code").asText("GRAPHQL_ERROR"))
-                            .append(": ")
-                            .append(error.path("message").asText("Ошибка API"));
-                }
-                throw new ApiException(message.toString());
-            }
-            if (!response.isSuccessful()) throw new ApiException("HTTP " + status);
-            JsonNode result = envelope == null ? null : envelope.path("data").get("result");
-            if (result == null || result.isNull())
-                throw new ApiException("Сервер не вернул результат операции");
-            T decoded =
-                    responseType == Void.class ? null : mapper.treeToValue(result, responseType);
+            T decoded = decode(envelope, response.isSuccessful(), status, responseType);
             StructuredCliLogger.logHttpCall(
                     log,
                     session,
@@ -376,5 +356,31 @@ public final class ApiClient {
                     null);
             throw error;
         }
+    }
+
+    private <T> T decode(JsonNode envelope, boolean successful, int status, Class<T> responseType)
+            throws IOException {
+        if (envelope != null
+                && envelope.path("errors").isArray()
+                && !envelope.path("errors").isEmpty()) {
+            throw graphqlFailure(envelope.path("errors"));
+        }
+        if (!successful) throw new ApiException("HTTP " + status);
+        JsonNode result = envelope == null ? null : envelope.path("data").get("result");
+        if (result == null || result.isNull())
+            throw new ApiException("Сервер не вернул результат операции");
+        T decoded = responseType == Void.class ? null : mapper.treeToValue(result, responseType);
+        return decoded;
+    }
+
+    private ApiException graphqlFailure(JsonNode errors) {
+        StringBuilder message = new StringBuilder();
+        for (JsonNode error : errors) {
+            if (!message.isEmpty()) message.append("; ");
+            message.append(error.path("extensions").path("code").asText("GRAPHQL_ERROR"))
+                    .append(": ")
+                    .append(error.path("message").asText("Ошибка API"));
+        }
+        return new ApiException(message.toString());
     }
 }
